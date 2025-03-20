@@ -1,5 +1,12 @@
-# Research Project
-Contains common AI work with LLMs
+# Elevate GenAI Snippets
+Contains common snippets of code with GenAI like:
+- Text to JSON
+- Text to Markdown
+- Text to SQL
+- And more ...
+  
+This project aims to provide fast, cheap, accurate, and deterministic outcomes to common code in GenAI. 
+We'll be using a Test-Driven Development approach to building this toolset.
 
 ## Setting it up
 

@@ -26,8 +26,15 @@ class OnlyJson:
             if self.model_id not in litellm.model_list:
                 raise ValueError(f"Model {self.model_id} is not supported.")
             messages = [{"role": "user", "content": content}]
+            schema.model_rebuild()
+            s = schema.model_json_schema()
+            s["type"] = "object"
+            json_schema = {
+                "type": "json_schema",
+                "json_schema": {"name": schema.__name__, "schema": s},
+            }
             resp = completion(
-                model=self.model_id, messages=messages, response_format=schema
+                model=self.model_id, messages=messages, response_format=json_schema
             )
             return schema.model_validate_json(resp.choices[0].message.content)
         else:

@@ -6,16 +6,7 @@ Contains common snippets of code with GenAI, like:
 - And more ...
 
 ## Approach
-This project aims to provide fast, cheap, accurate, and deterministic outcomes to common code in GenAI.
-If you're planning to perform one of the tasks that this code helps with, you should be guaranteed gold standard model and tool to perform that task. For example, in Text-to-JSON, you could use different models, but you can also use `lite-llm` or `instructor`. What's the best one for you?
-
-Here's how we will achieve this:
-- We'll be using a Test-Driven Development approach to building this toolset.
-- Each helper class can be run `with_tool` and `with_model`.
-- The default values for them should be the "gold standard".
-- Pytests should enforce the speed, cost, accuracy and determinism constraints.
-- Precommits should run pytest, and also test before merge to main.
-- A comparison chart should suggest what tools and models work well (TODO). Users will typically know the models they are allowed to use. The code should choose the right tools for it.
+This project is designed to deliver fast, cost-effective, reliable, and deterministic solutions to common GenAI challenges. We follow a Test-Driven Development methodology to ensure robust functionality and rapid feedback. Each helper class is configured to use a "gold standard" model and tool by default, with tests enforcing high performance, accuracy, and reproducibility. A forthcoming comparison chart will guide users to the best models and tools for their specific needs.
 
 ## Setting it up
 
@@ -33,3 +24,22 @@ Also create a `.env` file with the following:
 ```
 OPENAI_API_KEY=
 ```
+
+## Usage
+
+- Run the helper classes using the default "gold standard" tool and model.
+- Execute tests with `pytest` to ensure speed, cost, accuracy, and determinism.
+    - `uv run pytest` or `uv run pytest tests/test_file.py`.
+- Refer to individual module documentation for task-specific instructions.
+
+## Contributing
+
+Contributions are welcome! Please ensure all changes pass tests and adhere to our TDD guidelines.
+
+## Developer Instructions
+
+- Follow the "Setting it up" section to configure your development environment.
+- Use `uv sync` and activate the virtual environment before making changes.
+- Run tests with `uv run pytest` to ensure functionality and performance.
+- Adhere to TDD practices and ensure pre-commit hooks pass before merging.
+- Use descriptive branch names for feature development and submit pull requests for review.

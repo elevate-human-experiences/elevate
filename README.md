@@ -1,12 +1,14 @@
 # Elevate GenAI Snippets
-Contains common snippets of code with GenAI, like:
+This project is designed to deliver fast, cost-effective, reliable, and deterministic solutions to common GenAI challenges like:
 - Text to JSON
 - Text to Markdown
 - Text to SQL
 - And more ...
 
+This is a task focused way to do GenAI - you care about particular tasks work, not which model or tool to use. Or if you do have a preference of the model, the choice of underlying tool doesn't matter as long as you get the right result. There may be nuances to the tools and the models, but choosing this lib, you choose gold standard. 
+
 ## Approach
-This project is designed to deliver fast, cost-effective, reliable, and deterministic solutions to common GenAI challenges. We follow a Test-Driven Development methodology to ensure robust functionality and rapid feedback. Each helper class is configured to use a "gold standard" model and tool by default, with tests enforcing high performance, accuracy, and reproducibility. A forthcoming comparison chart will guide users to the best models and tools for their specific needs.
+We follow a Test-Driven Development methodology to ensure robust functionality and rapid feedback. Each helper class is configured to use a "gold standard" model and tool by default, with tests enforcing high performance, accuracy, and reproducibility. A forthcoming comparison chart will guide users to the best models and tools for their specific needs.
 
 ## Setting it up
 

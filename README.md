@@ -40,7 +40,6 @@ OPENAI_API_KEY=
 |:-----------:|------------------|----------------------------------|---------|
 | ✅          | Only JSON     | Converts text to JSON format     | 5       |
 | ✅          | Only AudioCast | Converts text to podcast style format | 2       |
-|            | Only Prompt      | Write prompts based on seed, and list of ffeedback containing examples or with critiques        | -       |
 |            | Only Markdown | Converts text to Markdown format | -       |
 |            | Only Python | Only generates python code, executes it and returns the response | -       |
 |            | Only SQL      | Converts text to SQL query       | -       |
@@ -50,6 +49,13 @@ OPENAI_API_KEY=
 |            | Only Email      | Write better emails        | -       |
 |            | Only Forms      | Conversations for form filling       | -       |
 |            | Only Excel      | Understand and execute Financial Models to answer user questions        | -       |
+
+## Only Prompts
+
+| Implemented | Snippet          | Description                      | # Tests |
+|:-----------:|------------------|----------------------------------|---------|
+|            | Only Prompt      | Write prompts based on seed, and list of feedback containing examples or with critiques        | -       |
+|            | Only Feedback      | Improve prompts with agent driven feedback.        | -       |
 
 
 ## Only Plan

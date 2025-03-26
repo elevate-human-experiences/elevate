@@ -137,6 +137,7 @@ class OnlyAudiocast:
             "- Use short sentences that are easily used with speech synthesis.\n"
             "- The conversation should have excitement and natural filler words like 'äh'.\n"
             "- Do not mention last names.\n"
+            "- Do not incluse speaking segments for the listener.\n"
             "- Each conversation entry should be complete and coherent paragraphs.\n"
             '- Avoid lines such as: "Thanks for having me, Marina!"\n'
             "\nHere's the cast configuration including speaker and listener profiles:\n"
@@ -175,7 +176,7 @@ class OnlyAudiocast:
                 speaker_voice_map[speaker.name] = vid
 
         system_prompt = self.get_system_prompt(cast_config)
-        parser = OnlyJson()
+        parser = OnlyJson(with_model="o3-mini")
         conversation_obj: Conversation = parser.parse(
             content, Conversation, system_prompt
         )

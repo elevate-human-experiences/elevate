@@ -12,7 +12,10 @@ def test_create_default_audiocast() -> None:
         "San Francisco is a city in California. It is known for the Golden Gate Bridge."
     )
     audiocast = OnlyAudiocast()
-    audiocast.cast(content, audio_out_path="~/Downloads/")
+    audiocast.cast(
+        content,
+        audio_out_path=f"{os.environ['HOME']}/Downloads/",
+    )
 
 
 def test_create_two_people_podcast() -> None:

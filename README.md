@@ -41,18 +41,19 @@ OPENAI_API_KEY=
 | ✅          | Only JSON     | Converts text to JSON format     | 5       |
 | ✅          | Only AudioCast | Converts text to podcast style format | 2       |
 |            | Only Prompt      | Write prompts based on seed, and list of ffeedback containing examples or with critiques        | -       |
-|            | Text to Markdown | Converts text to Markdown format | -       |
-|            | Text to SQL      | Converts text to SQL query       | -       |
-|            | Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email)       | -       |
-|            | Summaries      | Write summaries        | -       |
-|            | ELI5      | Write ELI5 summaries        | -       |
-|            | Email      | Write better emails        | -       |
-|            | Forms      | Conversations for form filling       | -       |
-|            | Plan      | Plan a tree of actions to be done to execute user task       | -       |
-|            | Writing      | Uses the DAG Planner to write a blog, etc.        | -       |
-|            | Excel      | Understand and execute Financial Models to answer user questions        | -       |
-|            | Fiction      | Uses the DAG Planner to write a fiction        | -       |
-|            | Art      | Generate images based on artistic params        | -       |
+|            | Only Markdown | Converts text to Markdown format | -       |
+|            | Only Python | Only generates python code, executes it and returns the response | -       |
+|            | Only SQL      | Converts text to SQL query       | -       |
+|            | Only Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email)       | -       |
+|            | Only Summaries      | Write summaries        | -       |
+|            | Only ELI5      | Write ELI5 summaries        | -       |
+|            | Only Email      | Write better emails        | -       |
+|            | Only Forms      | Conversations for form filling       | -       |
+|            | Only Plan      | Plan a tree of actions to be done to execute user task       | -       |
+|            | Only Writing      | Uses the DAG Planner to write a blog, etc.        | -       |
+|            | Only Excel      | Understand and execute Financial Models to answer user questions        | -       |
+|            | Only Fiction      | Uses the DAG Planner to write a fiction        | -       |
+|            | Only Art      | Generate images based on artistic params        | -       |
 |:-----------:|------------------|----------------------------------|---------|
 
 ## Contributing

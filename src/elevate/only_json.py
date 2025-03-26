@@ -19,13 +19,22 @@ class OnlyJson:
         # so we need to do it on the client side.
         litellm.enable_json_schema_validation = True
 
-    def parse(self, content: str, schema: Type[BaseModel]) -> BaseModel:
+    def parse(
+        self, content: str, schema: Type[BaseModel], system_prompt: str | None = None
+    ) -> BaseModel:
         """Parse the content using the specified schema."""
         if self.tool_id == "lite-llm":
             # Use LiteLLM for conversion
             if self.model_id not in litellm.model_list:
                 raise ValueError(f"Model {self.model_id} is not supported.")
-            messages = [{"role": "user", "content": content}]
+            # Updated messages with a system prompt for podcast conversation generation
+            messages = [
+                {"role": "user", "content": content},
+            ]
+            if system_prompt:
+                messages.insert(0, {"role": "system", "content": system_prompt})
+
+            # Rebuild the model and get the JSON schema
             schema.model_rebuild()
             s = schema.model_json_schema()
             s["type"] = "object"

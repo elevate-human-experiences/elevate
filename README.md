@@ -3,7 +3,7 @@ This project is designed to deliver fast, cost-effective, reliable, and determin
 - Text to JSON
 - Text to Markdown
 - Text to SQL
-- And more ...
+- [And more](#snippets) ... 
 
 This is a task focused way to do GenAI - you care about particular tasks work, not which model or tool to use. Or if you do have a preference of the model, the choice of underlying tool doesn't matter as long as you get the right result. There may be nuances to the tools and the models, but choosing this lib, you choose gold standard. 
 
@@ -33,6 +33,16 @@ OPENAI_API_KEY=
 - Execute tests with `pytest` to ensure speed, cost, accuracy, and determinism.
     - `uv run pytest` or `uv run pytest tests/test_file.py`.
 - Refer to individual module documentation for task-specific instructions.
+
+## Snippets
+
+| Implemented | Snippet          | Description                      | # Tests |
+|:-----------:|------------------|----------------------------------|---------|
+| ✅          | Only JSON     | Converts text to JSON format     | 5       |
+|            | Only AudioCast | Converts text to podcast style format | 2       |
+|            | Text to Markdown | Converts text to Markdown format | -       |
+|            | Text to SQL      | Converts text to SQL query       | -       |
+
 
 ## Contributing
 

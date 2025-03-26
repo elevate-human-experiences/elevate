@@ -5,9 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "elevenlabs>=1.54.0",
     "litellm>=1.63.12",
     "openai>=1.67.0",
     "pydantic>=2.10.6",
+    "pydub>=0.25.1",
 ]
 
 [build-system]

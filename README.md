@@ -34,7 +34,7 @@ OPENAI_API_KEY=
     - `uv run pytest` or `uv run pytest tests/test_file.py`.
 - Refer to individual module documentation for task-specific instructions.
 
-## Snippets
+## Only Snippets
 
 | Implemented | Snippet          | Description                      | # Tests |
 |:-----------:|------------------|----------------------------------|---------|
@@ -51,11 +51,24 @@ OPENAI_API_KEY=
 |            | Only Forms      | Conversations for form filling       | -       |
 |            | Only Excel      | Understand and execute Financial Models to answer user questions        | -       |
 |:-----------:|------------------|----------------------------------|---------|
+
+## Only Plan
+
+| Implemented | Snippet          | Description                      | # Tests |
+|:-----------:|------------------|----------------------------------|---------|
 |            | Only Plan      | Plan a tree of actions to be done to execute user task       | -       |
 |            | Only Writing      | Uses the DAG Planner to write a blog, etc.        | -       |
 |:-----------:|------------------|----------------------------------|---------|
+## Only Swarm
+
+| Implemented | Snippet          | Description                      | # Tests |
+|:-----------:|------------------|----------------------------------|---------|
 |            | Only Elves | Multi-agent system to do multiple small Only Tasks | -       |
 |            | Only Data Hygene | Elves that clean up your data together | -       |
+|:-----------:|------------------|----------------------------------|---------|
+## Only Art
+
+| Implemented | Snippet          | Description                      | # Tests |
 |:-----------:|------------------|----------------------------------|---------|
 |            | Only Fiction      | Uses the DAG Planner to write a fiction        | -       |
 |            | Only Art      | Generate images based on artistic params        | -       |

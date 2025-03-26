@@ -50,7 +50,7 @@ OPENAI_API_KEY=
 |            | Only Email      | Write better emails        | -       |
 |            | Only Forms      | Conversations for form filling       | -       |
 |            | Only Excel      | Understand and execute Financial Models to answer user questions        | -       |
-|:-----------:|------------------|----------------------------------|---------|
+
 
 ## Only Plan
 
@@ -58,14 +58,14 @@ OPENAI_API_KEY=
 |:-----------:|------------------|----------------------------------|---------|
 |            | Only Plan      | Plan a tree of actions to be done to execute user task       | -       |
 |            | Only Writing      | Uses the DAG Planner to write a blog, etc.        | -       |
-|:-----------:|------------------|----------------------------------|---------|
+
 ## Only Swarm
 
 | Implemented | Snippet          | Description                      | # Tests |
 |:-----------:|------------------|----------------------------------|---------|
 |            | Only Elves | Multi-agent system to do multiple small Only Tasks | -       |
 |            | Only Data Hygene | Elves that clean up your data together | -       |
-|:-----------:|------------------|----------------------------------|---------|
+
 ## Only Art
 
 | Implemented | Snippet          | Description                      | # Tests |
@@ -73,7 +73,6 @@ OPENAI_API_KEY=
 |            | Only Fiction      | Uses the DAG Planner to write a fiction        | -       |
 |            | Only Art      | Generate images based on artistic params        | -       |
 |            | Only Hokusai      | Generate images inspired from "36 Views of Mount Fuji"        | -       |
-|:-----------:|------------------|----------------------------------|---------|
 
 ## Contributing
 

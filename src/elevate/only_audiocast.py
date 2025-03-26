@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from pydub import AudioSegment
 from elevenlabs.client import ElevenLabs, VoiceSettings, Voice
 from typing import Optional, List  # added import for List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field  # modified to include Field
 from .only_json import OnlyJson  # new import for JSON parsing
 import yaml  # new import for YAML handling
 import difflib  # added import for matching
@@ -17,26 +17,30 @@ load_dotenv()
 
 
 class SpeakerConfig(BaseModel):
-    name: str
-    background: str
-    expertise: str
-    speaking_style: str
-    level_of_expertise: str
-    focus_aspect: str
-    depth: str
+    name: str = Field(..., description="Speaker's name")
+    background: str = Field(..., description="Speaker background information")
+    expertise: str = Field(..., description="Expertise level of the speaker")
+    speaking_style: str = Field(..., description="Style of the speaker's delivery")
+    level_of_expertise: str = Field(..., description="Detailed expertise level")
+    focus_aspect: str = Field(..., description="Aspect the speaker is focusing on")
+    depth: str = Field(..., description="Depth of content provided by the speaker")
 
 
 class ListenerConfig(BaseModel):
-    name: str | None = None
-    expertise: str
-    summary_of_similar_content: list
-    level_of_expertise: str
-    depth: str
+    name: str | None = Field(default=None, description="Listener's name (optional)")
+    expertise: str = Field(..., description="Expertise level of the listener")
+    summary_of_similar_content: list = Field(
+        ..., description="Summaries of similar content"
+    )
+    level_of_expertise: str = Field(..., description="Listener's proficiency level")
+    depth: str = Field(..., description="Depth of content for the listener")
 
 
 class CastConfiguration(BaseModel):
-    speakers: list[SpeakerConfig]
-    listener: ListenerConfig
+    speakers: list[SpeakerConfig] = Field(
+        ..., description="List of speaker configurations"
+    )
+    listener: ListenerConfig = Field(..., description="Configuration for the listener")
 
 
 # Default configuration for a single narrator technical podcast
@@ -62,12 +66,18 @@ default_cast_configuration = CastConfiguration(
 
 
 class ConversationEntry(BaseModel):
-    speaker: str
-    message: str
+    pause: float = Field(
+        default=0.1,
+        description="Pause duration between conversation segments. In seconds. 0 means other/interrupting.",
+    )
+    speaker: str = Field(..., description="Name of the conversation speaker")
+    message: str = Field(..., description="Message content of the entry")
 
 
 class Conversation(BaseModel):
-    entries: List[ConversationEntry]
+    entries: List[ConversationEntry] = Field(
+        ..., description="List of conversation entries"
+    )
 
 
 class OnlyAudiocast:
@@ -172,6 +182,10 @@ class OnlyAudiocast:
 
         combined_audio = AudioSegment.empty()
         for entry in conversation_obj.entries:
+            # Add a random delay (0.2 to 0.5 seconds)
+            delay_duration = entry.pause * 1000  # Convert to milliseconds
+            silent_segment = AudioSegment.silent(duration=delay_duration)
+            combined_audio += silent_segment
             if entry.speaker:
                 # Use speaker_voice_map based on the entry speaker name
                 voice_id = speaker_voice_map.get(entry.speaker)
@@ -200,11 +214,6 @@ class OnlyAudiocast:
             audio_segment = AudioSegment.from_file(buffer, format="mp3")
             combined_audio += audio_segment
             print(f"Audio segment added for {speaker}.")
-
-            # Add a random delay (0.2 to 0.5 seconds)
-            delay_duration = random.uniform(0.2, 0.5) * 1000  # Convert to milliseconds
-            silent_segment = AudioSegment.silent(duration=delay_duration)
-            combined_audio += silent_segment
 
         # Generate a filename with a timestamp (updated to remove guest part)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

@@ -120,7 +120,6 @@ class OnlyAudiocast:
         # Define available voices for GPT-4o
         self.available_voices = [
             "alloy",
-            "echo",
             "fable",
             "onyx",
             "nova",

@@ -5,7 +5,9 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from pydub import AudioSegment
-from elevenlabs.client import ElevenLabs, VoiceSettings, Voice
+from openai import OpenAI  # new import for GPT-4o
+from pathlib import Path  # new import for file path management
+import tempfile  # to create temporary files for audio
 from typing import Optional, List  # added import for List
 from pydantic import BaseModel, Field  # modified to include Field
 from .only_json import OnlyJson  # new import for JSON parsing
@@ -43,6 +45,10 @@ class CastConfiguration(BaseModel):
     listener: ListenerConfig = Field(..., description="Configuration for the listener")
 
 
+class Instructions(BaseModel):
+    instructions: str = Field(..., description="Instructions for the agent")
+
+
 # Default configuration for a single narrator technical podcast
 default_cast_configuration = CastConfiguration(
     speakers=[
@@ -67,7 +73,9 @@ default_cast_configuration = CastConfiguration(
 
 class ConversationEntry(BaseModel):
     pause: float = Field(
-        default=0.1,
+        default=0.5,
+        min=0.1,
+        max=2.0,
         description="Pause duration between conversation segments. In seconds. 0 means other/interrupting.",
     )
     speaker: str = Field(..., description="Name of the conversation speaker")
@@ -80,8 +88,24 @@ class Conversation(BaseModel):
     )
 
 
+# New Pydantic class to generate an audiocast title based on content
+class AudiocastTitle(BaseModel):
+    generated_title: str = Field(
+        ..., description="Title derived from the conversation content"
+    )
+
+    @classmethod
+    def generate(cls, content: str) -> "AudiocastTitle":
+        # Generate a simple title by taking the first 10 words from the provided content
+        words = content.split()[:10]
+        title = " ".join(words) if words else "Audiocast"
+        # Clean title by replacing spaces with underscores and limit length
+        title_snippet = title.replace(" ", "_")[:30]
+        return cls(generated_title=title_snippet)
+
+
 class OnlyAudiocast:
-    """Class that converts text into an audio file using ElevenLabs."""
+    """Class that converts text into an audio file using GPT-4o model."""
 
     def __init__(self) -> None:
         """Initialize the OnlyAudiocast class."""
@@ -91,58 +115,81 @@ class OnlyAudiocast:
                 "ffmpeg is not installed. Try installing it as `brew install ffmpeg`, or whatever is appropriate for your OS."
             )
 
-        # Initialize ElevenLabs client
-        self.client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
-        # Define voice settings for speakers only
-        self.speaker_voice_settings = VoiceSettings(
-            stability=0.45,
-            similarity_boost=0.75,
-            style=0.2,
-        )
-        # Initialize voice configurations based on provider (using only speakers)
-        self.voice_configurations = {
-            "elevenlabs": {
-                "9BWtsMINqrJLrRacOk9x": "Aria",
-                "CwhRBWXzGAHq8TQ4Fs17": "Roger",
-                "EXAVITQu4vr4xnSDxMaL": "Sarah",
-                "FGY2WhTYpPnrIDTdsKH5": "Laura",
-                "IKne3meq5aSn9XLyUdCD": "Charlie",
-                "JBFqnCBsd6RMkjVDRZzb": "George",
-                "N2lVS1w4EtoT3dr4eOWO": "Callum",
-                "SAz9YHcvj6GT2YYXdXww": "River",
-                "TX3LPaxmHKxFdv7VOQHJ": "Liam",
-                "XB0fDUnXU5powFXDhCwa": "Charlotte",
-                "Xb7hH8MSUJpSbSDYk0k2": "Alice",
-                "XrExE9yKIg1WjnnlVkGX": "Matilda",
-                "bIHbv24MWmeRgasZH58o": "Will",
-                "cgSgspJ2msm6clMCkdW9": "Jessica",
-                "cjVigY5qzO86Huf0OWal": "Eric",
-                "iP95p4xoKVk53GoZ742B": "Chris",
-                "nPczCjzI2devNBz1zQrb": "Brian",
-                "onwK4e9ZLuTAKqWW03F9": "Daniel",
-                "pFZP5JQG7iQjIQuC4Bku": "Lily",
-                "pqHfZKP75CvOlQylNhV4": "Bill",
-            }
-        }
+        # Initialize OpenAI client
+        self.client = OpenAI()
+        # Define available voices for GPT-4o
+        self.available_voices = [
+            "alloy",
+            "echo",
+            "fable",
+            "onyx",
+            "nova",
+            "shimmer",
+        ]
 
     def get_system_prompt(self, cast_configuration: CastConfiguration) -> dict:
         """
         Generate a system prompt with embedded cast configuration in YAML.
         """
-        cast_config_yaml = yaml.dump(cast_configuration.dict())
-        prompt_content = (
-            "you are an experienced podcast producer.\n"
-            "- Based on an article you create an engaging script for the podcast.\n"
-            "- Make the conversationfully covers the content, with clear articulated speaker mono/dialogues.\n"
-            "- Use short sentences that are easily used with speech synthesis.\n"
-            "- The conversation should have excitement and natural filler words like 'äh'.\n"
-            "- Do not mention last names.\n"
-            "- Do not incluse speaking segments for the listener.\n"
-            "- Each conversation entry should be complete and coherent paragraphs.\n"
-            '- Avoid lines such as: "Thanks for having me, Marina!"\n'
-            "\nHere's the cast configuration including speaker and listener profiles:\n"
-            + cast_config_yaml
-        )
+        cast_config_yaml = yaml.dump(cast_configuration.model_dump())
+        prompt_content = f"""ROLE:
+You are an experienced dialogue writer creating a natural-sounding conversation based on the provided article. The listener should feel as if they're casually dropping into an ongoing exchange.
+
+GOAL:
+Craft a conversation that:
+1. Accurately covers all key points from the article, presented organically as part of the ongoing discussion.
+2. Takes ample time to explore each point in depth as described by the article, without introducing new information.
+3. Flows naturally, giving the listener a sense of entering mid-conversation.
+4. Includes subtle contextual clues to orient the listener without explicit introductions, greetings, or farewells.
+5. Ensures each speaker’s dialogue is distinct, engaging, and authentic to their character profile.
+
+REQUIREMENTS:
+- Use short, conversational sentences suitable for speech synthesis.
+- Exclude all last names for privacy.
+- Do not add speakers beyond those specified in the cast configuration.
+- Avoid segments that directly address the listener or acknowledge their presence explicitly.
+- Do not include information outside what is explicitly mentioned in the article.
+- Include natural speech patterns and filler sounds (e.g., um, ah, (pause), (breath)) to enhance realism (but don't make it forced).
+- Present each speaker’s dialogue in complete, coherent paragraphs.
+- Maintain an engaging, informative, and seamless dialogue experience.
+- DO NOT INCLUDE A SEGMENT FOR THE LISTENER.
+
+CAST CONFIGURATION:
+Use the following schema to define speaker and listener profiles:
+- Speaker:
+- name: Name of the speaker
+- background: Background information relevant to the speaker
+- expertise: General expertise area
+- speaking_style: Description of their speaking style
+- level_of_expertise: Detailed expertise level
+- focus_aspect: Specific aspect or angle the speaker emphasizes
+- depth: Depth of content provided
+- Listener:
+- name: Optional name of the listener
+- expertise: General expertise area of the listener
+- summary_of_similar_content: List summarizing similar content known to the listener
+- level_of_expertise: Listener's proficiency level
+- depth: Desired depth of content for the listener
+
+EXAMPLE (Style Reference):
+Imagine dropping into a casual yet intellectually rich conversation between Joe Rogan and Neil deGrasse Tyson discussing space exploration:
+
+Joe:
+"So, Neil, you’re telling me we've got satellites out there, right now, literally mapping planets?"
+
+Neil:
+"(laughs) Yeah, exactly. (pause) It’s mind-blowing. These satellites send back detailed images, data on atmospheric conditions—everything scientists need to understand these worlds remotely."
+
+Joe:
+"Wow. (breath) And they're just floating out there, doing their thing?"
+
+Neil:
+"Precisely. And here’s the fascinating part—some missions even search for signs of life. It completely changes how we see ourselves in the universe."
+
+Here's the cast configuration provided for this conversation:
+{cast_config_yaml}
+"""
+
         return prompt_content
 
     def cast(
@@ -158,73 +205,93 @@ class OnlyAudiocast:
         # Use provided or default cast configuration
         cast_config = cast_configuration or default_cast_configuration
 
-        # Build a mapping from speaker name to voice_id without repeating voices
-        available_voice_options = dict(self.voice_configurations["elevenlabs"])
+        # Build a mapping from speaker name to voice without repetition
+        available_voice_options = self.available_voices.copy()
         speaker_voice_map = {}
         for speaker in cast_config.speakers:
-            voice_names = list(available_voice_options.values())
-            match = difflib.get_close_matches(speaker.name, voice_names, n=1, cutoff=0)
-            if match:
-                best_voice_name = match[0]
-                for vid, vname in available_voice_options.items():
-                    if vname == best_voice_name:
-                        speaker_voice_map[speaker.name] = vid
-                        del available_voice_options[vid]
-                        break
+            voice_match = difflib.get_close_matches(
+                speaker.name, available_voice_options, n=1, cutoff=0
+            )
+            if voice_match:
+                selected_voice = voice_match[0]
+                available_voice_options.remove(selected_voice)
+                speaker_voice_map[speaker.name] = selected_voice
             else:
-                vid, _ = available_voice_options.popitem()
-                speaker_voice_map[speaker.name] = vid
+                selected_voice = random.choice(available_voice_options)
+                available_voice_options.remove(selected_voice)
+                speaker_voice_map[speaker.name] = selected_voice
 
         system_prompt = self.get_system_prompt(cast_config)
-        parser = OnlyJson(with_model="o3-mini")
+        parser = OnlyJson(with_model="o1")
         conversation_obj: Conversation = parser.parse(
             content, Conversation, system_prompt
         )
 
+        # Compute agent for each speaker using OnlyJson
+        agent_map = {}
+        for sp in cast_config.speakers:
+            agent_prompt = f"""You are a producer/director of a podcast. 
+Generate a short paragraph of instructions for the speaker {sp.name} for their persona and how they should speak. 
+They have the background: {sp.background}. Their expertise {sp.expertise}. 
+Start it with 'You are ...' and include how the speaker should read and pronounce the words, pace, etc.
+
+Here's an example:
+```
+You are an experienced art instructor with a warm and refined tone who specializes in post-modernist impressionism.
+Accent/Affect: Warm, refined, and gently instructive, reminiscent of a friendly art instructor.
+Tone: Calm, encouraging, and articulate, clearly describing each step with patience.
+Pacing: Slow and deliberate, pausing often to allow the listener to follow instructions comfortably.
+```
+"""
+            agent_result: Instructions = parser.parse(
+                agent_prompt, Instructions, agent_prompt
+            )
+            print(
+                f"Agent instructions generated for {sp.name}: {agent_result.instructions}"
+            )
+            agent_map[sp.name] = agent_result.instructions
+
         combined_audio = AudioSegment.empty()
+
         for entry in conversation_obj.entries:
-            # Add a random delay (0.2 to 0.5 seconds)
-            delay_duration = entry.pause * 1000  # Convert to milliseconds
+            delay_duration = entry.pause * 1000  # milliseconds
             silent_segment = AudioSegment.silent(duration=delay_duration)
             combined_audio += silent_segment
+
             if entry.speaker:
-                # Use speaker_voice_map based on the entry speaker name
-                voice_id = speaker_voice_map.get(entry.speaker)
-                if not voice_id:
-                    voice_id = random.choice(
-                        list(self.voice_configurations["elevenlabs"].keys())
-                    )
-                settings = self.speaker_voice_settings
+                voice = speaker_voice_map.get(
+                    entry.speaker, random.choice(self.available_voices)
+                )
                 text = entry.message
-                speaker = entry.speaker
+                instructions = agent_map.get(entry.speaker, "")
             else:
                 continue  # Skip unrecognized entries
 
-            # Generate audio with custom voice settings
-            audio_generator = self.client.generate(
-                text=text,
-                voice=Voice(voice_id=voice_id, settings=settings),
-                model="eleven_multilingual_v2",
+            # Generate audio using GPT-4o (simulate streaming by writing to a temp file)
+            response = self.client.audio.speech.create(
+                model="gpt-4o-mini-tts",
+                voice=voice,
+                input=text,
+                instructions=instructions,
             )
-
-            # Initialize a bytes buffer and collect the audio chunks
-            buffer = io.BytesIO()
-            for chunk in audio_generator:
-                buffer.write(chunk)
-            buffer.seek(0)
-            audio_segment = AudioSegment.from_file(buffer, format="mp3")
+            with tempfile.NamedTemporaryFile(suffix=".mp3") as tmp_file:
+                temp_filename = tmp_file.name
+                response.write_to_file(temp_filename)
+                audio_segment = AudioSegment.from_file(temp_filename, format="mp3")
             combined_audio += audio_segment
-            print(f"Audio segment added for {speaker}.")
+            print(f"Audio segment added for {entry.speaker}.")
 
-        # Generate a filename with a timestamp (updated to remove guest part)
+        # Generate title from provided content using the AudiocastTitle model
+        title_model = AudiocastTitle.generate(content)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        # Use first speaker's name for the filename
-        filename = f"{timestamp}_conversation.mp3"
+        # Use the generated title snippet in the filename
+        filename = f"{timestamp}_{title_model.generated_title}.wav"
+
         audio_out_folder = audio_out_path or os.path.join(
             "generated_podcast", "podcast_out"
         )
         os.makedirs(audio_out_folder, exist_ok=True)
         audio_file_path = os.path.join(audio_out_folder, filename)
-        combined_audio.export(audio_file_path, format="mp3")
+        combined_audio.export(audio_file_path, format="wav")
         print(f"Audio file saved to {audio_file_path}")
         return filename, audio_file_path

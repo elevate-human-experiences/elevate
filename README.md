@@ -13,7 +13,7 @@ This is a task focused way to do GenAI - you care about particular tasks work, n
 | Implemented | Snippet          | Description                      | Uses      | # Tests |
 |:-----------:|------------------|----------------------------------|-----------|---------|
 | ✅          | Only JSON     | Converts text to JSON format     |           | 5       |
-| ✅          | Only AudioCast | Converts text to podcast style format | Only JSON | 2       |
+| ✅          | Only AudioCast | Converts text to podcast style format | Only JSON | 5       |
 |            | Only Markdown | Converts text to Markdown format |           | -       |
 |            | Only Python | Only generates python code, executes it and returns the response |           | -       |
 |            | Only SQL      | Converts text to SQL query       |           | -       |

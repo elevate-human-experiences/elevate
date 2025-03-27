@@ -10,49 +10,49 @@ This is a task focused way to do GenAI - you care about particular tasks work, n
 
 ### Only Snippets
 
-| Implemented | Snippet          | Description                      | # Tests |
-|:-----------:|------------------|----------------------------------|---------|
-| ✅          | Only JSON     | Converts text to JSON format     | 5       |
-| ✅          | Only AudioCast | Converts text to podcast style format | 2       |
-|            | Only Markdown | Converts text to Markdown format | -       |
-|            | Only Python | Only generates python code, executes it and returns the response | -       |
-|            | Only SQL      | Converts text to SQL query       | -       |
-|            | Only Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email)       | -       |
-|            | Only Summaries      | Write summaries        | -       |
-|            | Only ELI5      | Write ELI5 summaries        | -       |
-|            | Only Email      | Write better emails        | -       |
-|            | Only Forms      | Conversations for form filling       | -       |
-|            | Only Excel      | Understand and execute Financial Models to answer user questions        | -       |
+| Implemented | Snippet          | Description                      | Uses      | # Tests |
+|:-----------:|------------------|----------------------------------|-----------|---------|
+| ✅          | Only JSON     | Converts text to JSON format     |           | 5       |
+| ✅          | Only AudioCast | Converts text to podcast style format | Only JSON | 2       |
+|            | Only Markdown | Converts text to Markdown format |           | -       |
+|            | Only Python | Only generates python code, executes it and returns the response |           | -       |
+|            | Only SQL      | Converts text to SQL query       |           | -       |
+|            | Only Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email) |           | -       |
+|            | Only Summaries      | Write summaries        |           | -       |
+|            | Only ELI5      | Write ELI5 summaries        |           | -       |
+|            | Only Email      | Write better emails        |           | -       |
+|            | Only Forms      | Conversations for form filling       |           | -       |
+|            | Only Excel      | Understand and execute Financial Models to answer user questions        |           | -       |
 
 ### Only Prompts
 
-| Implemented | Snippet          | Description                      | # Tests |
-|:-----------:|------------------|----------------------------------|---------|
-|            | Only Prompt      | Write prompts based on seed, and list of feedback containing examples or with critiques        | -       |
-|            | Only Feedback      | Improve prompts with agent driven feedback.        | -       |
+| Implemented | Snippet          | Description                      | Uses | # Tests |
+|:-----------:|------------------|----------------------------------|------|---------|
+|            | Only Prompt      | Write prompts based on seed, and list of feedback containing examples or with critiques |      | -       |
+|            | Only Feedback      | Improve prompts with agent driven feedback. |      | -       |
 
 
 ### Only Plan
 
-| Implemented | Snippet          | Description                      | # Tests |
-|:-----------:|------------------|----------------------------------|---------|
-|            | Only Plan      | Plan a tree of actions to be done to execute user task       | -       |
-|            | Only Writing      | Uses the DAG Planner to write a blog, etc.        | -       |
+| Implemented | Snippet          | Description                      | Uses | # Tests |
+|:-----------:|------------------|----------------------------------|------|---------|
+|            | Only Plan      | Plan a tree of actions to be done to execute user task |      | -       |
+|            | Only Writing      | Uses the DAG Planner to write a blog, etc. |      | -       |
 
 ### Only Swarm
 
-| Implemented | Snippet          | Description                      | # Tests |
-|:-----------:|------------------|----------------------------------|---------|
-|            | Only Elves | Multi-agent system to do multiple small Only Tasks | -       |
-|            | Only Data Hygene | Elves that clean up your data together | -       |
+| Implemented | Snippet          | Description                      | Uses | # Tests |
+|:-----------:|------------------|----------------------------------|------|---------|
+|            | Only Elves | Multi-agent system to do multiple small Only Tasks |      | -       |
+|            | Only Data Hygene | Elves that clean up your data together |      | -       |
 
 ### Only Art
 
-| Implemented | Snippet          | Description                      | # Tests |
-|:-----------:|------------------|----------------------------------|---------|
-|            | Only Fiction      | Uses the DAG Planner to write a fiction        | -       |
-|            | Only Art      | Generate images based on artistic params        | -       |
-|            | Only Hokusai      | Generate images inspired from "36 Views of Mount Fuji"        | -       |
+| Implemented | Snippet          | Description                      | Uses | # Tests |
+|:-----------:|------------------|----------------------------------|------|---------|
+|            | Only Fiction      | Uses the DAG Planner to write a fiction |      | -       |
+|            | Only Art      | Generate images based on artistic params |      | -       |
+|            | Only Hokusai      | Generate images inspired from "36 Views of Mount Fuji" |      | -       |
 
 
 ## Approach

@@ -74,9 +74,8 @@ default_cast_configuration = CastConfiguration(
 class ConversationEntry(BaseModel):
     pause: float = Field(
         default=0.5,
-        min=0.1,
-        max=2.0,
         description="Pause duration between conversation segments. In seconds. 0 means other/interrupting.",
+        json_schema_extra={"minimum": 0.1, "maximum": 2.0},
     )
     speaker: str = Field(..., description="Name of the conversation speaker")
     message: str = Field(..., description="Message content of the entry")

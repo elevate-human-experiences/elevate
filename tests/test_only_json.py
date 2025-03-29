@@ -1,9 +1,8 @@
 """Test the OnlyJson class with a CalendarEvent schema."""
 
 from pydantic import BaseModel
-from elevate import OnlyJson
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from elevate.only_json import OnlyJson
 
@@ -141,11 +140,7 @@ def test_cyclic_relationships() -> None:
             None,
             description="Reference to another Employee object acting as the manager, or null if none.",
         )
-
-        class Config:
-            """Pydantic configuration to allow self-referencing fields."""
-
-            arbitrary_types_allowed = True
+        model_config = ConfigDict(arbitrary_types_allowed=True)
 
     text = "Employee: Jane Smith. Manager: John Wilson. Manager of John Wilson is none."
 

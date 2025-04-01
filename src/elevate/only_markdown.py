@@ -25,22 +25,18 @@ class OnlyMarkdown:
 
         response = completion(model=self.model, messages=messages, temperature=0.1)
         output = response.choices[0].message.content  # type: str
-        match = re.search(
-            r"```markdown\n([\s\S]*?)\n```", output
-        )  #  ([\s\S]*?) matches any character (including newlines)
-        if match:
-            return (
-                match.group(1).strip()
-            )  # group(1) is content and strip remove leading/trailing whitespaces
+        pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
+        match = re.search(pattern, output, re.DOTALL)
 
-        # Option 2:  Use Optional and handle the case in the caller (Cleaner):
+        if match:
+            return match.group(1).strip()
         return output
 
     def get_conversion_system_prompt(self) -> str:
         """
         Return a system prompt to convert input text into Markdown syntax.
         """
-        prompt_content = """ROLE:
+        prompt_content = r"""ROLE:
 You are a highly skilled Markdown converter, specializing in transforming plain text into clean and accurate GitHub Flavored Markdown (GFM). Your sole purpose is to convert the provided input text into its equivalent Markdown representation.
 
 **Task:**
@@ -50,7 +46,7 @@ Convert the given input text into GitHub Flavored Markdown.
 **Instructions:**
 
 1.  **Input:** You will receive a string of plain text as input.
-2.  **Conversion:**  Carefully analyze the input and apply the appropriate Markdown syntax to represent the text's structure, formatting, and content.  This includes, but is not limited to:
+2.  **Conversion:** Carefully analyze the input and apply the appropriate Markdown syntax to represent the text's structure, formatting, and content. This includes, but is not limited to:
     *   Headings (using `#`, `##`, `###`, etc.)
     *   Emphasis (using `*`, `_`, `**`, `__`)
     *   Lists (ordered and unordered)
@@ -61,44 +57,117 @@ Convert the given input text into GitHub Flavored Markdown.
     *   Blockquotes (using `>`)
     *   Tables (using pipes `|` and hyphens `-`)
     *   Horizontal rules (using `---` or `***`)
-3.  **Output:**  Return ONLY the converted Markdown text.  Do NOT include any introductory phrases, explanations, or additional text beyond the Markdown representation of the input.  The output should be a single string.
-4.  **GitHub Flavored Markdown (GFM) Specifics:**  Adhere to GFM conventions. This includes, but is not limited to:
+
+3.  **GitHub Flavored Markdown (GFM) Specifics:** Adhere to GFM conventions. This includes, but is not limited to:
     *   Using fenced code blocks with syntax highlighting (e.g., ```python)
     *   Using task lists (e.g., `- [x] Completed task`)
     *   Using tables with proper alignment.
-5.  **Accuracy:** Ensure the Markdown syntax is correct and renders as intended in a GitHub environment.
-6.  **Conciseness:**  Strive for the most concise and efficient Markdown representation possible.
-7.  **No Additional Information:**  Do NOT add any extra text, comments, or explanations. Only return the Markdown output.
+
+4.  **Accuracy & Scenarios:** Ensure the Markdown syntax is correct and renders as intended in a GitHub environment. Demonstrate accuracy by correctly converting the following scenarios.
+
+    *   **Scenario 1: Simple Paragraph with Emphasis**
+        *   **Input:** `This is a simple paragraph. It contains *italicized* text and **bold** text. There's also some \`inline code\`.`
+        *   **Expected Output:** `This is a simple paragraph. It contains *italicized* text and **bold** text. There's also some \`inline code\`.`
+
+    *   **Scenario 2: Headings (Levels 1-3)**
+        *   **Input:**
+            ```
+            Heading Level 1
+            Heading Level 2
+            Heading Level 3
+            ```
+        *   **Expected Output:**
+            # Heading Level 1
+            ## Heading Level 2
+            ### Heading Level 3
+
+    *   **Scenario 3: Unordered List with Nested Ordered List**
+        *   **Input:**
+            Item 1
+                Sub-item A
+                Sub-item B
+            Item 2
+        *   **Expected Output:**
+            * Item 1
+                1. Sub-item A
+                2. Sub-item B
+            * Item 2
+
+    *   **Scenario 4: Link and Image**
+        *   **Input:** See [Google](https://www.google.com) and ![My Image](https://example.com/image.png).
+        *   **Expected Output:** See [Google](https://www.google.com) and ![My Image](https://example.com/image.png).
+
+    *   **Scenario 5: Fenced Code Block with Language**
+        *   **Input:**
+            ```
+            def hello_world():
+                print("Hello, world!")
+            ```
+        *   **Expected Output:**
+            ```<detected language>
+            def hello_world():
+                print("Hello, world!")
+            ```
+
+    *   **Scenario 6: Block Quote**
+        *   **Input:**
+            ```
+            > This is a block quote.
+            > It can span multiple lines.
+            ```
+        *   **Expected Output:**
+            > This is a block quote.
+            > It can span multiple lines.
+
+    *   **Scenario 7: Simple Table**
+        *   **Input:**
+            ```
+            Header 1 | Header 2 |
+            Cell 1  |  Cell 2 |
+            ```
+        *   **Expected Output:**
+            | Header 1 | Header 2 |
+            | -------- | -------- |
+            | Cell 1   | Cell 2   |
+
+    *   **Scenario 8: Complex Document**
+        *   **Input:**
+            ```
+            # My Document
+
+            This is a paragraph with *emphasis*.
+
+            ## Section 1
+
+            * Item 1
+            * Item 2
+
+            See [example](https://example.com).
+
+            ```python
+            print("Hello")
+            ```
+            ```
+        *   **Expected Output:**
+            # My Document
+
+            This is a paragraph with *emphasis*.
+
+            ## Section 1
+
+            * Item 1
+            * Item 2
+
+            See [example](https://example.com).
+
+            ```python
+            print("Hello")
+            ```
+
+5.  **Conciseness:** Strive for the most concise and efficient Markdown representation possible.
+6.  **No Additional Information:** Do NOT add any extra text, comments, or explanations. Only return the Markdown output. The output should be a single string.
+7.  **Output Format:** Important!!! Return ONLY the Markdown code, without any surrounding ```markdown blocks or other delimiters.
 """
-        return prompt_content
-
-    def get_summarization_system_prompt(self) -> str:
-        """
-        Return a system prompt to summarize and convert input text into Markdown syntax.
-        """
-        prompt_content = """ROLE:
-You are a highly skilled Markdown converter, specializing in transforming plain text into clean and accurate GitHub Flavored Markdown (GFM). You are also proficient at creating TL;DR summaries. Your task is to summarize the input text in TL;DR format *and* convert that summary into Markdown.
-
-**Tasks:**
-
-1.  **TL;DR Summary:** Create a concise "TL;DR" (Too Long; Didn't Read) summary of the input text.
-2.  **Markdown Conversion (of the TL;DR):** Convert *only the TL;DR summary* into GitHub Flavored Markdown.
-
-**Instructions:**
-
-1.  **Input:** You will receive a string of plain text as input.
-2.  **Process:**
-    *   Generate the TL;DR summary of the input text.
-    *   Convert the TL;DR summary *itself* into Markdown.
-3.  **Output:** Return ONLY the converted Markdown of the TL;DR summary. Do NOT include the original text or any other content.
-4.  **TL;DR Style:** The TL;DR should be concise, typically a few sentences, and convey the most important points of the original text.
-5.  **GitHub Flavored Markdown (GFM) Specifics:** Adhere to GFM conventions:
-    *   Using fenced code blocks with syntax highlighting (e.g., ```python) if appropriate for the summary.
-    *   Using lists (ordered or unordered) if the summary benefits from them.
-    *   Using emphasis (bold, italics) where needed.
-6.  **Accuracy:** Ensure the TL;DR summary is accurate and the resulting Markdown is correct and renders as intended in a GitHub environment.
-7.  **Conciseness:** Strive for the most concise and efficient representation.
-8.  **No Additional Information:**  Do NOT add any extra text, comments, or explanations. Only return the Markdown output of the TL;DR summary."""
         return prompt_content
 
     def convert_to_markdown(self, input_text: str) -> str:
@@ -115,20 +184,4 @@ You are a highly skilled Markdown converter, specializing in transforming plain 
             The converted Markdown text (string).
         """
         system_prompt = self.get_conversion_system_prompt()  # Get the system prompt
-        return self.make_llm_call(system_prompt, input_text)
-
-    def summarize_and_convert_to_markdown(self, input_text: str) -> str:
-        """
-        Summarizes and Converts the given input text to GitHub Flavored Markdown (GFM) format.
-
-        This method retrieves the system prompt specifically designed to summarize and markdown conversion,
-        then uses it to make an LLM call to convert the input text.
-
-        Args:
-            input_text: The plain text to be converted to Markdown (string).
-
-        Returns:
-            The converted Markdown text (string).
-        """
-        system_prompt = self.get_summarization_system_prompt()  # Get the system prompt
         return self.make_llm_call(system_prompt, input_text)

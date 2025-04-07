@@ -1,6 +1,6 @@
 default_language_version:
   python: python3.10
-  
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -39,12 +39,15 @@ repos:
       # Run the formatter.
       - id: ruff-format
 
-  - repo: https://github.com/econchick/interrogate
+# --- MODIFIED SECTION ---
+  - repo: https://github.com/econchick/interrogate # Note: repo is econchick, not econchs as in traceback
     rev: 1.5.0
     hooks:
       - id: interrogate
         exclude: ^app/serve
         args: [--fail-under=80, --verbose]
+        additional_dependencies: [setuptools] # <--- ADD THIS LINE
+# --- END MODIFIED SECTION ---
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.15.0

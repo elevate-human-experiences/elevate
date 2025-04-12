@@ -14,7 +14,7 @@ load_dotenv()
 class OnlyEmail:
     """Class that returns well formatted emails."""
 
-    def __init__(self, with_model: str = "gemini/gemini-2.0-flash-lite") -> None:
+    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 

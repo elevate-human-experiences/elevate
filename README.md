@@ -3,9 +3,9 @@ This project is designed to deliver fast, cost-effective, reliable, and determin
 - Text to JSON
 - Text to Markdown
 - Text to SQL
-- [And more](#snippets) ... 
+- [And more](#snippets) ...
 
-This is a task focused way to do GenAI - you care about particular tasks work, not which model or tool to use. Or if you do have a preference of the model, the choice of underlying tool doesn't matter as long as you get the right result. There may be nuances to the tools and the models, but choosing this lib, you choose gold standard. 
+This is a task focused way to do GenAI - you care about particular tasks work, not which model or tool to use. Or if you do have a preference of the model, the choice of underlying tool doesn't matter as long as you get the right result. There may be nuances to the tools and the models, but choosing this lib, you choose gold standard.
 
 
 ### Only Snippets
@@ -14,15 +14,16 @@ This is a task focused way to do GenAI - you care about particular tasks work, n
 |:-----------:|------------------|----------------------------------|-----------|---------|
 | ✅          | Only JSON     | Converts text to JSON format     |           | 5       |
 | ✅          | Only AudioCast | Converts text to podcast style format | Only JSON | 5       |
-|            | Only Markdown | Converts text to Markdown format |           | -       |
+| ✅          | Only Markdown | Converts text to Markdown format |           | 5       |
 |            | Only Python | Only generates python code, executes it and returns the response |           | -       |
 |            | Only SQL      | Converts text to SQL query       |           | -       |
-|            | Only Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email) |           | -       |
-|            | Only Summaries      | Write summaries        |           | -       |
+| ✅          | Only Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email) |           | 8       |
+| ✅          | Only Summaries      | Write summaries        |           | -       |
 |            | Only ELI5      | Write ELI5 summaries        |           | -       |
-|            | Only Email      | Write better emails        |           | -       |
+| ✅          | Only Email      | Write better emails        |           | 8       |
 |            | Only Forms      | Conversations for form filling       |           | -       |
 |            | Only Excel      | Understand and execute Financial Models to answer user questions        |           | -       |
+|  ✅          | Only Judge LLMs      | Judge the outputs of LLMs        |           | 5       |
 
 ### Only Prompts
 
@@ -79,7 +80,7 @@ OPENAI_API_KEY=
 
 - Run the helper classes using the default "gold standard" tool and model.
 - Execute tests with `pytest` to ensure speed, cost, accuracy, and determinism.
-    - `uv run pytest` or `uv run pytest tests/test_file.py`.
+    - `uv run pytest` or `uv run pytest -s tests/test_file.py `.
 - Refer to individual module documentation for task-specific instructions.
 
 ## Contributing

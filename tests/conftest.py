@@ -20,17 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Elevate package."""
+"""Conftest file for pytest."""
 
-from dotenv import load_dotenv
+import sys
+from pathlib import Path
 
-# Load environment variables
-load_dotenv()
-
-
-def hello() -> str:
-    """Return a greeting."""
-    return "Hello from elevate!"
-
-
-__all__ = ["hello"]
+# Add the "src" folder to the PYTHONPATH for pytest
+sys.path.insert(0, Path(__file__).resolve().parent.parent.joinpath("src").as_posix())

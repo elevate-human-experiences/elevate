@@ -1,8 +1,30 @@
+# MIT License
+#
+# Copyright (c) 2025 elevate-human-experiences
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test the OnlyJson class with a CalendarEvent schema."""
 
 from pydantic import BaseModel
 from typing import List, Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import Field, ConfigDict
 from datetime import datetime
 from elevate.only_json import OnlyJson
 
@@ -39,7 +61,7 @@ def test_calendar_event() -> None:
             ..., description="A JSON array of CalendarEvent objects."
         )
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     events_list = only_json.parse(
         content="List 5 important events in the XIX century", schema=EventsList
     )
@@ -73,7 +95,7 @@ def test_extraction_of_contact_info() -> None:
         " I'll be available most weekdays."
     )
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     contact = only_json.parse(content=text, schema=ContactInfo)
     assert isinstance(contact, ContactInfo)
     assert contact.name == "John Doe"
@@ -117,7 +139,7 @@ def test_nested_structures() -> None:
         "The second is Marketing, managed by Bob Smith with 15 people."
     )
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     company = only_json.parse(content=text, schema=Company)
     assert isinstance(company, Company)
     assert len(company.departments) == 2
@@ -144,7 +166,7 @@ def test_cyclic_relationships() -> None:
 
     text = "Employee: Jane Smith. Manager: John Wilson. Manager of John Wilson is none."
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     employee = only_json.parse(content=text, schema=Employee)
     assert isinstance(employee, Employee)
     assert employee.name == "Jane Smith"
@@ -173,7 +195,7 @@ def test_conversion_while_extracting() -> None:
 
     text = "The temperature in Berlin is 86 degrees Fahrenheit today."
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     reading = only_json.parse(content=text, schema=TemperatureReading)
     assert isinstance(reading, TemperatureReading)
     # 86°F ~ 30°C
@@ -205,7 +227,7 @@ def test_different_field_descriptions() -> None:
         "We currently have 500 pieces in inventory."
     )
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     product = only_json.parse(content=text, schema=Product)
     assert isinstance(product, Product)
     assert product.title == "UltraWidget"
@@ -231,7 +253,7 @@ def test_data_formats() -> None:
 
     text = "Item: Fancy Pen. Price: $5.99. Stock: 100 units available."
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     item = only_json.parse(content=text, schema=StoreItem)
     assert isinstance(item, StoreItem)
     assert item.name == "Fancy Pen"
@@ -258,7 +280,7 @@ def test_datetime_parsing() -> None:
 
     text = "Meeting about budget planning on March 10, 2025 at 2:30 PM."
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     meeting = only_json.parse(content=text, schema=Meeting)
     assert isinstance(meeting, Meeting)
     assert meeting.start_time.year == 2025
@@ -289,7 +311,7 @@ def test_optional_fields() -> None:
 
     text = "Username: techguy. Bio: Loves coding in Python. (No website provided)."
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     profile = only_json.parse(content=text, schema=Profile)
     assert isinstance(profile, Profile)
     assert profile.username == "techguy"
@@ -321,7 +343,7 @@ def test_special_characters_and_lists() -> None:
         "End of list."
     )
 
-    only_json = OnlyJson(with_model="gpt-4o-mini")
+    only_json = OnlyJson()
     groceries = only_json.parse(content=text, schema=GroceryList)
     assert isinstance(groceries, GroceryList)
     assert len(groceries.items) == 4

@@ -1,10 +1,33 @@
+# MIT License
+#
+# Copyright (c) 2025 elevate-human-experiences
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from pydantic import BaseModel, Field
+from typing import Any
 from elevate.only_judge_llms import OnlyJudgeLLMs
 
 
 # --- Test 1: Evaluation of a summary response ---
 # Inspired by metrics on coherence, fluency, and factual consistency.
-def test_summary_evaluation():
+def test_summary_evaluation() -> None:
     class SummaryCriteria(BaseModel):
         coherence: int = Field(..., description="Coherence of the summary (1-5)")
         fluency: int = Field(..., description="Fluency of the language (1-5)")
@@ -15,7 +38,7 @@ def test_summary_evaluation():
         "cost-saving initiatives, and improved operational efficiency, though challenges remain in emerging markets."
     )
     judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result = judge.evaluate(sample_text, SummaryCriteria)
+    result: Any = judge.evaluate(sample_text, SummaryCriteria)
 
     # This text is coherent and factually consistent, so we expect mid-to-high scores
     assert 4 <= result.coherence <= 5
@@ -25,7 +48,7 @@ def test_summary_evaluation():
 
 # --- Test 2: Evaluation of a conversational reply ---
 # Updated to reflect a less relevant/helpful response.
-def test_conversational_evaluation():
+def test_conversational_evaluation() -> None:
     class ConversationCriteria(BaseModel):
         relevance: int = Field(..., description="How relevant is the reply? (1-5)")
         helpfulness: int = Field(..., description="How helpful is the response? (1-5)")
@@ -37,7 +60,7 @@ def test_conversational_evaluation():
         "It's a beautiful day, though. How have you been?"
     )
     judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result = judge.evaluate(sample_text, ConversationCriteria)
+    result: Any = judge.evaluate(sample_text, ConversationCriteria)
 
     # Relevance should be lower because it doesn't address the product launch well
     assert 1 <= result.relevance <= 3
@@ -49,7 +72,7 @@ def test_conversational_evaluation():
 
 # --- Test 3: Evaluation of creative writing ---
 # Leveraging metrics such as creativity, narrative flow, and imagery.
-def test_creative_writing_evaluation():
+def test_creative_writing_evaluation() -> None:
     class CreativeCriteria(BaseModel):
         creativity: int = Field(
             ..., description="How creative is the composition? (1-5)"
@@ -62,7 +85,7 @@ def test_creative_writing_evaluation():
         "The city pulses with poetic intensity, each corner revealing a story etched in light and shadow."
     )
     judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result = judge.evaluate(sample_text, CreativeCriteria)
+    result: Any = judge.evaluate(sample_text, CreativeCriteria)
 
     # Quite imaginative; likely high creativity
     assert 4 <= result.creativity <= 5
@@ -74,7 +97,7 @@ def test_creative_writing_evaluation():
 
 # --- Test 4: Evaluation of an instructional response ---
 # Updated to reflect a less complete/accurate set of instructions.
-def test_instructional_evaluation():
+def test_instructional_evaluation() -> None:
     class InstructionCriteria(BaseModel):
         clarity: int = Field(..., description="Clarity of the instructions (1-5)")
         accuracy: int = Field(..., description="Accuracy of the details provided (1-5)")
@@ -85,7 +108,7 @@ def test_instructional_evaluation():
     # This is intentionally vague and incomplete for installation instructions.
     sample_text = "To install the package, first you open your terminal. Then do something with pip. I'm not entirely sure."
     judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result = judge.evaluate(sample_text, InstructionCriteria)
+    result: Any = judge.evaluate(sample_text, InstructionCriteria)
 
     # The instructions aren't very clear
     assert 1 <= result.clarity <= 3
@@ -97,7 +120,7 @@ def test_instructional_evaluation():
 
 # --- Test 5: Evaluation of poetic text ---
 # Focusing on metrics like elegance, metaphorical depth, and rhythm.
-def test_poetic_evaluation():
+def test_poetic_evaluation() -> None:
     class PoeticCriteria(BaseModel):
         elegance: int = Field(..., description="Elegance of the phrasing (1-5)")
         metaphorical_depth: int = Field(
@@ -110,7 +133,7 @@ def test_poetic_evaluation():
         "the cadence of nature whispers secrets where dreams and reality converge into a poetic reverie."
     )
     judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result = judge.evaluate(sample_text, PoeticCriteria)
+    result: Any = judge.evaluate(sample_text, PoeticCriteria)
 
     # The text is fairly elegant, though we allow some variation
     assert 3 <= result.elegance <= 5

@@ -28,6 +28,7 @@ repos:
         args: [--strict, --ignore-missing-imports]
         additional_dependencies:
           - "pydantic>=1.10.4"
+        language_version: python3.10  # Explicitly set Python version for this hook
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
@@ -36,24 +37,26 @@ repos:
       # Run the linter.
       - id: ruff
         args: [--fix]
+        language_version: python3.10  # Explicitly set Python version
       # Run the formatter.
       - id: ruff-format
+        language_version: python3.10  # Explicitly set Python version
 
-# --- MODIFIED SECTION ---
   - repo: https://github.com/econchick/interrogate # Note: repo is econchick, not econchs as in traceback
     rev: 1.5.0
     hooks:
       - id: interrogate
-        exclude: ^app/serve
+        files: ^(src|tests)/
         args: [--fail-under=80, --verbose]
-        additional_dependencies: [setuptools] # <--- ADD THIS LINE
-# --- END MODIFIED SECTION ---
+        additional_dependencies: [setuptools]
+        language_version: python3.10  # Explicitly set Python version
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.15.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
+        language_version: python3.10  # Explicitly set Python version
 
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
@@ -61,6 +64,7 @@ repos:
       - id: detect-secrets
         name: "detect-secrets"
         args: ["--exclude-files", '.*\.ipynb$']
+        language_version: python3.10  # Explicitly set Python version
       - id: detect-secrets
         name: "detect-secrets-jupyter"
         args:
@@ -70,12 +74,14 @@ repos:
             "--exclude-lines",
             '"(hash|id|authorship_tag|image/\w+)":.*',
           ]
+        language_version: python3.10  # Explicitly set Python version
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.1.10
     hooks:
       - id: insert-license
-        files: ^app/.*\.py$
+        files: ^(src|tests)/.*\.py$
         args:
           - --license-filepath
-          - LICENSE.txt
+          - LICENSE
+        language_version: python3.10  # Explicitly set Python version

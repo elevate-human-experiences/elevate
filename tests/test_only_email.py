@@ -1,3 +1,25 @@
+# MIT License
+#
+# Copyright (c) 2025 elevate-human-experiences
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module to test the email generation functionalities of the OnlyEmail class."""
 
 from elevate.only_email import OnlyEmail
@@ -70,7 +92,7 @@ def test_resignation_email() -> None:
     the supervisor, expressing gratitude and outlining a transition plan.
     """
     resignation_input_message = """
-    Please draft a formal resignation email addressed to my supervisor. I am resigning effective [date] 
+    Please draft a formal resignation email addressed to my supervisor. I am resigning effective [date]
     and would like to express my gratitude for the opportunities provided. I am willing to help with the transition.
     """
     only_email = OnlyEmail()
@@ -87,7 +109,7 @@ def test_workplace_conflict_email() -> None:
     with a colleague and proposes a meeting to discuss and resolve the issues.
     """
     conflict_input_message = """
-    Draft an email addressing a workplace conflict with a colleague. The email should highlight concerns 
+    Draft an email addressing a workplace conflict with a colleague. The email should highlight concerns
     regarding recent interactions, propose a meeting to discuss the issues, and aim for a resolution while remaining professional.
     """
     only_email = OnlyEmail()

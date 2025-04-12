@@ -1,24 +1,44 @@
-import io
+"""Module for audio cast generation using GPT-4o."""
+
+# MIT License
+#
+# Copyright (c) 2025 elevate-human-experiences
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import random
 from datetime import datetime
+from typing import Optional, List, Dict, Tuple
 
-from dotenv import load_dotenv
 from pydub import AudioSegment
-from openai import OpenAI  # new import for GPT-4o
-from pathlib import Path  # new import for file path management
-import tempfile  # to create temporary files for audio
-from typing import Optional, List  # added import for List
-from pydantic import BaseModel, Field  # modified to include Field
-from .only_json import OnlyJson  # new import for JSON parsing
-import yaml  # new import for YAML handling
-import difflib  # added import for matching
-
-# Load environment variables
-load_dotenv()
+from openai import OpenAI
+import tempfile
+from pydantic import BaseModel, Field
+from .only_json import OnlyJson
+import yaml  # type: ignore
+import difflib
 
 
 class SpeakerConfig(BaseModel):
+    """Speaker configuration model."""
+
     name: str = Field(..., description="Speaker's name")
     background: str = Field(..., description="Speaker background information")
     expertise: str = Field(..., description="Expertise level of the speaker")
@@ -29,9 +49,11 @@ class SpeakerConfig(BaseModel):
 
 
 class ListenerConfig(BaseModel):
+    """Listener configuration model."""
+
     name: str | None = Field(default=None, description="Listener's name (optional)")
     expertise: str = Field(..., description="Expertise level of the listener")
-    summary_of_similar_content: list = Field(
+    summary_of_similar_content: List[str] = Field(
         ..., description="Summaries of similar content"
     )
     level_of_expertise: str = Field(..., description="Listener's proficiency level")
@@ -39,17 +61,20 @@ class ListenerConfig(BaseModel):
 
 
 class CastConfiguration(BaseModel):
-    speakers: list[SpeakerConfig] = Field(
+    """Cast configuration model for speakers and listener."""
+
+    speakers: List[SpeakerConfig] = Field(
         ..., description="List of speaker configurations"
     )
     listener: ListenerConfig = Field(..., description="Configuration for the listener")
 
 
 class Instructions(BaseModel):
+    """Model for instructions to the agent."""
+
     instructions: str = Field(..., description="Instructions for the agent")
 
 
-# Default configuration for a single narrator technical podcast
 default_cast_configuration = CastConfiguration(
     speakers=[
         SpeakerConfig(
@@ -72,6 +97,8 @@ default_cast_configuration = CastConfiguration(
 
 
 class ConversationEntry(BaseModel):
+    """Data model for a conversation entry."""
+
     pause: float = Field(
         default=0.5,
         description="Pause duration between conversation segments. In seconds. 0 means other/interrupting.",
@@ -82,41 +109,39 @@ class ConversationEntry(BaseModel):
 
 
 class Conversation(BaseModel):
+    """Data model for a conversation consisting of multiple entries."""
+
     entries: List[ConversationEntry] = Field(
         ..., description="List of conversation entries"
     )
 
 
-# New Pydantic class to generate an audiocast title based on content
 class AudiocastTitle(BaseModel):
+    """Model to generate an audiocast title from conversation content."""
+
     generated_title: str = Field(
         ..., description="Title derived from the conversation content"
     )
 
     @classmethod
     def generate(cls, content: str) -> "AudiocastTitle":
-        # Generate a simple title by taking the first 10 words from the provided content
+        """Generate a title using the first 10 words of content."""
         words = content.split()[:10]
         title = " ".join(words) if words else "Audiocast"
-        # Clean title by replacing spaces with underscores and limit length
         title_snippet = title.replace(" ", "_")[:30]
         return cls(generated_title=title_snippet)
 
 
 class OnlyAudiocast:
-    """Class that converts text into an audio file using GPT-4o model."""
+    """Converts text into an audio file using the GPT-4o model."""
 
     def __init__(self) -> None:
-        """Initialize the OnlyAudiocast class."""
-        # Check if ffmpeg is installed
+        """Initialize OnlyAudiocast and verify ffmpeg installation."""
         if not AudioSegment.ffmpeg:
             raise Exception(
                 "ffmpeg is not installed. Try installing it as `brew install ffmpeg`, or whatever is appropriate for your OS."
             )
-
-        # Initialize OpenAI client
         self.client = OpenAI()
-        # Define available voices for GPT-4o
         self.available_voices = [
             "alloy",
             "fable",
@@ -125,10 +150,8 @@ class OnlyAudiocast:
             "shimmer",
         ]
 
-    def get_system_prompt(self, cast_configuration: CastConfiguration) -> dict:
-        """
-        Generate a system prompt with embedded cast configuration in YAML.
-        """
+    def get_system_prompt(self, cast_configuration: CastConfiguration) -> str:
+        """Generate a system prompt with cast configuration in YAML."""
         cast_config_yaml = yaml.dump(cast_configuration.model_dump())
         prompt_content = f"""ROLE:
 You are an experienced dialogue writer creating a natural-sounding conversation based on the provided article. The listener should feel as if they're casually dropping into an ongoing exchange.
@@ -195,17 +218,12 @@ Here's the cast configuration provided for this conversation:
         content: str,
         audio_out_path: str,
         cast_configuration: Optional[CastConfiguration] = None,
-    ) -> tuple:
-        """
-        Convert the provided content text into a conversation using JSON schema validation,
-        then convert the conversation into an audio file.
-        """
-        # Use provided or default cast configuration
+    ) -> Tuple[str, str]:
+        """Convert text into a conversation and generate an audio file."""
         cast_config = cast_configuration or default_cast_configuration
 
-        # Build a mapping from speaker name to voice without repetition
         available_voice_options = self.available_voices.copy()
-        speaker_voice_map = {}
+        speaker_voice_map: Dict[str, str] = {}
         for speaker in cast_config.speakers:
             voice_match = difflib.get_close_matches(
                 speaker.name, available_voice_options, n=1, cutoff=0
@@ -221,16 +239,15 @@ Here's the cast configuration provided for this conversation:
 
         system_prompt = self.get_system_prompt(cast_config)
         parser = OnlyJson(with_model="o1")
-        conversation_obj: Conversation = parser.parse(
-            content, Conversation, system_prompt
-        )
+        conversation_obj = parser.parse(content, Conversation, system_prompt)
+        if not isinstance(conversation_obj, Conversation):
+            raise TypeError("Expected Conversation type")
 
-        # Compute agent for each speaker using OnlyJson
-        agent_map = {}
+        agent_map: Dict[str, str] = {}
         for sp in cast_config.speakers:
-            agent_prompt = f"""You are a producer/director of a podcast. 
-Generate a short paragraph of instructions for the speaker {sp.name} for their persona and how they should speak. 
-They have the background: {sp.background}. Their expertise {sp.expertise}. 
+            agent_prompt = f"""You are a producer/director of a podcast.
+Generate a short paragraph of instructions for the speaker {sp.name} for their persona and how they should speak.
+They have the background: {sp.background}. Their expertise {sp.expertise}.
 Start it with 'You are ...' and include how the speaker should read and pronounce the words, pace, etc.
 
 Here's an example:
@@ -241,9 +258,10 @@ Tone: Calm, encouraging, and articulate, clearly describing each step with patie
 Pacing: Slow and deliberate, pausing often to allow the listener to follow instructions comfortably.
 ```
 """
-            agent_result: Instructions = parser.parse(
-                agent_prompt, Instructions, agent_prompt
-            )
+            agent_result = parser.parse(agent_prompt, Instructions, agent_prompt)
+            if not isinstance(agent_result, Instructions):
+                raise TypeError("Expected Instructions type")
+
             print(
                 f"Agent instructions generated for {sp.name}: {agent_result.instructions}"
             )
@@ -252,7 +270,7 @@ Pacing: Slow and deliberate, pausing often to allow the listener to follow instr
         combined_audio = AudioSegment.empty()
 
         for entry in conversation_obj.entries:
-            delay_duration = entry.pause * 1000  # milliseconds
+            delay_duration = entry.pause * 1000
             silent_segment = AudioSegment.silent(duration=delay_duration)
             combined_audio += silent_segment
 
@@ -263,9 +281,8 @@ Pacing: Slow and deliberate, pausing often to allow the listener to follow instr
                 text = entry.message
                 instructions = agent_map.get(entry.speaker, "")
             else:
-                continue  # Skip unrecognized entries
+                continue
 
-            # Generate audio using GPT-4o (simulate streaming by writing to a temp file)
             response = self.client.audio.speech.create(
                 model="gpt-4o-mini-tts",
                 voice=voice,
@@ -279,10 +296,8 @@ Pacing: Slow and deliberate, pausing often to allow the listener to follow instr
             combined_audio += audio_segment
             print(f"Audio segment added for {entry.speaker}.")
 
-        # Generate title from provided content using the AudiocastTitle model
         title_model = AudiocastTitle.generate(content)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        # Use the generated title snippet in the filename
         filename = f"{timestamp}_{title_model.generated_title}.wav"
 
         audio_out_folder = audio_out_path or os.path.join(

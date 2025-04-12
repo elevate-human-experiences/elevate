@@ -3,9 +3,9 @@ This project is designed to deliver fast, cost-effective, reliable, and determin
 - Text to JSON
 - Text to Markdown
 - Text to SQL
-- [And more](#snippets) ... 
+- [And more](#snippets) ...
 
-This is a task focused way to do GenAI - you care about particular tasks work, not which model or tool to use. Or if you do have a preference of the model, the choice of underlying tool doesn't matter as long as you get the right result. There may be nuances to the tools and the models, but choosing this lib, you choose gold standard. 
+This is a task focused way to do GenAI - you care about particular tasks work, not which model or tool to use. Or if you do have a preference of the model, the choice of underlying tool doesn't matter as long as you get the right result. There may be nuances to the tools and the models, but choosing this lib, you choose gold standard.
 
 
 ### Only Snippets

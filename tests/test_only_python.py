@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module to test the text rephrasing functionalities of the OnlyPython class."""
+"""Module to test the Python code generation functionalities of the OnlyPython class."""
 
 from elevate.only_python import OnlyPython
 

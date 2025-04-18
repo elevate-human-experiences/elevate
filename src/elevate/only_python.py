@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Only rephrase module for the Elevate app."""
+"""Only Python module for the Elevate app."""
 
 import re
 

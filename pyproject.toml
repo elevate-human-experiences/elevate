@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "e2b-code-interpreter>=1.2.0",
     "litellm>=1.63.12",
     "openai>=1.67.0",
     "pydantic>=2.10.6",

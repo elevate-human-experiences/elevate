@@ -59,24 +59,30 @@ This is a task focused way to do GenAI - you care about particular tasks work, n
 ## Approach
 We follow a Test-Driven Development methodology to ensure robust functionality and rapid feedback. Each helper class is configured to use a "gold standard" model and tool by default, with tests enforcing high performance, accuracy, and reproducibility. A forthcoming comparison chart will guide users to the best models and tools for their specific needs.
 
-## Setting it up
+## Setup
 
 ```bash
 uv sync
 source .venv/bin/activate
 ```
 
-We also use precommit to make sure commited files work well. After installing pre-commit, run:
-```bash
-pre-commit install
-```
-
 Also create a `.env` file with the following:
 ```
 OPENAI_API_KEY=
 ```
+The .env file is loaded automatically using `python-dotenv`'s `load_env` method.
 
 ## Usage
+
+### ClI Agent
+You can use a CLI Agent to use the snippets to do work.
+
+You can run the agent with:
+```bash
+uv run agent/cli.py
+```
+
+### Tests
 
 - Run the helper classes using the default "gold standard" tool and model.
 - Execute tests with `pytest` to ensure speed, cost, accuracy, and determinism.
@@ -90,6 +96,11 @@ Contributions are welcome! Please ensure all changes pass tests and adhere to ou
 ## Developer Instructions
 
 - Follow the "Setting it up" section to configure your development environment.
+- We also use precommit to make sure commited files work well. After installing pre-commit, run:
+```bash
+pre-commit install
+```
+While pre-commit runs on commits, you can manually run the tests with `pre-commit run --all-files`.
 - Use `uv sync` and activate the virtual environment before making changes.
 - Run tests with `uv run pytest` to ensure functionality and performance.
 - Adhere to TDD practices and ensure pre-commit hooks pass before merging.

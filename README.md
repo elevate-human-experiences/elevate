@@ -15,7 +15,7 @@ This is a task focused way to do GenAI - you care about particular tasks work, n
 | ✅          | Only JSON     | Converts text to JSON format     |           | 5       |
 | ✅          | Only AudioCast | Converts text to podcast style format | Only JSON | 5       |
 | ✅          | Only Markdown | Converts text to Markdown format |           | 5       |
-|            | Only Python | Only generates python code, executes it and returns the response |           | -       |
+| ✅          | Only Python | Only generates python code, executes it and returns the response |           | 5       |
 |            | Only SQL      | Converts text to SQL query       |           | -       |
 | ✅          | Only Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email) |           | 8       |
 | ✅          | Only Summaries      | Write summaries        |           | -       |

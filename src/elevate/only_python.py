@@ -23,6 +23,7 @@
 """Only Python module for the Elevate app."""
 
 import re
+import base64
 
 from litellm import completion
 from e2b_code_interpreter import Sandbox
@@ -53,6 +54,11 @@ class OnlyPython:
 
         if match:
             return match.group(1).strip()
+        else:
+            pattern = r"```json\n((?:(?!```).|\n)*?)```"
+            match = re.search(pattern, output, re.DOTALL)
+            if match:
+                return match.group(1).strip()
         return output
 
     def print_sandbox_status(self, message: str, use_existing: bool = True) -> None:
@@ -67,7 +73,9 @@ class OnlyPython:
         print(border_middle)
         print(border_top_bottom)
 
-    def execute_code_using_e2b_sandbox(self, python_code: str) -> str:
+    def execute_code_using_e2b_sandbox(
+        self, python_code: str, plote_graph: bool
+    ) -> str:
         """
         Executes the given Python code in an E2B sandbox environment.
         Reuses an existing sandbox if available, otherwise creates a new one.
@@ -84,11 +92,25 @@ class OnlyPython:
             sandbox = Sandbox()  # Default lifetime is 5 minutes
 
         try:
-            print()
             execution = sandbox.run_code(python_code)
+            if plote_graph:
+                # There's only one result in this case - the plot displayed with `plt.show()`
+                first_result = execution.results[0]
+
+                if first_result.png:
+                    # Save the png to a file. The png is in base64 format.
+                    with open("chart.png", "wb") as f:
+                        f.write(base64.b64decode(first_result.png))
+                    return "Chart saved as chart.png"
             return str(execution.logs)
         except Exception as e:
             return f"Error during code execution: {e}"
+
+    def create_json_reponse(self, generated_output: str) -> str:
+        system_prompt = """
+        Your task is convert the given string into a json response. Only process the api response from given input and truncate any other string.
+        """
+        return self.make_llm_call(system_prompt, generated_output)
 
     def get_python_code_generation_system_prompt(self) -> str:
         """Returns the code generation system prompt.
@@ -98,7 +120,13 @@ class OnlyPython:
         """
         return PYTHON_CODE_GENRATION_PROMPT
 
-    def generate_code(self, message: str, framework: str) -> str:
+    def print_section_header(self, title: str) -> None:
+        """Prints a formatted section header."""
+        print("\n" + "*" * 20 + f" {title} " + "*" * 20 + "\n")
+
+    def generate_code(
+        self, message: str, framework: str, jsonify: bool, plot_graph: bool
+    ) -> str:
         """Generate code for user given prompt with the specified field and framework.
 
         Args:
@@ -112,6 +140,23 @@ class OnlyPython:
         message = "\n<Prompt>" + message + "</Prompt>\n\n"
         message += "<Framework> " + framework + " </Framework>"
 
+        self.print_section_header("Generating Python Code")
+        print("Generating the python code...")
         python_code = self.make_llm_call(system_prompt, message)
-        print("\nPython code:\n", python_code)
-        return self.execute_code_using_e2b_sandbox(python_code)
+        print("\nGenerated Python code:\n\n", python_code)
+        self.print_section_header("End of Generated Code")
+
+        self.print_section_header("Executing Generated Code")
+        print("Executing the generated code...")
+        generated_code_ouput = self.execute_code_using_e2b_sandbox(
+            python_code, plot_graph
+        )
+        self.print_section_header("End of Execution")
+
+        if jsonify:
+            self.print_section_header("Jsonifying Output")
+            print("Jsonifying the output...")
+            generated_code_ouput = self.create_json_reponse(generated_code_ouput)
+            self.print_section_header("End of Jsonification")
+
+        return generated_code_ouput

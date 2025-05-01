@@ -31,10 +31,45 @@ from e2b_code_interpreter import Sandbox
 from elevate.only_python_prompt import PYTHON_CODE_GENRATION_PROMPT
 
 
+ONLY_EMAIL = """
+""OnlyEmail class for generating emails using LLMs.""
+
+from litellm import completion
+
+class OnlyEmail:
+
+    def __init__(self, with_model: str = "groq/llama-3.3-70b-versatile"):
+        self.model = with_model
+
+    def make_llm_call(self, system_prompt: str, input_text: str) -> str:
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": input_text},
+        ]
+        response = completion(api_key="",model=self.model, messages=messages, temperature=0.1)
+        output = str(response.choices[0].message.content)
+        return output
+
+    def generate_email(self, message: str, email_type: str) -> str:
+        try:
+            # system_prompt = get_email_prompt(email_type)
+            system_prompt = "You are an expert in crafting engaging and thoughtful personal emails. Your goal is to write a warm and friendly email that is tailored to the recipient and the specific context provided.  You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email it. *OUTPUT:*Respond *only* with the rephrased message, adhering to the specified instructions."
+            return self.make_llm_call(system_prompt, message)
+
+        except ValueError as ve:
+            print(f"ValueError: {ve}")  # Log the error.
+            return "Error: Invalid email type specified."
+        except Exception as e:
+            print(f"An error occurred: {e}")  # Log the error.
+            return "Error: An unexpected error occurred while generating the email."
+
+"""
+
+
 class OnlyPython:
     """Class that returns rephrased text."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
+    def __init__(self, with_model: str = "gemini/gemini-2.0-flash-lite") -> None:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
@@ -92,6 +127,7 @@ class OnlyPython:
             sandbox = Sandbox()  # Default lifetime is 5 minutes
 
         try:
+            sandbox.commands.run("pip install litellm==1.67.4.post1")
             execution = sandbox.run_code(python_code)
             if plote_graph:
                 # There's only one result in this case - the plot displayed with `plt.show()`
@@ -102,6 +138,7 @@ class OnlyPython:
                     with open("chart.png", "wb") as f:
                         f.write(base64.b64decode(first_result.png))
                     return "Chart saved as chart.png"
+            print(execution.logs)
             return str(execution.logs)
         except Exception as e:
             return f"Error during code execution: {e}"
@@ -139,6 +176,7 @@ class OnlyPython:
 
         message = "\n<Prompt>" + message + "</Prompt>\n\n"
         message += "<Framework> " + framework + " </Framework>"
+        message += "<Code>" + ONLY_EMAIL + " </Code>"
 
         self.print_section_header("Generating Python Code")
         print("Generating the python code...")

@@ -31,41 +31,6 @@ from e2b_code_interpreter import Sandbox
 from elevate.only_python_prompt import PYTHON_CODE_GENRATION_PROMPT
 
 
-ONLY_EMAIL = """
-""OnlyEmail class for generating emails using LLMs.""
-
-from litellm import completion
-
-class OnlyEmail:
-
-    def __init__(self, with_model: str = "groq/llama-3.3-70b-versatile"):
-        self.model = with_model
-
-    def make_llm_call(self, system_prompt: str, input_text: str) -> str:
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": input_text},
-        ]
-        response = completion(api_key="",model=self.model, messages=messages, temperature=0.1)
-        output = str(response.choices[0].message.content)
-        return output
-
-    def generate_email(self, message: str, email_type: str) -> str:
-        try:
-            # system_prompt = get_email_prompt(email_type)
-            system_prompt = "You are an expert in crafting engaging and thoughtful personal emails. Your goal is to write a warm and friendly email that is tailored to the recipient and the specific context provided.  You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email it. *OUTPUT:*Respond *only* with the rephrased message, adhering to the specified instructions."
-            return self.make_llm_call(system_prompt, message)
-
-        except ValueError as ve:
-            print(f"ValueError: {ve}")  # Log the error.
-            return "Error: Invalid email type specified."
-        except Exception as e:
-            print(f"An error occurred: {e}")  # Log the error.
-            return "Error: An unexpected error occurred while generating the email."
-
-"""
-
-
 class OnlyPython:
     """Class that returns rephrased text."""
 
@@ -138,7 +103,7 @@ class OnlyPython:
                     with open("chart.png", "wb") as f:
                         f.write(base64.b64decode(first_result.png))
                     return "Chart saved as chart.png"
-            print(execution.logs)
+            # print(execution.logs)
             return str(execution.logs)
         except Exception as e:
             return f"Error during code execution: {e}"
@@ -162,7 +127,12 @@ class OnlyPython:
         print("\n" + "*" * 20 + f" {title} " + "*" * 20 + "\n")
 
     def generate_code(
-        self, message: str, framework: str, jsonify: bool, plot_graph: bool
+        self,
+        message: str,
+        framework: str,
+        jsonify: bool,
+        plot_graph: bool,
+        genai_snippet_code: str,
     ) -> str:
         """Generate code for user given prompt with the specified field and framework.
 
@@ -176,7 +146,7 @@ class OnlyPython:
 
         message = "\n<Prompt>" + message + "</Prompt>\n\n"
         message += "<Framework> " + framework + " </Framework>"
-        message += "<Code>" + ONLY_EMAIL + " </Code>"
+        message += "<Code>" + genai_snippet_code + " </Code>"
 
         self.print_section_header("Generating Python Code")
         print("Generating the python code...")
@@ -189,6 +159,20 @@ class OnlyPython:
         generated_code_ouput = self.execute_code_using_e2b_sandbox(
             python_code, plot_graph
         )
+        #  Use re.DOTALL (or re.S) to make '.' match newlines as well
+        match = re.search(
+            r'Logs\(stdout:\s*\["(.*)"\]', generated_code_ouput, re.DOTALL
+        )
+
+        if match:
+            stdout_content = str(match.group(1))
+            # print("Match found!")  # Debugging output
+            print("\nOutput of Execution:\n")
+            print(stdout_content)
+        else:
+            print("No stdout content found.")
+            print("Regex used:", r'Logs\(stdout:\s*\["(.*)"\]')  # Show the regex
+            print("Input string:", generated_code_ouput)  # Show the input string
         self.print_section_header("End of Execution")
 
         if jsonify:

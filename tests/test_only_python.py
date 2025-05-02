@@ -121,4 +121,23 @@ def test_data_visualization() -> None:
     print("\n" + "*" * 20 + " End of Printing " + "*" * 20 + "\n")
 
 
-test_data_visualization()
+# test_data_visualization()
+
+
+def test_only_email_code_generation() -> None:
+    """Tests the generation of a personal email.
+
+    This function uses the OnlyEmail class to generate a personal email based on a
+    given input message and then prints the generated email.
+    """
+    personal_email_input_message = """
+    A wedding anuversary message to John and Jane.
+    """
+    only_python = OnlyPython()
+    output = only_python.generate_code(personal_email_input_message, "", False, False)
+    print("\n" + "*" * 20 + " Printing Final Output " + "*" * 20 + "\n")
+    print("\nOutput:\n", output)
+    print("\n" + "*" * 20 + " End of Printing " + "*" * 20 + "\n")
+
+
+test_only_email_code_generation()

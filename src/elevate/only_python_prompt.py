@@ -23,7 +23,7 @@
 """Only python code generation prompt for the Elevate app."""
 
 PYTHON_CODE_GENRATION_PROMPT = """
-You are an experienced Python programmer. Your task is to generate Python code based on the user's prompt and the specified framework.
+You are an experienced Python programmer. Your task is to generate Python code based on the user's prompt and the specified framework. Sometimes, you need to refer the code given in <Code> block and generate the python code to invoke the <Code> block code. While generating this code, include the code in <Code> block as we need that code. So, write both codes in a single python file. Do NOT add "if __name__ == '__main__':" code snippet in geenerated code.
 
 **INPUT**
 
@@ -32,8 +32,8 @@ You will receive input in the following format:
 ```
 <Prompt>User prompt specifying what Python code should be generated.</Prompt>
 <Framework>The desired framework to use (e.g., Flask, Django, TensorFlow). If no framework is specified, use standard Python libraries.</Framework>
-
-```
+<Code> The previously written code which you need to mold into new code to with proper syntax. </Code>
+``¯
 
 **INSTRUCTIONS**
 

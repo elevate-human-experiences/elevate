@@ -34,7 +34,7 @@ from elevate.only_python_prompt import PYTHON_CODE_GENRATION_PROMPT
 class OnlyPython:
     """Class that returns rephrased text."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
+    def __init__(self, with_model: str = "gemini/gemini-2.0-flash-lite") -> None:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
@@ -92,6 +92,7 @@ class OnlyPython:
             sandbox = Sandbox()  # Default lifetime is 5 minutes
 
         try:
+            sandbox.commands.run("pip install litellm==1.67.4.post1")
             execution = sandbox.run_code(python_code)
             if plote_graph:
                 # There's only one result in this case - the plot displayed with `plt.show()`
@@ -102,6 +103,7 @@ class OnlyPython:
                     with open("chart.png", "wb") as f:
                         f.write(base64.b64decode(first_result.png))
                     return "Chart saved as chart.png"
+            # print(execution.logs)
             return str(execution.logs)
         except Exception as e:
             return f"Error during code execution: {e}"
@@ -125,7 +127,12 @@ class OnlyPython:
         print("\n" + "*" * 20 + f" {title} " + "*" * 20 + "\n")
 
     def generate_code(
-        self, message: str, framework: str, jsonify: bool, plot_graph: bool
+        self,
+        message: str,
+        framework: str,
+        jsonify: bool,
+        plot_graph: bool,
+        genai_snippet_code: str,
     ) -> str:
         """Generate code for user given prompt with the specified field and framework.
 
@@ -139,6 +146,7 @@ class OnlyPython:
 
         message = "\n<Prompt>" + message + "</Prompt>\n\n"
         message += "<Framework> " + framework + " </Framework>"
+        message += "<Code>" + genai_snippet_code + " </Code>"
 
         self.print_section_header("Generating Python Code")
         print("Generating the python code...")
@@ -151,6 +159,20 @@ class OnlyPython:
         generated_code_ouput = self.execute_code_using_e2b_sandbox(
             python_code, plot_graph
         )
+        #  Use re.DOTALL (or re.S) to make '.' match newlines as well
+        match = re.search(
+            r'Logs\(stdout:\s*\["(.*)"\]', generated_code_ouput, re.DOTALL
+        )
+
+        if match:
+            stdout_content = str(match.group(1))
+            # print("Match found!")  # Debugging output
+            print("\nOutput of Execution:\n")
+            print(stdout_content)
+        else:
+            print("No stdout content found.")
+            print("Regex used:", r'Logs\(stdout:\s*\["(.*)"\]')  # Show the regex
+            print("Input string:", generated_code_ouput)  # Show the input string
         self.print_section_header("End of Execution")
 
         if jsonify:

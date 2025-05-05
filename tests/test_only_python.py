@@ -45,16 +45,22 @@ def test_generate_code_simple_function_generation() -> None:
 def test_api_call() -> None:
     """Tests the generate_code method's ability to generate code that fetches data from an API.
 
-    The function provides an API endpoint and a sample response, and instructs the generate_code method
-    to fetch data from the API for a specific product ID. The generated code is then printed to the console.
+    The function uses a public API endpoint from JSONPlaceholder to fetch data for product id 2.
+    The generated code is then printed to the console.
     """
     sample_api_response = """
+  {
+    "userId": 1,
+    "id": 2,
+    "title": "qui est esse",
+    "body": "est rerum tempore vitae\\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\\nqui aperiam non debitis possimus qui neque nisi nulla"
+  }
   """
-    api = ""
+    api = "https://jsonplaceholder.typicode.com/posts/2"
     input_message = f"""
-  Fetch data of product id 2 from given api.
+  Fetch data of product id 2 from the given API.
   API : {api}
-  Sample reponse from the api:{sample_api_response}
+  Sample response from the API:{sample_api_response}
   """
     only_python = OnlyPython()
     output = only_python.generate_code(input_message, "", True, False)
@@ -82,17 +88,20 @@ def test_internet_connection() -> None:
     print("\n" + "*" * 20 + " End of Printing " + "*" * 20 + "\n")
 
 
-# test_internet_connection()
-
-
 def test_data_structure_code() -> None:
     """Tests the generate_code method's ability to generate code that manipulates a data structure (linked list).
 
     The function instructs the generate_code method to create code that deletes the middle node of a linked list.
     The generated code is then printed to the console.
     """
-    input_message = """
-  """
+    input_message = """Write Python code that:
+
+1. Defines a Node class for a singly linked list, with attributes `val` and `next`.
+2. Implements a function `delete_middle(head)` which removes the middle node of a linked list (if the list has even length, remove the second of the two middles).
+3. Constructs a linked list from the json array `[1, 2, 3, 4, 5]`.
+4. Calls `delete_middle` on the head of that list.
+5. Prints the resulting linked list values as a json array.
+"""
     only_python = OnlyPython()
     output = only_python.generate_code(input_message, "", True, False)
     print("\n" + "*" * 20 + " Printing Final Output " + "*" * 20 + "\n")

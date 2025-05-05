@@ -27,14 +27,14 @@ import base64
 
 from litellm import completion
 from e2b_code_interpreter import Sandbox
-
+import json
 from elevate.only_python_prompt import PYTHON_CODE_GENRATION_PROMPT
 
 
 class OnlyPython:
     """Class that returns rephrased text."""
 
-    def __init__(self, with_model: str = "gemini/gemini-2.0-flash-lite") -> None:
+    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
@@ -74,7 +74,7 @@ class OnlyPython:
         print(border_top_bottom)
 
     def execute_code_using_e2b_sandbox(
-        self, python_code: str, plote_graph: bool
+        self, python_code: str, pip_installs: str, plote_graph: bool
     ) -> str:
         """
         Executes the given Python code in an E2B sandbox environment.
@@ -93,6 +93,7 @@ class OnlyPython:
 
         try:
             sandbox.commands.run("pip install litellm==1.67.4.post1")
+            sandbox.commands.run(pip_installs)
             execution = sandbox.run_code(python_code)
             if plote_graph:
                 # There's only one result in this case - the plot displayed with `plt.show()`
@@ -103,8 +104,7 @@ class OnlyPython:
                     with open("chart.png", "wb") as f:
                         f.write(base64.b64decode(first_result.png))
                     return "Chart saved as chart.png"
-            # print(execution.logs)
-            return str(execution.logs)
+            return str("\n".join(execution.logs.stdout))
         except Exception as e:
             return f"Error during code execution: {e}"
 
@@ -129,10 +129,10 @@ class OnlyPython:
     def generate_code(
         self,
         message: str,
-        framework: str,
-        jsonify: bool,
-        plot_graph: bool,
-        genai_snippet_code: str,
+        framework: str = "",
+        jsonify: bool = True,
+        plot_graph: bool = False,
+        genai_snippet_code: str = "",
     ) -> str:
         """Generate code for user given prompt with the specified field and framework.
 
@@ -145,40 +145,43 @@ class OnlyPython:
         system_prompt = self.get_python_code_generation_system_prompt()
 
         message = "\n<Prompt>" + message + "</Prompt>\n\n"
-        message += "<Framework> " + framework + " </Framework>"
-        message += "<Code>" + genai_snippet_code + " </Code>"
+        if framework:
+            message += "<Framework> " + framework + " </Framework>"
+        if genai_snippet_code:
+            message += "<Code>" + genai_snippet_code + " </Code>"
+        if jsonify:
+            message += "\n<OutputFormat>json</OutputFormat>"
+        else:
+            message += "\n<OutputFormat>str</OutputFormat>"
 
         self.print_section_header("Generating Python Code")
         print("Generating the python code...")
-        python_code = self.make_llm_call(system_prompt, message)
-        print("\nGenerated Python code:\n\n", python_code)
+        code = self.make_llm_call(system_prompt, message)
+        print("\nGenerated Code + Installs:\n\n", code)
+        if "<PipInstalls>" in code:
+            pip_installs = code[
+                code.index("<PipInstalls>") + len("<PipInstalls>") : code.index(
+                    "</PipInstalls>"
+                )
+            ]
+        else:
+            pip_installs = ""
+        python_code = code[code.index("<Code>") + len("<Code>") : code.index("</Code>")]
+        pip_installs = pip_installs.strip()
+        python_code = python_code.strip()
         self.print_section_header("End of Generated Code")
 
         self.print_section_header("Executing Generated Code")
         print("Executing the generated code...")
-        generated_code_ouput = self.execute_code_using_e2b_sandbox(
-            python_code, plot_graph
+        generated_code_output = self.execute_code_using_e2b_sandbox(
+            python_code, pip_installs, plot_graph
         )
-        #  Use re.DOTALL (or re.S) to make '.' match newlines as well
-        match = re.search(
-            r'Logs\(stdout:\s*\["(.*)"\]', generated_code_ouput, re.DOTALL
-        )
+        generated_code_output = generated_code_output.strip()
+        print("\nOutput of Execution:\n")
+        print(generated_code_output)
 
-        if match:
-            stdout_content = str(match.group(1))
-            # print("Match found!")  # Debugging output
-            print("\nOutput of Execution:\n")
-            print(stdout_content)
-        else:
-            print("No stdout content found.")
-            print("Regex used:", r'Logs\(stdout:\s*\["(.*)"\]')  # Show the regex
-            print("Input string:", generated_code_ouput)  # Show the input string
         self.print_section_header("End of Execution")
-
         if jsonify:
-            self.print_section_header("Jsonifying Output")
-            print("Jsonifying the output...")
-            generated_code_ouput = self.create_json_reponse(generated_code_ouput)
-            self.print_section_header("End of Jsonification")
+            generated_code_output = json.loads(generated_code_output)
 
-        return generated_code_ouput
+        return generated_code_output

@@ -27,7 +27,7 @@ from litellm import completion
 class OnlyRephrase:
     """Class that returns rephrased text."""
 
-    def __init__(self, with_model: str = "groq/llama-3.3-70b-versatile") -> None:
+    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 

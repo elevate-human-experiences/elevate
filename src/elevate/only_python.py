@@ -24,6 +24,7 @@
 
 import re
 import base64
+import os
 
 from litellm import completion
 from e2b_code_interpreter import Sandbox
@@ -89,12 +90,24 @@ class OnlyPython:
             sandbox = Sandbox.connect(running_sandboxes[0].sandbox_id)
         else:
             self.print_sandbox_status("No running sandboxes found. Creating a new one")
-            sandbox = Sandbox()  # Default lifetime is 5 minutes
+            sandbox = Sandbox(
+                envs=dict(os.environ)  # Pass current environment variables
+            )  # Default lifetime is 5 minutes
 
         try:
             sandbox.commands.run("pip install litellm==1.67.4.post1")
             sandbox.commands.run(pip_installs)
             execution = sandbox.run_code(python_code)
+            errored = False
+            if execution.error:
+                print(f"Error during code execution: {execution.error}")
+                errored = True
+            if execution.logs.stderr:
+                print("\n".join(execution.logs.stderr))
+                errored = True
+            if errored:
+                raise SystemExit(1, f"Error during code execution: {execution.error}")
+
             if plote_graph:
                 # There's only one result in this case - the plot displayed with `plt.show()`
                 first_result = execution.results[0]
@@ -166,15 +179,44 @@ class OnlyPython:
             ]
         else:
             pip_installs = ""
-        python_code = code[code.index("<Code>") + len("<Code>") : code.index("</Code>")]
+        python_code = code[
+            code.index("<CodeCompletion>") + len("<CodeCompletion>") : code.index(
+                "</CodeCompletion>"
+            )
+        ]
+        python_imports = code[
+            code.index("<Imports>") + len("<Imports>") : code.index("</Imports>")
+        ]
         pip_installs = pip_installs.strip()
         python_code = python_code.strip()
+        python_imports = python_imports.strip()
         self.print_section_header("End of Generated Code")
 
+        self.print_section_header("Generated Code")
+        full_code = "\n\n".join(
+            [
+                "# -" * 40,
+                "# Generated imports",
+                python_imports,
+                "# -" * 40,
+                "# Original code.",
+                genai_snippet_code,
+                "# -" * 40,
+                "# Generated Completion",
+                python_code,
+            ]
+        )
+        print("-" * 40)
+        print("Full code with imports and pip installs:\n")
+        print("-" * 40)
+        print(pip_installs)
+        print("-" * 40)
+        print(full_code)
+        print("-" * 40)
+
         self.print_section_header("Executing Generated Code")
-        print("Executing the generated code...")
         generated_code_output = self.execute_code_using_e2b_sandbox(
-            python_code, pip_installs, plot_graph
+            full_code, pip_installs, plot_graph
         )
         generated_code_output = generated_code_output.strip()
         print("\nOutput of Execution:\n")

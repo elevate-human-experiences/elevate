@@ -1,4 +1,4 @@
-import argparse
+import fire
 import os
 from typing import Dict, Any, Callable
 
@@ -50,8 +50,8 @@ class UIBeautifier:
 
 
 class MarketingWorkflow:
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config or {}
+    def __init__(self) -> None:
+        # self.config = config or {} #Removed
         self.blog_generator = OnlyVideoToBlog("gemini/gemini-2.0-flash-lite")
         self.summary_generator = OnlySummary("gemini/gemini-2.0-flash-lite")
         self.email_generator = OnlyEmail("gemini/gemini-2.0-flash-lite")
@@ -154,10 +154,9 @@ class MarketingWorkflow:
             video_transcript,
         )
 
-    def generate_emails(self, blog_content: str) -> str:
+    def generate_emails(self, blog_content: str, email_type: str = "marketing") -> str:
         """Generates and optionally rephrases emails."""
         self.ui.print_section_header("Generating Emails")
-        email_type = "marketing"
         return self.process_with_rephrase(
             self.email_generator.generate_email,
             "emails",
@@ -176,7 +175,9 @@ class MarketingWorkflow:
             blog_content,
         )
 
-    def execute(self, video_transcript: str) -> Dict[str, str]:
+    def execute(
+        self, video_transcript: str, email_type: str = "marketing"
+    ) -> Dict[str, str]:
         """
         Executes the marketing workflow based on user selection from the menu.
         """
@@ -198,7 +199,9 @@ class MarketingWorkflow:
                         )
                     )
                     continue
-                results["emails"] = self.generate_emails(results["blog_content"])
+                results["emails"] = self.generate_emails(
+                    results["blog_content"], email_type
+                )
             elif choice == "4":
                 if "blog_content" not in results:
                     print(
@@ -234,32 +237,27 @@ class MarketingWorkflow:
         self.ui.print_menu(menu_items)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Marketing Workflow CLI Application")
-    parser.add_argument(
-        "transcript_file", help="Path to the file containing the video transcript"
-    )
-    parser.add_argument(
-        "--email_type",
-        default="marketing",
-        help="The type of email to generate (default: marketing)",
-    )
-    args = parser.parse_args()
+def run_workflow(transcript_file: str, email_type: str = "marketing") -> None:
+    """
+    Runs the marketing workflow CLI application.
 
-    config = {"email_type": args.email_type}
+    Args:
+        transcript_file: Path to the file containing the video transcript.
+        email_type: The type of email to generate (default: marketing).
+    """
 
     try:
-        with open(args.transcript_file) as f:
+        with open(transcript_file) as f:
             video_transcript = f.read()
     except FileNotFoundError:
-        print("Error: Transcript file not found at  ", {args.transcript_file}, "\n")
+        print("Error: Transcript file not found at  ", transcript_file, "\n")
         return
     except Exception as e:
-        print("Error reading transcript file: ", {e}, "\n")
+        print("Error reading transcript file: ", e, "\n")
         return
 
-    workflow = MarketingWorkflow(config=config)
-    results = workflow.execute(video_transcript)
+    workflow = MarketingWorkflow()
+    results = workflow.execute(video_transcript, email_type)
 
     print("\nWorkflow Results:")
     for key, value in results.items():
@@ -267,4 +265,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(run_workflow)

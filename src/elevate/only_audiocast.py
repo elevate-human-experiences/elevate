@@ -240,7 +240,7 @@ Here's the cast configuration provided for this conversation:
 
         system_prompt = self.get_system_prompt(cast_config)
         parser = OnlyJson(with_model=self.with_model)
-        conversation_obj = parser.parse(content, Conversation, system_prompt)
+        conversation_obj = await parser.parse(content, Conversation, system_prompt)
         if not isinstance(conversation_obj, Conversation):
             raise TypeError("Expected Conversation type")
 
@@ -259,7 +259,7 @@ Tone: Calm, encouraging, and articulate, clearly describing each step with patie
 Pacing: Slow and deliberate, pausing often to allow the listener to follow instructions comfortably.
 ```
 """
-            agent_result = parser.parse(agent_prompt, Instructions, agent_prompt)
+            agent_result = await parser.parse(agent_prompt, Instructions, agent_prompt)
             if not isinstance(agent_result, Instructions):
                 raise TypeError("Expected Instructions type")
 

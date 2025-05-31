@@ -21,9 +21,15 @@
 # SOFTWARE.
 """OnlyMarkdown class for converting text to Markdown format using litellm."""
 
+import logging
 import re
 
-from litellm import completion
+from litellm import acompletion
+
+from common import setup_logging
+
+
+logger = setup_logging(logging.DEBUG)
 
 
 class OnlyMarkdown:
@@ -33,17 +39,15 @@ class OnlyMarkdown:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
-    def make_llm_call(self, system_prompt: str, input_text: str) -> str:
-        """
-        Makes the LLM call using litellm, extracting the markdown content.
-        """
+    async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
+        """Make the LLM call using litellm and extract the markdown content."""
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
 
-        response = completion(model=self.model, messages=messages, temperature=0.1)
-        output = response.choices[0].message.content  # type: str
+        response = await acompletion(model=self.model, messages=messages, temperature=0.1)
+        output = str(response.choices[0].message.content)
         pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
         match = re.search(pattern, output, re.DOTALL)
 
@@ -52,10 +56,8 @@ class OnlyMarkdown:
         return output
 
     def get_conversion_system_prompt(self) -> str:
-        """
-        Return a system prompt to convert input text into Markdown syntax.
-        """
-        prompt_content = r"""ROLE:
+        """Return a system prompt to convert input text into Markdown syntax."""
+        return r"""ROLE:
 You are a highly skilled Markdown converter, specializing in transforming plain text into clean and accurate GitHub Flavored Markdown (GFM). Your sole purpose is to convert the provided input text into its equivalent Markdown representation.
 
 **Task:**
@@ -187,20 +189,17 @@ Convert the given input text into GitHub Flavored Markdown.
 6.  **No Additional Information:** Do NOT add any extra text, comments, or explanations. Only return the Markdown output. The output should be a single string.
 7.  **Output Format:** Important!!! Return ONLY the Markdown code, without any surrounding ```markdown blocks or other delimiters.
 """
-        return prompt_content
 
-    def convert_to_markdown(self, input_text: str) -> str:
-        """
-        Converts the given input text to GitHub Flavored Markdown (GFM) format.
+    async def convert_to_markdown(self, input_text: str) -> str:
+        """Convert the given input text to GitHub Flavored Markdown (GFM) format."""
+        system_prompt = self.get_conversion_system_prompt()
+        return await self.make_llm_call(system_prompt, input_text)
 
-        This method retrieves the system prompt specifically designed for markdown conversion,
-        then uses it to make an LLM call to convert the input text.
+    async def summarize_and_convert_to_markdown(self, input_text: str) -> str:
+        """Summarize and convert the given input text to GitHub Flavored Markdown (GFM) format."""
+        system_prompt = self.get_conversion_system_prompt()
+        return await self.make_llm_call(system_prompt, input_text)
 
-        Args:
-            input_text: The plain text to be converted to Markdown (string).
-
-        Returns:
-            The converted Markdown text (string).
-        """
-        system_prompt = self.get_conversion_system_prompt()  # Get the system prompt
-        return self.make_llm_call(system_prompt, input_text)
+    def print_section_header(self, title: str) -> None:
+        """Print a formatted section header."""
+        logger.debug("%s", f"\n{'*' * 20} {title} {'*' * 20}\n")

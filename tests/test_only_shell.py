@@ -22,10 +22,20 @@
 
 """Module to test the text rephrasing functionalities of the OnlyShell class."""
 
+import logging
+from typing import Any
+
+import pytest
+
+from common import setup_logging
 from elevate.only_shell import OnlyShell
 
 
-def test_simple_shell_command() -> None:
+logger = setup_logging(logging.DEBUG)
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_simple_shell_command(settings: Any) -> None:
     """
     Tests the generation of a simple shell command from a natural language description using the `OnlyShell` class.
 
@@ -37,9 +47,6 @@ def test_simple_shell_command() -> None:
     input_message = """
     Command to list all files in directory.
     """
-    only_shell = OnlyShell()
-    shell_command = only_shell.generate_shell_command(input_message)
-    print("Shell command:\n", shell_command)
-
-
-test_simple_shell_command()
+    only_shell = OnlyShell(with_model=settings.with_model)
+    shell_command = await only_shell.generate_shell_command(input_message)
+    logger.debug("Shell command:\n%s", shell_command)

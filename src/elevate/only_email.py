@@ -21,7 +21,14 @@
 # SOFTWARE.
 """OnlyEmail class for generating emails using LLMs."""
 
-from litellm import completion
+import logging
+
+from litellm import acompletion
+
+from common import setup_logging
+
+
+logger = setup_logging(logging.DEBUG)
 
 
 class OnlyEmail:
@@ -31,38 +38,27 @@ class OnlyEmail:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
-    def make_llm_call(self, system_prompt: str, input_text: str) -> str:
-        """
-        Makes the LLM call using litellm, extracting the markdown content.
-        """
+    async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
+        """Make the LLM call using litellm and extract the markdown content."""
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-
-        response = completion(
-            api_key="", model=self.model, messages=messages, temperature=0.1
-        )
-        output = str(response.choices[0].message.content)
-        return output
+        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        return str(response.choices[0].message.content)
 
     def get_personal_email_system_prompt(self) -> str:
-        """
-        Return a PERSONAL_EMAIL_PROMPT.
-        """
-        personal_email_prompt = """
+        """Return a PERSONAL_EMAIL_PROMPT."""
+        return """
 You are an expert in crafting engaging and thoughtful personal emails. Your goal is to write a warm and friendly email that is tailored to the recipient and the specific context provided.  You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email itself.
 
 *OUTPUT:*
 Respond *only* with the rephrased message, adhering to the specified instructions.
 """
-        return personal_email_prompt
 
     def get_professional_email_system_prompt(self) -> str:
-        """
-        Return a PROFESSIONAL_EMAIL_PROMPT.
-        """
-        professional_email_prompt = """
+        """Return a PROFESSIONAL_EMAIL_PROMPT."""
+        return """
 You are an expert in crafting engaging and thoughtful professional emails. Your goal is to write a fomral tone email that is tailored to the recipient and the specific context provided.  You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email itself.
 
 **Guidelines for generating an email:**
@@ -77,13 +73,10 @@ You are an expert in crafting engaging and thoughtful professional emails. Your 
 Respond *only* with the rephrased message, adhering to the specified instructions.
 
 """
-        return professional_email_prompt
 
     def get_marketing_email_system_prompt(self) -> str:
-        """
-        Return a MARKETING_EMAIL_PROMPT.
-        """
-        marketing_email_prompt = """
+        """Return a MARKETING_EMAIL_PROMPT."""
+        return """
 You are an expert in crafting persuasive and effective marketing emails designed to promote products, services, and brands, and drive conversions. Your goal is to write an engaging email that captures the recipient's attention, highlights the value proposition, and encourages a specific action (e.g., clicking a link, making a purchase). You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email itself.
 
 **INPUT:**
@@ -120,8 +113,6 @@ You are an expert in crafting persuasive and effective marketing emails designed
 Provide the complete marketing email, ready to be sent.
 """
 
-        return marketing_email_prompt
-
     def get_email_prompt(self, email_type: str) -> str:
         """Return the appropriate email prompt based on the email type."""
         match email_type.lower():
@@ -134,23 +125,14 @@ Provide the complete marketing email, ready to be sent.
             case _:
                 raise ValueError("Invalid email type specified.")
 
-    def generate_email(self, message: str, email_type: str) -> str:
-        """Generates an email of the specified type using an LLM.
-
-        Args:
-            message: The email content.
-            email_type:  The type of email (personal, professional, marketing).
-
-        Returns:
-            The generated email or an error message.
-        """
+    async def generate_email(self, message: str, email_type: str) -> str:
+        """Generate an email of the specified type using an LLM."""
         try:
             system_prompt = self.get_email_prompt(email_type)
-            return self.make_llm_call(system_prompt, message)
-
+            return await self.make_llm_call(system_prompt, message)
         except ValueError as ve:
-            print(f"ValueError: {ve}")  # Log the error.
+            logger.debug(f"ValueError: {ve}")
             return "Error: Invalid email type specified."
         except Exception as e:
-            print(f"An error occurred: {e}")  # Log the error.
+            logger.debug(f"An error occurred: {e}")
             return "Error: An unexpected error occurred while generating the email."

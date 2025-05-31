@@ -21,9 +21,13 @@
 # SOFTWARE.
 """OnlyJudgeLLMs: Class to evaluate LLM outputs based on defined scoring criteria."""
 
-from typing import Type
+import logging
+
+from litellm import acompletion
 from pydantic import BaseModel
-from litellm import completion
+
+
+logger = logging.getLogger(__name__)
 
 
 class OnlyJudgeLLMs:
@@ -39,18 +43,14 @@ class OnlyJudgeLLMs:
         Initialize the OnlyJudgeLLMs class with the specified LLM model.
 
         Args:
+        ----
             with_model: Identifier for the LLM model.
         """
         self.model = with_model
 
     def get_judgment_prompt(self) -> str:
-        """
-        Constructs a system prompt that instructs the LLM to evaluate the text based on provided criteria,
-        acknowledging that each criterion may have a different scoring or assessment format.
-        The prompt encourages step-by-step reasoning and planning on how to judge each criterion,
-        then asks for a strictly valid JSON response matching the schema.
-        """
-        prompt = (
+        """Construct a system prompt for LLM evaluation."""
+        return (
             "You are an expert evaluator of LLM outputs. You have been given multiple criteria, and each "
             "criterion might use a different method of assessment (e.g., a numerical scale, a boolean check, "
             "a pass/fail judgment, or something else entirely).\n\n"
@@ -69,11 +69,8 @@ class OnlyJudgeLLMs:
             "the JSON.\n"
             "- Do not reveal your internal chain-of-thought; simply provide the final ratings and justifications.\n"
         )
-        return prompt
 
-    def evaluate(
-        self, text: str, criteria: Type[BaseModel], system_prompt: str | None = None
-    ) -> BaseModel:
+    async def evaluate(self, text: str, criteria: type[BaseModel], system_prompt: str | None = None) -> BaseModel:
         """
         Evaluates the given text against the scoring criteria defined in the Pydantic model.
 
@@ -81,14 +78,17 @@ class OnlyJudgeLLMs:
         the resulting JSON into an instance of the scoring criteria model.
 
         Args:
+        ----
             text: The LLM output text to be evaluated.
             criteria: A Pydantic model representing the scoring criteria.
             system_prompt: An optional custom system prompt to override the default evaluation prompt.
 
         Returns:
+        -------
             An instance of the criteria model populated with the evaluation metrics.
 
         Raises:
+        ------
             ValueError: If the output cannot be parsed according to the criteria schema.
         """
         if system_prompt is None:
@@ -97,17 +97,31 @@ class OnlyJudgeLLMs:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": text},
         ]
-        response = completion(
+        response = await acompletion(
             model=self.model,
             messages=messages,
             response_format=criteria,
         )
+        content = None
+        # Try dict-like access
         try:
-            evaluation_result = criteria.model_validate_json(
-                response.choices[0].message.content
-            )
-        except Exception as e:
-            raise ValueError(
-                f"Failed to parse evaluation result: {e}\nOutput received: {response.choices[0].message}"
-            )
-        return evaluation_result
+            if isinstance(response, dict):
+                choices = response.get("choices")
+                if choices and isinstance(choices, list) and len(choices) > 0:
+                    message = choices[0].get("message")
+                    if message and isinstance(message, dict):
+                        content = message.get("content")
+        except Exception as ex_dict:
+            logger.debug(f"Dict-like response parsing failed: {ex_dict}")
+        # Try object-like access
+        if content is None:
+            try:
+                choices = getattr(response, "choices", None)
+                if choices and isinstance(choices, list) and len(choices) > 0:
+                    message = getattr(choices[0], "message", None)
+                    if message:
+                        content = getattr(message, "content", None)
+            except Exception as ex_obj:
+                logger.debug(f"Object-like response parsing failed: {ex_obj}")
+
+        return criteria.model_validate_json(str(content))

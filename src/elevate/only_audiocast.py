@@ -22,18 +22,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
-import random
-from datetime import datetime
-from typing import Optional, List, Dict, Tuple
-
-from pydub import AudioSegment
-from openai import OpenAI
-import tempfile
-from pydantic import BaseModel, Field
-from .only_json import OnlyJson
-import yaml  # type: ignore
 import difflib
+import logging
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+from secrets import choice as secrets_choice
+
+import yaml  # type: ignore
+from openai import OpenAI
+from pydantic import BaseModel, Field
+from pydub import AudioSegment
+
+from common import setup_logging
+
+from .only_json import OnlyJson
+
+
+logger = setup_logging(logging.DEBUG)
 
 
 class SpeakerConfig(BaseModel):
@@ -53,9 +59,7 @@ class ListenerConfig(BaseModel):
 
     name: str | None = Field(default=None, description="Listener's name (optional)")
     expertise: str = Field(..., description="Expertise level of the listener")
-    summary_of_similar_content: List[str] = Field(
-        ..., description="Summaries of similar content"
-    )
+    summary_of_similar_content: list[str] = Field(..., description="Summaries of similar content")
     level_of_expertise: str = Field(..., description="Listener's proficiency level")
     depth: str = Field(..., description="Depth of content for the listener")
 
@@ -63,9 +67,7 @@ class ListenerConfig(BaseModel):
 class CastConfiguration(BaseModel):
     """Cast configuration model for speakers and listener."""
 
-    speakers: List[SpeakerConfig] = Field(
-        ..., description="List of speaker configurations"
-    )
+    speakers: list[SpeakerConfig] = Field(..., description="List of speaker configurations")
     listener: ListenerConfig = Field(..., description="Configuration for the listener")
 
 
@@ -111,17 +113,13 @@ class ConversationEntry(BaseModel):
 class Conversation(BaseModel):
     """Data model for a conversation consisting of multiple entries."""
 
-    entries: List[ConversationEntry] = Field(
-        ..., description="List of conversation entries"
-    )
+    entries: list[ConversationEntry] = Field(..., description="List of conversation entries")
 
 
 class AudiocastTitle(BaseModel):
     """Model to generate an audiocast title from conversation content."""
 
-    generated_title: str = Field(
-        ..., description="Title derived from the conversation content"
-    )
+    generated_title: str = Field(..., description="Title derived from the conversation content")
 
     @classmethod
     def generate(cls, content: str) -> "AudiocastTitle":
@@ -132,13 +130,17 @@ class AudiocastTitle(BaseModel):
         return cls(generated_title=title_snippet)
 
 
+class AudiocastFFmpegNotInstalledError(Exception):
+    """Raised when ffmpeg is not installed for audio processing."""
+
+
 class OnlyAudiocast:
     """Converts text into an audio file using the GPT-4o model."""
 
-    def __init__(self) -> None:
+    def __init__(self, with_model: str = "o1") -> None:
         """Initialize OnlyAudiocast and verify ffmpeg installation."""
         if not AudioSegment.ffmpeg:
-            raise Exception(
+            raise AudiocastFFmpegNotInstalledError(
                 "ffmpeg is not installed. Try installing it as `brew install ffmpeg`, or whatever is appropriate for your OS."
             )
         self.client = OpenAI()
@@ -149,6 +151,7 @@ class OnlyAudiocast:
             "nova",
             "shimmer",
         ]
+        self.with_model = with_model
 
     def get_system_prompt(self, cast_configuration: CastConfiguration) -> str:
         """Generate a system prompt with cast configuration in YAML."""
@@ -162,7 +165,7 @@ Craft a conversation that:
 2. Takes ample time to explore each point in depth as described by the article, without introducing new information.
 3. Flows naturally, giving the listener a sense of entering mid-conversation.
 4. Includes subtle contextual clues to orient the listener without explicit introductions, greetings, or farewells.
-5. Ensures each speaker’s dialogue is distinct, engaging, and authentic to their character profile.
+5. Ensures each speaker`s dialogue is distinct, engaging, and authentic to their character profile.
 
 REQUIREMENTS:
 - Use short, conversational sentences suitable for speech synthesis.
@@ -171,7 +174,7 @@ REQUIREMENTS:
 - Avoid segments that directly address the listener or acknowledge their presence explicitly.
 - Do not include information outside what is explicitly mentioned in the article.
 - Include natural speech patterns and filler sounds (e.g., um, ah, (pause), (breath)) to enhance realism (but don't make it forced).
-- Present each speaker’s dialogue in complete, coherent paragraphs.
+- Present each speaker`s dialogue in complete, coherent paragraphs.
 - Maintain an engaging, informative, and seamless dialogue experience.
 - DO NOT INCLUDE A SEGMENT FOR THE LISTENER.
 
@@ -196,54 +199,52 @@ EXAMPLE (Style Reference):
 Imagine dropping into a casual yet intellectually rich conversation between Joe Rogan and Neil deGrasse Tyson discussing space exploration:
 
 Joe:
-"So, Neil, you’re telling me we've got satellites out there, right now, literally mapping planets?"
+"So, Neil, you`re telling me we've got satellites out there, right now, literally mapping planets?"
 
 Neil:
-"(laughs) Yeah, exactly. (pause) It’s mind-blowing. These satellites send back detailed images, data on atmospheric conditions—everything scientists need to understand these worlds remotely."
+"(laughs) Yeah, exactly. (pause) It`s mind-blowing. These satellites send back detailed images, data on atmospheric conditions—everything scientists need to understand these worlds remotely."
 
 Joe:
 "Wow. (breath) And they're just floating out there, doing their thing?"
 
 Neil:
-"Precisely. And here’s the fascinating part—some missions even search for signs of life. It completely changes how we see ourselves in the universe."
+"Precisely. And here`s the fascinating part—some missions even search for signs of life. It completely changes how we see ourselves in the universe."
 
 Here's the cast configuration provided for this conversation:
 {cast_config_yaml}
 """
 
-        return prompt_content
+        return str(prompt_content)
 
-    def cast(
+    async def cast(
         self,
         content: str,
         audio_out_path: str,
-        cast_configuration: Optional[CastConfiguration] = None,
-    ) -> Tuple[str, str]:
+        cast_configuration: CastConfiguration | None = None,
+    ) -> tuple[str, str]:
         """Convert text into a conversation and generate an audio file."""
         cast_config = cast_configuration or default_cast_configuration
 
         available_voice_options = self.available_voices.copy()
-        speaker_voice_map: Dict[str, str] = {}
+        speaker_voice_map: dict[str, str] = {}
         for speaker in cast_config.speakers:
-            voice_match = difflib.get_close_matches(
-                speaker.name, available_voice_options, n=1, cutoff=0
-            )
+            voice_match = difflib.get_close_matches(speaker.name, available_voice_options, n=1, cutoff=0)
             if voice_match:
                 selected_voice = voice_match[0]
                 available_voice_options.remove(selected_voice)
                 speaker_voice_map[speaker.name] = selected_voice
             else:
-                selected_voice = random.choice(available_voice_options)
+                selected_voice = secrets_choice(available_voice_options)
                 available_voice_options.remove(selected_voice)
                 speaker_voice_map[speaker.name] = selected_voice
 
         system_prompt = self.get_system_prompt(cast_config)
-        parser = OnlyJson(with_model="o1")
+        parser = OnlyJson(with_model=self.with_model)
         conversation_obj = parser.parse(content, Conversation, system_prompt)
         if not isinstance(conversation_obj, Conversation):
             raise TypeError("Expected Conversation type")
 
-        agent_map: Dict[str, str] = {}
+        agent_map: dict[str, str] = {}
         for sp in cast_config.speakers:
             agent_prompt = f"""You are a producer/director of a podcast.
 Generate a short paragraph of instructions for the speaker {sp.name} for their persona and how they should speak.
@@ -262,22 +263,18 @@ Pacing: Slow and deliberate, pausing often to allow the listener to follow instr
             if not isinstance(agent_result, Instructions):
                 raise TypeError("Expected Instructions type")
 
-            print(
-                f"Agent instructions generated for {sp.name}: {agent_result.instructions}"
-            )
+            logger.debug(f"Agent instructions generated for {sp.name}: {agent_result.instructions}")
             agent_map[sp.name] = agent_result.instructions
 
         combined_audio = AudioSegment.empty()
 
-        for entry in conversation_obj.entries:
+        for entry in list(conversation_obj.entries):
             delay_duration = entry.pause * 1000
-            silent_segment = AudioSegment.silent(duration=delay_duration)
+            silent_segment = AudioSegment.silent(duration=int(delay_duration))
             combined_audio += silent_segment
 
             if entry.speaker:
-                voice = speaker_voice_map.get(
-                    entry.speaker, random.choice(self.available_voices)
-                )
+                voice = speaker_voice_map.get(entry.speaker, secrets_choice(self.available_voices))
                 text = entry.message
                 instructions = agent_map.get(entry.speaker, "")
             else:
@@ -294,17 +291,16 @@ Pacing: Slow and deliberate, pausing often to allow the listener to follow instr
                 response.write_to_file(temp_filename)
                 audio_segment = AudioSegment.from_file(temp_filename, format="mp3")
             combined_audio += audio_segment
-            print(f"Audio segment added for {entry.speaker}.")
+            logger.debug(f"Audio segment added for {entry.speaker}.")
 
         title_model = AudiocastTitle.generate(content)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Use UTC timestamp for filenames
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")  # noqa: UP017
         filename = f"{timestamp}_{title_model.generated_title}.wav"
 
-        audio_out_folder = audio_out_path or os.path.join(
-            "generated_podcast", "podcast_out"
-        )
-        os.makedirs(audio_out_folder, exist_ok=True)
-        audio_file_path = os.path.join(audio_out_folder, filename)
-        combined_audio.export(audio_file_path, format="wav")
-        print(f"Audio file saved to {audio_file_path}")
-        return filename, audio_file_path
+        audio_out_folder = audio_out_path or Path("generated_podcast") / "podcast_out"
+        Path(audio_out_folder).mkdir(parents=True, exist_ok=True)
+        audio_file_path = Path(audio_out_folder) / filename
+        combined_audio.export(str(audio_file_path), format="wav")
+        logger.debug(f"Audio file saved to {audio_file_path}")
+        return filename, str(audio_file_path)

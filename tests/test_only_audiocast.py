@@ -21,26 +21,30 @@
 # SOFTWARE.
 
 import os
+from typing import Any
+
+import pytest
+
 from elevate.only_audiocast import (
-    OnlyAudiocast,
     CastConfiguration,
-    SpeakerConfig,
     ListenerConfig,
+    OnlyAudiocast,
+    SpeakerConfig,
 )
 
 
-def test_create_default_audiocast() -> None:
-    content = (
-        "San Francisco is a city in California. It is known for the Golden Gate Bridge."
-    )
-    audiocast = OnlyAudiocast()
-    audiocast.cast(
+@pytest.mark.asyncio  # type: ignore
+async def test_create_default_audiocast(settings: Any) -> None:
+    content = "San Francisco is a city in California. It is known for the Golden Gate Bridge."
+    audiocast = OnlyAudiocast(with_model=settings.with_model)
+    await audiocast.cast(
         content,
         audio_out_path=f"{os.environ['HOME']}/Downloads/",
     )
 
 
-def test_create_two_people_podcast() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_create_two_people_podcast(settings: Any) -> None:
     content = """The standard cosmological model rests on a foundational assumption: that the universe is homogeneous and isotropic on large scales. However, this assumption has long been questioned due to observable evidence of substantial cosmic inhomogeneities—galaxy clusters, vast voids, and filamentary structures spanning billions of light-years. Such uneven distributions of matter challenge the premise that the universe expands uniformly. Post-doctorate astrophysics researchers are increasingly examining the implications of these structures, realizing that overlooking them might significantly distort our understanding of cosmic expansion.
 
 One emerging theory gaining traction is timescape cosmology, which offers a compelling alternative to the elusive concept of dark energy. Timescape theory posits that different regions of the universe experience their own distinct "timescapes"—unique expansion histories shaped by local gravitational environments. In this model, what appears to be an accelerating universe (currently explained by invoking dark energy) is instead interpreted as an observational artifact arising from comparing clocks and rulers in regions with varying gravitational conditions. Essentially, the accelerated expansion emerges naturally from general relativity when accounting properly for gravitational inhomogeneities, eliminating the need for mysterious forms of energy.
@@ -76,15 +80,16 @@ This theory is resonating within the astrophysics community largely because of i
         ),
     )
 
-    audiocast = OnlyAudiocast()
-    audiocast.cast(
+    audiocast = OnlyAudiocast(with_model=settings.with_model)
+    await audiocast.cast(
         content,
         cast_configuration=cast_configuration,
         audio_out_path=f"{os.environ['HOME']}/Downloads/",
     )
 
 
-def test_create_art_teacher_conversation() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_create_art_teacher_conversation(settings: Any) -> None:
     content = """Impressionism was a revolutionary art movement originating in France in the late 19th century. Impressionist painters, such as Monet, Renoir, and Degas, focused on capturing the immediate impression of a scene, particularly the effects of light, color, and atmosphere. Instead of precise detail, their paintings were characterized by quick brushstrokes and vibrant colors, conveying mood and emotion rather than realistic accuracy.
 
 An important hallmark of impressionism was painting en plein air, meaning outdoors. Artists abandoned studios to paint directly from nature, allowing them to observe and capture the changing qualities of light firsthand. This fresh perspective challenged traditional academic standards and faced initial resistance, eventually transforming public appreciation and paving the way for modern art."""
@@ -97,7 +102,7 @@ An important hallmark of impressionism was painting en plein air, meaning outdoo
                 expertise="high",
                 speaking_style="friendly, inspiring",
                 level_of_expertise="art educator",
-                focus_aspect="Impressionism’s visual techniques",
+                focus_aspect="Impressionism`s visual techniques",
                 depth="medium",
             ),
             SpeakerConfig(
@@ -118,18 +123,19 @@ An important hallmark of impressionism was painting en plein air, meaning outdoo
         ),
     )
 
-    audiocast = OnlyAudiocast()
-    audiocast.cast(
+    audiocast = OnlyAudiocast(with_model=settings.with_model)
+    await audiocast.cast(
         content,
         cast_configuration=cast_configuration,
         audio_out_path=f"{os.environ['HOME']}/Downloads/",
     )
 
 
-def test_create_children_storytelling_session() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_create_children_storytelling_session(settings: Any) -> None:
     content = """In the magical kingdom of Eldoria lived a brave little fox named Finley. Unlike other foxes, Finley dreamed of flying. Each evening, Finley climbed the tallest oak and gazed at the stars, whispering a wish to soar among them. One night, a wise old owl named Orion overheard Finley's wish and decided to help.
 
-With the owl’s guidance, Finley set off on a journey through enchanted forests and shimmering lakes to find the legendary Wings of Eldoria. Along the way, Finley faced challenges and made many animal friends who offered their help. Together, they discovered courage, friendship, and that true magic comes from believing in yourself."""
+With the owl`s guidance, Finley set off on a journey through enchanted forests and shimmering lakes to find the legendary Wings of Eldoria. Along the way, Finley faced challenges and made many animal friends who offered their help. Together, they discovered courage, friendship, and that true magic comes from believing in yourself."""
 
     cast_configuration = CastConfiguration(
         speakers=[
@@ -151,8 +157,8 @@ With the owl’s guidance, Finley set off on a journey through enchanted forests
         ),
     )
 
-    audiocast = OnlyAudiocast()
-    audiocast.cast(
+    audiocast = OnlyAudiocast(with_model=settings.with_model)
+    await audiocast.cast(
         content,
         cast_configuration=cast_configuration,
         audio_out_path=f"{os.environ['HOME']}/Downloads/",

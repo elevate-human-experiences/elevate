@@ -64,6 +64,7 @@ repos:
       - id: detect-secrets
         name: "detect-secrets"
         args: ["--exclude-files", '.*\.ipynb$']
+        exclude: suite/reports/.*\.json$
         language_version: python3.10  # Explicitly set Python version
       - id: detect-secrets
         name: "detect-secrets-jupyter"

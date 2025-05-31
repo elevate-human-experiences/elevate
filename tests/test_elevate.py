@@ -22,8 +22,11 @@
 
 """Test the elevate module."""
 
+import pytest
 
-def test_elevate() -> None:
+
+@pytest.mark.asyncio  # type: ignore
+async def test_elevate() -> None:
     """Test the elevate module."""
     from elevate import hello
 

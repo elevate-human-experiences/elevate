@@ -22,6 +22,13 @@
 
 """Only python code generation prompt for the Elevate app."""
 
+import logging
+
+from common import setup_logging
+
+
+logger = setup_logging(logging.DEBUG)
+
 PYTHON_CODE_GENRATION_PROMPT = """
 You are an experienced Python programmer. Your task is to generate Python code based on the user's prompt.
 If provided, use the frameworks mentioned in <Framework> block (assume that it is installed).

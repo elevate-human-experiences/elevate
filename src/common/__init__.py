@@ -20,10 +20,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Conftest file for pytest."""
-
+import atexit
+import logging
 import sys
-from pathlib import Path
 
-# Add the "src" folder to the PYTHONPATH for pytest
-sys.path.insert(0, Path(__file__).resolve().parent.parent.joinpath("src").as_posix())
+
+atexit.register(logging.shutdown)
+
+
+def setup_logging(level: int = logging.INFO) -> logging.Logger:
+    """Configure the root logger to output log messages to the console only."""
+    # Get the root logger
+    logger = logging.getLogger()
+    # Set the overall logging level
+    logger.setLevel(level)
+
+    # Remove all existing handlers, if any
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+
+    # Create console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(level)
+    formatter = logging.Formatter("%(levelname)s: %(message)s")
+    console_handler.setFormatter(formatter)
+
+    # Add handler to the logger
+    logger.addHandler(console_handler)
+
+    return logger

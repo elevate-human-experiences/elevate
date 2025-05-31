@@ -21,7 +21,7 @@
 # SOFTWARE.
 """Only rephrase module for the Elevate app."""
 
-from litellm import completion
+from litellm import acompletion
 
 
 class OnlyShell:
@@ -31,53 +31,26 @@ class OnlyShell:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
-    def make_llm_call(self, system_prompt: str, input_text: str) -> str:
-        """
-        Makes the LLM call using litellm, extracting the markdown content.
-        """
+    async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
+        """Make the LLM call using litellm and extract the markdown content."""
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-
-        response = completion(
-            api_key="", model=self.model, messages=messages, temperature=0.1
-        )
-        output = str(response.choices[0].message.content)
-        return output
+        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        return str(response.choices[0].message.content)
 
     def get_shell_system_prompt(self) -> str:
-        """Returns the shell system prompt.
-
-        Returns:
-            str: A string containing the shell system prompt.
-        """
-        rephrase_prompt = """
+        """Return the shell system prompt."""
+        return """
 You are an expert shell command generator. Your task is to translate user requests into precise and efficient shell commands.
 
 *   **Input:** User's description of a task (e.g., "List all files in the current directory").
 *   **Output:** A single, executable shell command that accomplishes the task.  Do not include any introductory text, explanations, or apologies.  Focus solely on the command itself.  Assume a Linux/Unix environment.  Prioritize common and portable commands.  If the task is ambiguous, ask the user for clarification.
 """
-        return rephrase_prompt
 
-    def generate_shell_command(self, user_prompt: str) -> str:
-        """
-        Generates a shell command based on a user-provided natural language prompt.
-
-        This function takes a user prompt describing the desired shell command, combines it with a
-        predefined system prompt that guides the language model's response, and then invokes the
-        language model to generate the actual shell command.
-
-        Args:
-            user_prompt: A string containing the natural language description of the desired
-                shell command.  For example, "List all files in the current directory."
-
-        Returns:
-            A string containing the generated shell command. The command is the output of the
-            language model, intended to fulfill the user's request.
-        """
+    async def generate_shell_command(self, user_prompt: str) -> str:
+        """Generates a shell command based on a user-provided natural language prompt."""
         system_prompt = self.get_shell_system_prompt()
-
         message = "\n<UserPrompt>" + user_prompt + "</UserPrompt>\n\n"
-
-        return self.make_llm_call(system_prompt, message)
+        return await self.make_llm_call(system_prompt, message)

@@ -22,14 +22,21 @@
 
 """Module to test the markdown conversion functionality of the OnlyMarkdown class with hastily copied inputs."""
 
+import logging
+from typing import Any
+
+import pytest
+
+from common import setup_logging
 from elevate.only_markdown import OnlyMarkdown
 
 
-def test_hastily_copied_html_conversion() -> None:
-    """
-    Simulates a conversion where a user has copy-pasted HTML content that lost its formatting.
-    The input contains HTML tags with little structure and no proper formatting.
-    """
+logger = setup_logging(logging.DEBUG)
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_hastily_copied_html_conversion(settings: Any) -> None:
+    """Simulate a conversion where a user has copy-pasted HTML content that lost its formatting."""
     input_text = (
         "<h1>Repo for Learning - A Repository for Exploration</h1>"
         "<div>This repository is designed to be a learning resource. It covers a variety of topics to help you expand your knowledge. "
@@ -40,16 +47,14 @@ def test_hastily_copied_html_conversion() -> None:
         "<tr><td>README.txt</td><td>This file.</td></tr><tr><td>/examples</td><td>Code examples.</td></tr></table>"
         "End of README."
     )
-    only_markdown = OnlyMarkdown()
+    only_markdown = OnlyMarkdown(with_model=settings.with_model)
     markdown_output = only_markdown.convert_to_markdown(input_text)
-    print("HTML Copy-Paste Conversion:\n", markdown_output)
+    logger.debug("HTML Copy-Paste Conversion:\n%s", markdown_output)
 
 
-def test_hastily_copied_word_doc_conversion() -> None:
-    """
-    Simulates a conversion of text that was copy-pasted from a Word document.
-    The formatting is lost and the text appears as an unstructured block with inconsistent line breaks.
-    """
+@pytest.mark.asyncio  # type: ignore
+async def test_hastily_copied_word_doc_conversion(settings: Any) -> None:
+    """Simulate a conversion of text that was copy-pasted from a Word document."""
     input_text = (
         "Repo for Learning - A Repository for Exploration  "
         "This repository is designed to be a learning resource. It covers a variety of topics to help you expand your knowledge. "
@@ -60,32 +65,23 @@ def test_hastily_copied_word_doc_conversion() -> None:
         "README.txt  This file.   /examples  Code examples.  "
         "End of document."
     )
-    only_markdown = OnlyMarkdown()
+    only_markdown = OnlyMarkdown(with_model=settings.with_model)
     markdown_output = only_markdown.convert_to_markdown(input_text)
-    print("Word Doc Copy-Paste Conversion:\n", markdown_output)
+    logger.debug("Word Doc Copy-Paste Conversion:\n%s", markdown_output)
 
 
-def test_hastily_copied_db_output_conversion() -> None:
-    """
-    Simulates a conversion where tabular data from a database (or spreadsheet) is copy-pasted as plain text.
-    The table structure is lost due to inconsistent spacing.
-    """
-    input_text = (
-        "ID   Name   Age   City\n"
-        "1   Alice   28   New York\n"
-        "2   Bob     34   Los Angeles\n"
-        "3   Charlie 22   Chicago"
-    )
-    only_markdown = OnlyMarkdown()
+@pytest.mark.asyncio  # type: ignore
+async def test_hastily_copied_db_output_conversion(settings: Any) -> None:
+    """Simulate a conversion where tabular data from a database is copy-pasted as plain text."""
+    input_text = "Name    Age    Occupation\nAlice   30     Engineer\nBob     25     Designer\nCharlie 35     Manager\n"
+    only_markdown = OnlyMarkdown(with_model=settings.with_model)
     markdown_output = only_markdown.convert_to_markdown(input_text)
-    print("DB Output Conversion from Copy-Paste:\n", markdown_output)
+    logger.debug("DB Output Copy-Paste Conversion:\n%s", markdown_output)
 
 
-def test_hastily_copied_blog_post_conversion() -> None:
-    """
-    Simulates a conversion of a blog post that was copied from a web page or document and lost its formatting.
-    The headings, author info, and paragraphs appear in a messy block.
-    """
+@pytest.mark.asyncio  # type: ignore
+async def test_hastily_copied_blog_post_conversion(settings: Any) -> None:
+    """Simulate a conversion of a blog post that was copied from a web page or document and lost its formatting."""
     input_text = (
         "Blog Post: Journey Through Code   Author: Jane Doe   Date: 2025-04-10  "
         "Welcome to my coding journey! Over the years, I have learned a great deal about programming.  "
@@ -93,14 +89,15 @@ def test_hastily_copied_blog_post_conversion() -> None:
         "My Experience  I began coding in college and since then the landscape of technology has never ceased to amaze me.  "
         "Stay tuned for more updates.  Happy coding and keep exploring!"
     )
-    only_markdown = OnlyMarkdown()
+    only_markdown = OnlyMarkdown(with_model=settings.with_model)
     markdown_output = only_markdown.convert_to_markdown(input_text)
-    print("Blog Post Copy-Paste Conversion:\n", markdown_output)
+    logger.debug("Blog Post Copy-Paste Conversion:\n%s", markdown_output)
 
 
-def test_hastily_copied_complex_unformatted_conversion() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_hastily_copied_complex_unformatted_conversion(settings: Any) -> None:
     """
-    Simulates a conversion of a complex document where various elements (titles, lists, code, and links)
+    Simulate a conversion of a complex document where various elements (titles, lists, code, and links)
     are mashed together due to hasty copy-paste, resulting in lost formatting.
     """
     input_text = (
@@ -112,6 +109,6 @@ def test_hastily_copied_complex_unformatted_conversion() -> None:
         "Code: def example(): return 'Hello, Markdown!'  "
         "More info: Visit https://example.com for further details."
     )
-    only_markdown = OnlyMarkdown()
+    only_markdown = OnlyMarkdown(with_model=settings.with_model)
     markdown_output = only_markdown.convert_to_markdown(input_text)
-    print("Complex Unformatted Copy-Paste Conversion:\n", markdown_output)
+    logger.debug("Complex Unformatted Copy-Paste Conversion:\n%s", markdown_output)

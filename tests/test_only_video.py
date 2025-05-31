@@ -22,15 +22,23 @@
 
 """Module to test the blog generation functionality of the OnlyVideoToBlog class."""
 
+import logging
+from typing import Any
+
+import pytest
+
+from common import setup_logging
 from elevate.only_video_to_blog import OnlyVideoToBlog
 
 
-def test_simple_blog_generation() -> None:
-    """
-    Tests the generation of blog of simple text using the OnlyVideoToBlog class.
-    """
-    onlyVideo = OnlyVideoToBlog()
+logger = setup_logging(logging.DEBUG)
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_simple_blog_generation(settings: Any) -> None:
+    """Test the generation of blog of simple text using the OnlyVideoToBlog class."""
+    only_video = OnlyVideoToBlog(with_model=settings.with_model)
 
     transcript = """ """
 
-    print(onlyVideo.generate_blog(transcript))
+    logger.debug(await only_video.generate_blog(transcript))

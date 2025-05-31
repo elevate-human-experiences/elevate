@@ -20,14 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from pydantic import BaseModel, Field
 from typing import Any
+
+import pytest
+from pydantic import BaseModel, Field
+
 from elevate.only_judge_llms import OnlyJudgeLLMs
 
 
-# --- Test 1: Evaluation of a summary response ---
-# Inspired by metrics on coherence, fluency, and factual consistency.
-def test_summary_evaluation() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_summary_evaluation(settings: Any) -> None:
     class SummaryCriteria(BaseModel):
         coherence: int = Field(..., description="Coherence of the summary (1-5)")
         fluency: int = Field(..., description="Fluency of the language (1-5)")
@@ -37,8 +39,8 @@ def test_summary_evaluation() -> None:
         "The Q3 report indicates a 12% increase in revenue driven by new market strategies, "
         "cost-saving initiatives, and improved operational efficiency, though challenges remain in emerging markets."
     )
-    judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result: Any = judge.evaluate(sample_text, SummaryCriteria)
+    judge = OnlyJudgeLLMs(with_model=settings.with_model)
+    result: Any = await judge.evaluate(sample_text, SummaryCriteria)
 
     # This text is coherent and factually consistent, so we expect mid-to-high scores
     assert 4 <= result.coherence <= 5
@@ -48,7 +50,8 @@ def test_summary_evaluation() -> None:
 
 # --- Test 2: Evaluation of a conversational reply ---
 # Updated to reflect a less relevant/helpful response.
-def test_conversational_evaluation() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_conversational_evaluation(settings: Any) -> None:
     class ConversationCriteria(BaseModel):
         relevance: int = Field(..., description="How relevant is the reply? (1-5)")
         helpfulness: int = Field(..., description="How helpful is the response? (1-5)")
@@ -59,8 +62,8 @@ def test_conversational_evaluation() -> None:
         "Thanks for reaching out. Honestly, I don't have any details about the product launch right now. "
         "It's a beautiful day, though. How have you been?"
     )
-    judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result: Any = judge.evaluate(sample_text, ConversationCriteria)
+    judge = OnlyJudgeLLMs(with_model=settings.with_model)
+    result: Any = await judge.evaluate(sample_text, ConversationCriteria)
 
     # Relevance should be lower because it doesn't address the product launch well
     assert 1 <= result.relevance <= 3
@@ -72,11 +75,10 @@ def test_conversational_evaluation() -> None:
 
 # --- Test 3: Evaluation of creative writing ---
 # Leveraging metrics such as creativity, narrative flow, and imagery.
-def test_creative_writing_evaluation() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_creative_writing_evaluation(settings: Any) -> None:
     class CreativeCriteria(BaseModel):
-        creativity: int = Field(
-            ..., description="How creative is the composition? (1-5)"
-        )
+        creativity: int = Field(..., description="How creative is the composition? (1-5)")
         narrative_flow: int = Field(..., description="Flow of the narrative (1-5)")
         imagery: int = Field(..., description="Quality of imagery evoked (1-5)")
 
@@ -84,8 +86,8 @@ def test_creative_writing_evaluation() -> None:
         "Amidst the twilight of a fading day, the vibrant hues of an impressionist sky dissolve into whispers of lost dreams. "
         "The city pulses with poetic intensity, each corner revealing a story etched in light and shadow."
     )
-    judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result: Any = judge.evaluate(sample_text, CreativeCriteria)
+    judge = OnlyJudgeLLMs(with_model=settings.with_model)
+    result: Any = await judge.evaluate(sample_text, CreativeCriteria)
 
     # Quite imaginative; likely high creativity
     assert 4 <= result.creativity <= 5
@@ -97,18 +99,19 @@ def test_creative_writing_evaluation() -> None:
 
 # --- Test 4: Evaluation of an instructional response ---
 # Updated to reflect a less complete/accurate set of instructions.
-def test_instructional_evaluation() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_instructional_evaluation(settings: Any) -> None:
     class InstructionCriteria(BaseModel):
         clarity: int = Field(..., description="Clarity of the instructions (1-5)")
         accuracy: int = Field(..., description="Accuracy of the details provided (1-5)")
-        completeness: int = Field(
-            ..., description="Completeness of the explanation (1-5)"
-        )
+        completeness: int = Field(..., description="Completeness of the explanation (1-5)")
 
     # This is intentionally vague and incomplete for installation instructions.
-    sample_text = "To install the package, first you open your terminal. Then do something with pip. I'm not entirely sure."
-    judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result: Any = judge.evaluate(sample_text, InstructionCriteria)
+    sample_text = (
+        "To install the package, first you open your terminal. Then do something with pip. I'm not entirely sure."
+    )
+    judge = OnlyJudgeLLMs(with_model=settings.with_model)
+    result: Any = await judge.evaluate(sample_text, InstructionCriteria)
 
     # The instructions aren't very clear
     assert 1 <= result.clarity <= 3
@@ -120,20 +123,19 @@ def test_instructional_evaluation() -> None:
 
 # --- Test 5: Evaluation of poetic text ---
 # Focusing on metrics like elegance, metaphorical depth, and rhythm.
-def test_poetic_evaluation() -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_poetic_evaluation(settings: Any) -> None:
     class PoeticCriteria(BaseModel):
         elegance: int = Field(..., description="Elegance of the phrasing (1-5)")
-        metaphorical_depth: int = Field(
-            ..., description="Depth of metaphorical expression (1-5)"
-        )
+        metaphorical_depth: int = Field(..., description="Depth of metaphorical expression (1-5)")
         rhythm: int = Field(..., description="Rhythmic quality of the verse (1-5)")
 
     sample_text = (
         "In the gentle embrace of dusk, silver threads of moonlight weave ancient tales; "
         "the cadence of nature whispers secrets where dreams and reality converge into a poetic reverie."
     )
-    judge = OnlyJudgeLLMs(with_model="o3-mini")
-    result: Any = judge.evaluate(sample_text, PoeticCriteria)
+    judge = OnlyJudgeLLMs(with_model=settings.with_model)
+    result: Any = await judge.evaluate(sample_text, PoeticCriteria)
 
     # The text is fairly elegant, though we allow some variation
     assert 3 <= result.elegance <= 5

@@ -19,9 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 """Only rephrase module for the Elevate app."""
 
-from litellm import completion
+from litellm import acompletion
 
 
 class OnlyRephrase:
@@ -31,28 +32,19 @@ class OnlyRephrase:
         """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
-    def make_llm_call(self, system_prompt: str, input_text: str) -> str:
-        """
-        Makes the LLM call using litellm, extracting the markdown content.
-        """
+    async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
+        """Make the LLM call using litellm and extract the markdown content."""
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-
-        response = completion(
-            api_key="", model=self.model, messages=messages, temperature=0.1
-        )
-        output = str(response.choices[0].message.content)
-        return output
+        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        # Fix: Use response.content if choices/message is not available
+        return str(getattr(response, "content", response))
 
     def get_rephrase_system_prompt(self) -> str:
-        """Returns the rephrase system prompt.
-
-        Returns:
-            str: A string containing the rephrase system prompt.
-        """
-        rephrase_prompt = """
+        """Return the rephrase system prompt."""
+        return """
 You are a highly skilled expert in English grammar, style, and tone. Your primary task is to rephrase user-provided text to ensure it is grammatically correct, stylistically appropriate, and aligned with the specified tone and length.
 
 **INPUT**
@@ -81,17 +73,19 @@ You will receive input in the following format:
 Provide the rephrased text as a single string. Do not include any additional formatting or explanations.
 
 """
-        return rephrase_prompt
 
-    def rephrase_text(self, message: str, tone: str, length: str) -> str:
-        """Rephrases the given message with the specified tone and length.
+    async def rephrase_text(self, message: str, tone: str, length: str) -> str:
+        """
+        Rephrases the given message with the specified tone and length.
 
         Args:
+        ----
             message (str): The message to rephrase.
             tone (str): The desired tone for the rephrased message.
             length (str): The desired length for the rephrased message.
 
         Returns:
+        -------
             str: The rephrased message.
         """
         system_prompt = self.get_rephrase_system_prompt()
@@ -100,4 +94,4 @@ Provide the rephrased text as a single string. Do not include any additional for
         message += "<Tone> " + tone + " </Tone>\n\n"
         message += "<Length> " + length + " </Length>"
 
-        return self.make_llm_call(system_prompt, message)
+        return await self.make_llm_call(system_prompt, message)

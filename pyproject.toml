@@ -12,6 +12,14 @@ dependencies = [
     "prompt-toolkit>=3.0.51",
     "pydantic>=2.10.6",
     "pydub>=0.25.1",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=1.0.0",
+    "aiofiles>=24.1.0",
+    "types-aiofiles>=24.1.0.20250516",
+    "pytest-json-report>=1.5.0",
+    "rich>=14.0.0",
+    "pandas>=2.2.3",
+    "tabulate>=0.9.0",
 ]
 
 [build-system]
@@ -22,3 +30,122 @@ build-backend = "hatchling.build"
 dev-dependencies = [
     "pytest>=8.3.5",
 ]
+
+[tool.ruff]
+src = ["src"]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+ignore = [
+  # allow arguments with same name as builtins (does not actually shadow the builtin)
+  "A002",
+  # allow attributes with same name as builtins (does not actually shadow the builtin)
+  "A003",
+  # don't require any docstrings (mostly using pydocstyle rules for formatting) -- worth enabling gradually
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  # ignoring incorrect-blank-line-before-class as it conflicts with D211 (no-blank-line-before-class)
+  "D203",
+  # ignoring multi-line-summary-first-line as it conflicts with D213 (multi-line-summary-second-line)
+  "D212",
+  # ignoring missing-blank-line-after-last-section to avoid superfluous blank lines
+  "D413",
+  # these are worth fixing at some point (ignored temporarily)
+  "D205",  # missing-blank-line-after-summary
+  "D400",  # missing-trailing-period
+  "D401",  # non-imperative-mood
+  "D404",  # docstring-starts-with-this
+  "D414",  # empty-docstring-section
+  "D415",  # missing-terminal-punctuation
+  "D417",  # undocumented-param
+  "D419",  # empty-docstring
+  # conflicts with linters for trailing commas in function arguments
+  "COM812",
+  # allow importing multiple items on one line
+  "E401",
+  # allow imports after statements
+  "E402",
+  # handled by other linters
+  "E501",
+  # allow f-strings in log statements
+  "G004",
+  # ruff-format recommends turning off this rule
+  "ISC001",
+  # allow @pytest.fixture() (conflicts with auto formatting)
+  "PT001",
+  # allow @pytest.mark.asyncio # type: ignore() (conflicts with auto formatting)
+  "PT023",
+  # ruff removes directives for linters not yet available in ruff
+  "RUF100",
+  # allow assert statements
+  "S101",
+  # allow different ways of writing exceptions
+  "TRY003",
+  # allow mutable class variable without ClassVar typing
+  "RUF012",
+  # allow TODO comments without author
+  "TD002",
+  # allow TODO comments without link
+  "TD003",
+]
+
+# Ignore 'invalid noqa' warnings for codes handled by external flake8 plugins
+external = ["CCR001", "ECE001"]
+
+# we select as many relevant plugins as possible to ensure that we catch as many issues as possible
+select = [
+  "A",
+  "ASYNC",
+  "B",
+  "C4",
+  "COM",
+  "D",
+  "DTZ",
+  "E",
+  "ERA",
+  "EXE",
+  "F",
+  "FLY",
+  "G",
+  "I001",
+  "ICN",
+  "INP",
+  "ISC",
+  "LOG",
+  "N",
+  "NPY",
+  "PD",
+  "PERF",
+  "PIE",
+  "PT",
+  "PTH",
+  "RET",
+  "RSE102",
+  "RUF",
+  "S",
+  "SIM",
+  "SLF",
+  "T10",
+  "T20",
+  "TD",
+  "TRY",
+  "UP",
+  "W",
+]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.mypy]
+allow_untyped_decorators = true

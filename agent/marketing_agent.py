@@ -1,14 +1,14 @@
 import asyncio
-import logging
-import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import aiofiles  # type: ignore
 import fire
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.table import Table
 
-from common import setup_logging
 from elevate.only_email import OnlyEmail
 from elevate.only_markdown import OnlyMarkdown
 from elevate.only_python import OnlyPython
@@ -17,41 +17,29 @@ from elevate.only_summary import OnlySummary
 from elevate.only_video_to_blog import OnlyVideoToBlog
 
 
-logger = setup_logging(logging.DEBUG)
+console = Console()
 
 
 class UIBeautifier:
-    """Provides methods for beautifying the UI of the CLI application."""
+    """Provides methods for beautifying the UI of the CLI application using Rich."""
 
-    COLOR_RESET = "\033[0m"  # Reset to default color
-    COLOR_GREEN = "\033[92m"
-    COLOR_YELLOW = "\033[93m"
-    COLOR_RED = "\033[91m"
-    COLOR_BLUE = "\033[94m"
-    COLOR_MAGENTA = "\033[95m"
-    COLOR_CYAN = "\033[96m"
+    def print_section_header(self, title: str, color: str = "cyan") -> None:
+        header = f"[bold {color}]{'*' * 3} {title} {'*' * 3}[/bold {color}]"
+        console.rule(header)
 
-    def print_section_header(self, title: str, color: str = COLOR_CYAN) -> None:
-        """Print a formatted section header with color."""
-        width = os.get_terminal_size().columns
-        padding = (width - len(title) - 2) // 2
-        header = f"{color}{'*' * padding} {title} {'*' * padding}{self.COLOR_RESET}"
-        logger.debug(f"{header.center(width)}\n")
+    def print_colored_text(self, text: str, color: str = "green") -> None:
+        console.print(f"[{color}]{text}[/{color}]")
 
-    def print_colored_text(self, text: str, color: str = COLOR_GREEN) -> None:
-        """Print text with a specified color."""
-        logger.debug(f"{color}{text}{self.COLOR_RESET}\n")
-
-    def print_menu(self, menu_items: dict[str, str], color: str = COLOR_YELLOW) -> None:
-        """Print a formatted menu with color."""
+    def print_menu(self, menu_items: dict[str, str], color: str = "yellow") -> None:
         self.print_section_header("Marketing Workflow Menu", color)
+        table = Table(show_header=False, box=None)
         for key, value in menu_items.items():
-            self.print_colored_text(f"{key}. {value}", color)
-        logger.debug("%s", "*" * os.get_terminal_size().columns + "\n")
+            table.add_row(f"[{color}]{key}[/{color}]", value)
+        console.print(table)
+        console.rule()
 
-    def print_prompt(self, prompt: str, color: str = COLOR_YELLOW) -> str:
-        """Print a colored prompt and return user input."""
-        return input(f"{color}{prompt}{self.COLOR_RESET}")
+    def print_prompt(self, prompt: str, color: str = "yellow") -> Any:
+        return Prompt.ask(f"[{color}]{prompt}[/{color}]")
 
 
 class MarketingWorkflow:
@@ -64,21 +52,20 @@ class MarketingWorkflow:
         self.markdown_tool = OnlyMarkdown("gemini/gemini-2.0-flash-lite")
         self.ui = UIBeautifier()  # Instantiate the beautifier
 
-    async def rephrase_content(self, content: str) -> str:
-        """Rephrase the given content with user-specified tone and length, beautified."""
-        self.ui.print_section_header("Rephrasing Content", self.ui.COLOR_MAGENTA)
+    async def rephrase_content(self, content: str) -> Any:
+        self.ui.print_section_header("Rephrasing Content", "magenta")
         while True:
-            tone = self.ui.print_prompt("Enter rephrase tone: ", self.ui.COLOR_YELLOW)
-            length_str = self.ui.print_prompt("Enter rephrase message length in words: ", self.ui.COLOR_YELLOW)
+            tone = self.ui.print_prompt("Enter rephrase tone:", "yellow")
+            length_str = self.ui.print_prompt("Enter rephrase message length in words:", "yellow")
             try:
                 length = int(length_str)
             except ValueError:
-                logger.debug(", Invalid length. Please enter a number. , \n")
+                self.ui.print_colored_text("Invalid length. Please enter a number.", "red")
                 continue
-            logger.debug(f"\nRephrasing with tone: {tone}, and length: {length} \n")
+            self.ui.print_colored_text(f"Rephrasing with tone: {tone}, and length: {length}", "cyan")
             rephrased_content = await self.rephrase_tool.rephrase_text(content, tone, str(length))
-            self.ui.print_colored_text("Rephrased content:\n", self.ui.COLOR_GREEN)
-            logger.debug(f"{rephrased_content}\n")
+            self.ui.print_colored_text("Rephrased content:", "green")
+            console.print(rephrased_content)
             return rephrased_content
 
     async def process_with_rephrase(
@@ -88,12 +75,11 @@ class MarketingWorkflow:
         file_name: str,
         *args: Any,
     ) -> str:
-        """Generate content and repeatedly rephrase it based on user input."""
         content = await generate_func(*args)
-        self.ui.print_colored_text("Content generated:\n\n", self.ui.COLOR_GREEN)
-        logger.debug(f"{content}\n")
+        self.ui.print_colored_text("Content generated:", "green")
+        console.print(content)
         while True:
-            rephrase = input(f"Rephrase {prompt}? (y/n): ").lower()
+            rephrase = Prompt.ask(f"Rephrase {prompt}? (y/n)", choices=["y", "n"], default="n")
             if rephrase == "y":
                 content = await self.rephrase_content(content)
             else:
@@ -103,10 +89,10 @@ class MarketingWorkflow:
                         file.write(content)
                     self.ui.print_colored_text(
                         f"Contents written in file output/{file_name}",
-                        self.ui.COLOR_BLUE,
+                        "blue",
                     )
                 except Exception as e:
-                    logger.debug(f"Error writing the contents to file {e}")
+                    self.ui.print_colored_text(f"Error writing the contents to file: {e}", "red")
                 break
         return str(content)
 
@@ -156,26 +142,24 @@ class MarketingWorkflow:
         results: dict[str, str] = {}
         while True:
             self.print_menu()
-            choice = input("Enter your choice: ")
+            choice = Prompt.ask("Enter your choice", choices=["1", "2", "3", "4", "5"])
             if choice == "1":
                 results["blog_content"] = await self.generate_blog(video_transcript)
             elif choice == "2":
                 results["video_summary"] = await self.generate_summary(video_transcript)
             elif choice == "3":
                 if "blog_content" not in results:
-                    logger.debug(", Please generate blog content first (option 1). , \n")
+                    self.ui.print_colored_text("Please generate blog content first (option 1).", "red")
                     continue
                 results["emails"] = await self.generate_emails(results["blog_content"], email_type)
             elif choice == "4":
                 if "blog_content" not in results:
-                    logger.debug(", Please generate blog content first (option 1). , \n")
+                    self.ui.print_colored_text("Please generate blog content first (option 1).", "red")
                     continue
                 results["markdown_docs"] = await self.generate_markdown(results["blog_content"])
             elif choice == "5":
-                self.ui.print_colored_text("Workflow Complete", self.ui.COLOR_GREEN)
+                self.ui.print_colored_text("Workflow Complete", "green")
                 break
-            else:
-                logger.debug(", Invalid choice. Please try again. , \n")
         return results
 
     def print_menu(self) -> None:
@@ -198,16 +182,16 @@ def run_workflow(transcript_file: str, email_type: str = "marketing") -> None:
             async with aiofiles.open(transcript_file) as f:
                 video_transcript = await f.read()
         except FileNotFoundError:
-            logger.debug(f"Error: Transcript file not found at {transcript_file}")
+            console.print(f"[red]Error: Transcript file not found at {transcript_file}[/red]")
             return
         except Exception as e:
-            logger.debug(f"Error reading transcript file: {e}")
+            console.print(f"[red]Error reading transcript file: {e}[/red]")
             return
         workflow = MarketingWorkflow()
         results = await workflow.execute(video_transcript, email_type)
-        logger.debug("\nWorkflow Results:")
+        console.print("[bold green]\nWorkflow Results:[/bold green]")
         for key, value in results.items():
-            logger.debug(f"\n{key}:\n{value}\n")
+            console.print(f"[cyan]{key}[/cyan]:\n{value}\n")
 
     asyncio.run(_run())
 

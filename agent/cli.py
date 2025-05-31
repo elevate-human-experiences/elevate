@@ -8,6 +8,10 @@ from litellm import acompletion
 from rich.console import Console
 from rich.prompt import Prompt
 
+from common import setup_logging
+
+
+logger = setup_logging(logging.DEBUG)
 
 console = Console()
 
@@ -108,7 +112,6 @@ async def main(with_model: str = "anthropic/claude-3-7-sonnet-20250219") -> None
 
 def fire_main(with_model: str = "anthropic/claude-3-7-sonnet-20250219") -> None:
     asyncio.run(main(with_model=with_model))
-
 
 if __name__ == "__main__":
     Fire(fire_main)

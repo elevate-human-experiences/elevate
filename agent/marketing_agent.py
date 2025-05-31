@@ -1,4 +1,5 @@
 import asyncio
+
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -15,7 +16,6 @@ from elevate.only_python import OnlyPython
 from elevate.only_rephrase import OnlyRephrase
 from elevate.only_summary import OnlySummary
 from elevate.only_video_to_blog import OnlyVideoToBlog
-
 
 console = Console()
 
@@ -40,7 +40,6 @@ class UIBeautifier:
 
     def print_prompt(self, prompt: str, color: str = "yellow") -> Any:
         return Prompt.ask(f"[{color}]{prompt}[/{color}]")
-
 
 class MarketingWorkflow:
     def __init__(self) -> None:
@@ -160,6 +159,8 @@ class MarketingWorkflow:
             elif choice == "5":
                 self.ui.print_colored_text("Workflow Complete", "green")
                 break
+            else:
+                logger.debug(", Invalid choice. Please try again. , \n")
         return results
 
     def print_menu(self) -> None:

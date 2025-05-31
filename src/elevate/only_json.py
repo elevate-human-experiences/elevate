@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Class that only supports JSON schema validation."""
+"""OnlyJson class for JSON schema validation using litellm."""
 
 import litellm
 from litellm import acompletion

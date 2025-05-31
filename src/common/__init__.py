@@ -20,8 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import atexit
 import logging
 import sys
+
+
+atexit.register(logging.shutdown)
 
 
 def setup_logging(level: int = logging.INFO) -> logging.Logger:

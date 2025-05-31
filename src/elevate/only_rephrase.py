@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 """Only rephrase module for the Elevate app."""
 
 from litellm import acompletion
@@ -38,7 +39,8 @@ class OnlyRephrase:
             {"role": "user", "content": input_text},
         ]
         response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
-        return str(response.choices[0].message.content)
+        # Fix: Use response.content if choices/message is not available
+        return str(getattr(response, "content", response))
 
     def get_rephrase_system_prompt(self) -> str:
         """Return the rephrase system prompt."""

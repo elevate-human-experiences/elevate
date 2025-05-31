@@ -19,7 +19,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""OnlyMarkdown class for converting text to Markdown format using litellm."""
+"""
+OnlyMarkdown class for converting text to Markdown format using litellm.
+
+This module provides the OnlyMarkdown class, which is designed to convert
+plain text into GitHub Flavored Markdown (GFM) using the litellm library.
+The conversion process is guided by a set of predefined scenarios and a
+system prompt that instructs the model on the desired Markdown output.
+"""
 
 import logging
 import re
@@ -47,7 +54,8 @@ class OnlyMarkdown:
         ]
 
         response = await acompletion(model=self.model, messages=messages, temperature=0.1)
-        output = str(response.choices[0].message.content)
+        # Fix: Use response.content if choices/message is not available
+        output = str(getattr(response, "content", response))
         pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
         match = re.search(pattern, output, re.DOTALL)
 

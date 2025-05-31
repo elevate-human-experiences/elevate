@@ -19,7 +19,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Only summary module for the Elevate app."""
+"""
+Only summary module for the Elevate app.
+
+This module provides the OnlySummary class, which is responsible for
+generating TL;DR summaries and converting them into GitHub Flavored Markdown
+(GFM) using the litellm library and the GPT-4o language model. The class
+offers a method to summarize input text and return the summary in a
+Markdown format, suitable for GitHub rendering.
+"""
 
 import re
 
@@ -40,7 +48,8 @@ class OnlySummary:
             {"role": "user", "content": input_text},
         ]
         response = await acompletion(model=self.model, messages=messages, temperature=0.1)
-        output = str(response.choices[0].message.content)
+        # Fix: Use response.content if choices/message is not available
+        output = str(getattr(response, "content", response))
         pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
         match = re.search(pattern, output, re.DOTALL)
 

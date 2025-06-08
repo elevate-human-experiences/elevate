@@ -1,11 +1,10 @@
 # run_all_models.py
 
-import os
 import re
 import subprocess
 from pathlib import Path
 
-from dotenv import load_dotenv
+from fire import Fire
 from rich.console import Console
 
 
@@ -28,7 +27,7 @@ def main(with_model: str = "gpt-4o-mini") -> None:
         "--durations=0",
     ]
 
-    result = subprocess.run(cmd, check=False, cwd=Path(__file__).parent)  # noqa: S603
+    result = subprocess.run(cmd, check=False, cwd=Path(__file__).parent.parent)  # noqa: S603
     if result.returncode != 0:
         console.print(
             f"[yellow]⚠ pytest exited with code {result.returncode} for model={with_model}. Continuing…[/yellow]"
@@ -38,9 +37,4 @@ def main(with_model: str = "gpt-4o-mini") -> None:
 
 
 if __name__ == "__main__":
-    load_dotenv(override=True)
-    console = Console()
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "No API key found")
-    console.print(f"[cyan]ANTHROPIC_API_KEY:[/cyan] {api_key}")
-
-    # TODO: Add CLI support (e.g., fire.Fire(main)) if needed
+    Fire(main)

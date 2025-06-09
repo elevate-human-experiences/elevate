@@ -8,9 +8,9 @@ from fire import Fire
 from rich.console import Console
 
 
-def main(with_model: str = "gpt-4o-mini") -> None:
+def main(with_model: str = "groq/llama-3.3-70b-versatile") -> None:
     """Run pytest for the specified model."""
-    if not re.match(r"^[\w\-]+$", with_model):
+    if not re.match(r"^[\w\-\/\.]+$", with_model):
         raise ValueError(f"Invalid model name: {with_model}")
     report_dir = Path(__file__).parent / "reports"
     report_dir = Path(__file__).parent / "reports"

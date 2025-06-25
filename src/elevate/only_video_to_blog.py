@@ -41,12 +41,12 @@ class OnlyVideoToBlog:
         response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
         return str(response.choices[0].message.content)
 
-    def get_blog_generation_system_prompt(self) -> str:
+    def get_blog_generation_system_prompt(self, number_of_words: int) -> str:
         """Return the system prompt for blog generation."""
-        return """
+        return f"""
         You are a highly skilled blog writer specializing in transforming complex information into engaging and easily
         digestible content.  Your task is to create a compelling blog post based on a video transcript provided by the
-        user.
+        user within {number_of_words} words.
 
         The goal is to explain the video's content through the lens of a light, fictional story. Think of how a CEO or
         other executive might use a relatable narrative to illustrate a point.  This story should be interwoven seamlessly
@@ -68,7 +68,7 @@ class OnlyVideoToBlog:
 
         The user will provide the video transcript.  Your output should be a complete and ready-to-publish blog post. """
 
-    async def generate_blog(self, transcript: str) -> str:
+    async def generate_blog(self, transcript: str, number_of_words: int) -> str:
         """Generate a blog post from a given video transcript."""
-        system_prompt = self.get_blog_generation_system_prompt()
+        system_prompt = self.get_blog_generation_system_prompt(number_of_words)
         return await self.make_llm_call(system_prompt, transcript)

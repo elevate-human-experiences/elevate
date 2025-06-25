@@ -1,5 +1,4 @@
 import asyncio
-
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -16,6 +15,7 @@ from elevate.only_python import OnlyPython
 from elevate.only_rephrase import OnlyRephrase
 from elevate.only_summary import OnlySummary
 from elevate.only_video_to_blog import OnlyVideoToBlog
+
 
 console = Console()
 
@@ -40,6 +40,7 @@ class UIBeautifier:
 
     def print_prompt(self, prompt: str, color: str = "yellow") -> Any:
         return Prompt.ask(f"[{color}]{prompt}[/{color}]")
+
 
 class MarketingWorkflow:
     def __init__(self) -> None:
@@ -95,82 +96,110 @@ class MarketingWorkflow:
                 break
         return str(content)
 
-    async def generate_blog(self, video_transcript: str) -> str:
+    async def generate_blog(self, technical_content: str, number_of_words: int) -> str:
         """Generates and optionally rephrases a blog post."""
         self.ui.print_section_header("Generating Blog Post")
         return await self.process_with_rephrase(
             self.blog_generator.generate_blog,
             "blog content",
-            "blog.txt",
-            video_transcript,
+            "blog.md",
+            technical_content,
+            number_of_words,
         )
 
-    async def generate_summary(self, video_transcript: str) -> str:
+    async def generate_summary(self, technical_content: str, summary_type: str) -> str:
         """Generates and optionally rephrases a video summary."""
         self.ui.print_section_header("Generating Summary")
         return await self.process_with_rephrase(
             self.summary_generator.summarize_and_convert_to_markdown,
             "video summary",
-            "summary.txt",
-            video_transcript,
+            "summary.md",
+            technical_content,
+            summary_type,
         )
 
-    async def generate_emails(self, blog_content: str, email_type: str = "marketing") -> str:
+    async def generate_emails(self, technical_content: str, email_type: str = "marketing") -> str:
         """Generates and optionally rephrases emails."""
         self.ui.print_section_header("Generating Emails")
         return await self.process_with_rephrase(
             self.email_generator.generate_email,
             "emails",
-            "email.txt",
-            blog_content,
+            "email.md",
+            technical_content,
             email_type,
         )
 
-    async def generate_markdown(self, blog_content: str) -> str:
+    async def generate_markdown(self, technical_content: str) -> str:
         """Generates and optionally rephrases markdown documentation."""
         self.ui.print_section_header("Generating Markdown Documentation")
         return await self.process_with_rephrase(
             self.markdown_tool.convert_to_markdown,
             "markdown documentation",
             "markdown.md",
-            blog_content,
+            technical_content,
         )
 
-    async def execute(self, video_transcript: str, email_type: str = "marketing") -> dict[str, str]:
+    async def execute(self, technical_content: str, email_type: str = "marketing") -> dict[str, str]:
         """Execute the marketing workflow based on user selection from the menu."""
         results: dict[str, str] = {}
         while True:
             self.print_menu()
-            choice = Prompt.ask("Enter your choice", choices=["1", "2", "3", "4", "5"])
+            choice = Prompt.ask("Enter your choice", choices=["1", "2", "3", "4", "5", "6", "7"])
             if choice == "1":
-                results["blog_content"] = await self.generate_blog(video_transcript)
+                while True:  # Loop until valid input is received
+                    try:
+                        number_of_words = int(input("Enter the desired number of words for the blog: "))
+                        if number_of_words <= 0:
+                            self.ui.print_colored_text("Please enter a positive number of words.", "red")
+                        else:
+                            break  # Exit the loop if input is valid
+                    except ValueError:
+                        self.ui.print_colored_text("Invalid input. Please enter a number.", "red")
+
+                results["blog_content"] = await self.generate_blog(technical_content, number_of_words=number_of_words)
             elif choice == "2":
-                results["video_summary"] = await self.generate_summary(video_transcript)
+                # Input to add executive summary, social media post, press release
+                summary_type = Prompt.ask(
+                    "Summary type :\n 1. Executive Summary \n2. Linkedin Post\n 3. Press Release\n Choose summary type:",
+                    choices=["1", "2", "3"],
+                )
+                if summary_type == "1":
+                    summary_type = "Executive summary"
+                elif summary_type == "2":
+                    summary_type = "Linkedin Post"
+                elif summary_type == "3":
+                    summary_type = "Press Release"
+                results["video_summary"] = await self.generate_summary(technical_content, summary_type)
             elif choice == "3":
-                if "blog_content" not in results:
-                    self.ui.print_colored_text("Please generate blog content first (option 1).", "red")
-                    continue
-                results["emails"] = await self.generate_emails(results["blog_content"], email_type)
+                results["emails"] = await self.generate_emails(technical_content, email_type)
             elif choice == "4":
-                if "blog_content" not in results:
-                    self.ui.print_colored_text("Please generate blog content first (option 1).", "red")
-                    continue
-                results["markdown_docs"] = await self.generate_markdown(results["blog_content"])
+                # call generate_slide function with content and persona
+                continue
             elif choice == "5":
+                # call generate_demoscript function with content and persona
+                continue
+            elif choice == "6":
+                self.ui.print_colored_text("This is RAG Workflow", "yellow")
+            elif choice == "7":
                 self.ui.print_colored_text("Workflow Complete", "green")
                 break
             else:
-                logger.debug(", Invalid choice. Please try again. , \n")
+                console.print("[red]Invalid choice. Please try again.[/red]")
         return results
 
     def print_menu(self) -> None:
         """Prints the menu of available components."""
         menu_items = {
-            "1": "Generate Blog Post",
+            "1": "Generate Blog Post",  # input to add number of words
+            # input to add executive summary, social media post, press release
             "2": "Generate Summary",
-            "3": "Generate Emails",
-            "4": "Generate Markdown Documentation",
-            "5": "Exit",
+            "3": "Generate External marketing emails",
+            # input number of slides and target persona
+            "4": "Generate Slides in Markdown format",
+            # input demo time and target persona
+            "5": "Generate Demo script in Markdown format",
+            "6": "Q&A",
+            "7": "Exit",
         }
         self.ui.print_menu(menu_items)
 
@@ -181,7 +210,7 @@ def run_workflow(transcript_file: str, email_type: str = "marketing") -> None:
     async def _run() -> None:
         try:
             async with aiofiles.open(transcript_file) as f:
-                video_transcript = await f.read()
+                technical_content = await f.read()
         except FileNotFoundError:
             console.print(f"[red]Error: Transcript file not found at {transcript_file}[/red]")
             return
@@ -189,7 +218,7 @@ def run_workflow(transcript_file: str, email_type: str = "marketing") -> None:
             console.print(f"[red]Error reading transcript file: {e}[/red]")
             return
         workflow = MarketingWorkflow()
-        results = await workflow.execute(video_transcript, email_type)
+        results = await workflow.execute(technical_content, email_type)
         console.print("[bold green]\nWorkflow Results:[/bold green]")
         for key, value in results.items():
             console.print(f"[cyan]{key}[/cyan]:\n{value}\n")

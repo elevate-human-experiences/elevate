@@ -15,9 +15,7 @@ def main() -> None:
     report_dir = Path(__file__).parent / "reports"
 
     # Load each JSON report
-    for file in report_dir.iterdir():
-        if not file.name.endswith(".json"):
-            continue
+    for file in report_dir.rglob("*.json"):
         with file.open() as fp:
             data = json.load(fp)
         model_name = file.name.replace("report_", "").replace(".json", "")

@@ -1,10 +1,5 @@
-import os
-
-
-# VERY IMPORTANT: Disable LiteLLM verbose logging *before* any imports or code that uses litellm.
-os.environ["LITELLM_VERBOSE"] = "0"
-
 import asyncio
+import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -29,7 +24,13 @@ from elevate.only_summary import OnlySummary
 from elevate.only_video_to_blog import OnlyVideoToBlog
 
 
+# VERY IMPORTANT: Disable LiteLLM verbose logging before any imports or code that uses litellm.
+os.environ["LITELLM_VERBOSE"] = "0"
+
 console = Console()
+
+# Global flag for LiteLLM logging
+litellm_logging_enabled = False
 
 
 class UIBeautifier:
@@ -96,7 +97,12 @@ class UIBeautifier:
         -------
             The user's input as a string.
         """
-        return Prompt.ask(f"[bold {color}]{prompt}[/bold {color}]", choices=choices)
+        prompt_text = f"[bold {color}]{prompt}[/bold {color}]"
+        panel = Panel(
+            prompt_text, box=box.ROUNDED, border_style=color, padding=1, title="[bold]Input[/bold]", title_align="left"
+        )
+        console.print(panel, end="> ")  # Print the panel and the > symbol
+        return Prompt.ask("")  # Use an empty string to only show the cursor
 
     def get_integer_input(self, prompt: str, color: str = "yellow", default: int | None = None) -> Any:
         """
@@ -112,7 +118,12 @@ class UIBeautifier:
         -------
             The user's input as an integer.
         """
-        return IntPrompt.ask(f"[bold {color}]{prompt}[/bold {color}]", default=default)
+        prompt_text = f"[bold {color}]{prompt}[/bold {color}]"
+        panel = Panel(
+            prompt_text, box=box.ROUNDED, border_style=color, padding=1, title="[bold]Input[/bold]", title_align="left"
+        )
+        console.print(panel, end="> ")  # Print the panel and the > symbol
+        return IntPrompt.ask("")
 
     def print_markdown(self, content: str, title: str = "Content") -> None:
         """
@@ -177,7 +188,7 @@ class MarketingWorkflow:
         self.qa_tool = OnlyQA(llm)
         self.ui = UIBeautifier()
 
-    async def rephrase_content(self, content: str) -> str:
+    async def rephrase_content(self, content: str) -> Any:
         """
         Rephrases content based on user-specified tone and length.
 
@@ -386,7 +397,7 @@ class MarketingWorkflow:
             demo_length_in_minutes,
         )
 
-    async def generate_answers(self, technical_content: str, question: str) -> str:
+    async def generate_answers(self, technical_content: str, question: str) -> Any:
         """
         Generates answers to questions based on technical content.
 

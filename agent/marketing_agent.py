@@ -81,7 +81,13 @@ class UIBeautifier:
         table.add_column(style="white")
         for key, value in menu_items.items():
             table.add_row(f"[{key}]", value)
-        console.print(table)
+
+        # Add a subtle white box around the menu
+        console.print(
+            Panel(
+                table, box=box.ROUNDED, border_style="white", padding=1, title="[bold]Menu[/bold]", title_align="left"
+            )
+        )
 
     def get_user_input(self, prompt: str, color: str = "yellow", choices: list[str] | None = None) -> Any:
         """

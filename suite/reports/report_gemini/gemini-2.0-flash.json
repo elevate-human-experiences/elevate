@@ -1,6 +1,6 @@
 {
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_markdown.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_markdown.py",
+    " /tests/test_only_markdown.py": {
+        "nodeid": " /tests/test_only_markdown.py",
         "outcome": "passed",
         "result": [
             {
@@ -30,8 +30,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_judge_llms.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_judge_llms.py",
+    " /tests/test_only_judge_llms.py": {
+        "nodeid": " /tests/test_only_judge_llms.py",
         "outcome": "passed",
         "result": [
             {
@@ -61,8 +61,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_shell.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_shell.py",
+    " /tests/test_only_shell.py": {
+        "nodeid": " /tests/test_only_shell.py",
         "outcome": "passed",
         "result": [
             {
@@ -72,8 +72,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_summary.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_summary.py",
+    " /tests/test_only_summary.py": {
+        "nodeid": " /tests/test_only_summary.py",
         "outcome": "passed",
         "result": [
             {
@@ -118,8 +118,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_rephrase.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_rephrase.py",
+    " /tests/test_only_rephrase.py": {
+        "nodeid": " /tests/test_only_rephrase.py",
         "outcome": "passed",
         "result": [
             {
@@ -164,8 +164,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_json.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_json.py",
+    " /tests/test_only_json.py": {
+        "nodeid": " /tests/test_only_json.py",
         "outcome": "failed",
         "result": [
             {
@@ -250,13 +250,13 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_elevate.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_elevate.py",
+    " /tests/test_elevate.py": {
+        "nodeid": " /tests/test_elevate.py",
         "outcome": "passed",
         "result": []
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_email.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_email.py",
+    " /tests/test_only_email.py": {
+        "nodeid": " /tests/test_only_email.py",
         "outcome": "passed",
         "result": [
             {
@@ -306,8 +306,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_python.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_python.py",
+    " /tests/test_only_python.py": {
+        "nodeid": " /tests/test_only_python.py",
         "outcome": "failed",
         "result": [
             {
@@ -352,8 +352,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_audiocast.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_audiocast.py",
+    " /tests/test_only_audiocast.py": {
+        "nodeid": " /tests/test_only_audiocast.py",
         "outcome": "failed",
         "result": [
             {
@@ -378,8 +378,8 @@
             }
         ]
     },
-    "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_video.py": {
-        "nodeid": "/Users/kedarkutaskar/Developer/OpenSource/elevate/tests/test_only_video.py",
+    " /tests/test_only_video.py": {
+        "nodeid": " /tests/test_only_video.py",
         "outcome": "passed",
         "result": [
             {

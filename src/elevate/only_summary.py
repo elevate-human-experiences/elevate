@@ -49,7 +49,7 @@ class OnlySummary:
         ]
         response = await acompletion(model=self.model, messages=messages, temperature=0.1)
         # Fix: Use response.content if choices/message is not available
-        output = str(getattr(response, "content", response))
+        output = str(response.choices[0].message.content)
         pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
         match = re.search(pattern, output, re.DOTALL)
 
@@ -64,7 +64,7 @@ You are a highly skilled Markdown converter, specializing in transforming plain 
 
 **Tasks:**
 
-1.  **TL;DR Summary:** Create a concise "TL;DR" (Too Long; Didn't Read) summary of the input text.
+1.  **{summary_type} Summary:** Create a concise "TL;DR" (Too Long; Didn't Read) summary of the input text.
 2.  **Markdown Conversion (of the TL;DR):** Convert *only the TL;DR summary* into GitHub Flavored Markdown.
 
 **Instructions:**
@@ -74,7 +74,7 @@ You are a highly skilled Markdown converter, specializing in transforming plain 
     *   Generate the TL;DR summary of the input text.
     *   Convert the TL;DR summary *itself* into Markdown.
 3.  **Output:** Return ONLY the converted Markdown of the TL;DR summary. Do NOT include the original text or any other content.
-4.  **TL;DR Style:** The TL;DR should be concise, typically a few sentences, and convey the most important points of the original text.
+4.  **{summary_type} Style:** The TL;DR should be concise, typically a few sentences, and convey the most important points of the original text.
 5.  **GitHub Flavored Markdown (GFM) Specifics:** Adhere to GFM conventions:
     *   Using fenced code blocks with syntax highlighting (e.g., ```python) if appropriate for the summary.
     *   Using lists (ordered or unordered) if the summary benefits from them.

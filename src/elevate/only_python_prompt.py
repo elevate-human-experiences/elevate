@@ -27,7 +27,7 @@ import logging
 from common import setup_logging
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 PYTHON_CODE_GENRATION_PROMPT = """
 You are an experienced Python programmer. Your task is to generate Python code based on the user's prompt.
@@ -63,7 +63,7 @@ If no framework is specified, use standard Python libraries.</Framework>
 
 **OUTPUT**
 Return ONLY an XML containing two fields:
-1. **PipInstalls**: Any pip installs needed
+1. **PipInstalls**: Any pip package names needed (just the package names, not the full pip install command)
 2. **Imports**: Any imports needed for the code to run.
 3. **CodeCompletion**: Your additional generated Python code in your response to follow the existing code.
     Include comments to explain the code.
@@ -73,7 +73,7 @@ Return ONLY an XML containing two fields:
 For example (when output format is json):
 ```
 <PipInstalls>
-pip install requests
+requests
 </PipInstalls>
 <Imports>
 import requests

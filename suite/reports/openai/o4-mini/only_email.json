@@ -1,0 +1,399 @@
+{
+    "created": 1752613659.176435,
+    "duration": 109.54546999931335,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 11,
+        "total": 11,
+        "collected": 11
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_email.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_email.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_email.py::test_personal_email",
+                    "type": "Coroutine",
+                    "lineno": 36
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_professional_email",
+                    "type": "Coroutine",
+                    "lineno": 47
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_marketing_email",
+                    "type": "Coroutine",
+                    "lineno": 58
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_resignation_email",
+                    "type": "Coroutine",
+                    "lineno": 81
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_workplace_conflict_email",
+                    "type": "Coroutine",
+                    "lineno": 93
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_bill_dispute_email",
+                    "type": "Coroutine",
+                    "lineno": 105
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_baby_shower_invite_email",
+                    "type": "Coroutine",
+                    "lineno": 117
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_urgent_meeting_email",
+                    "type": "Coroutine",
+                    "lineno": 129
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_structured_personal_email",
+                    "type": "Coroutine",
+                    "lineno": 141
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_structured_professional_email",
+                    "type": "Coroutine",
+                    "lineno": 160
+                },
+                {
+                    "nodeid": "tests/test_only_email.py::test_structured_marketing_email",
+                    "type": "Coroutine",
+                    "lineno": 179
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_email.py::test_personal_email",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_personal_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00043020909652113914,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: openai/o4-mini\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: openai/o4-mini",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752613550.326625,
+                        "msecs": 326.0,
+                        "relativeCreated": 756.8662166595459,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 29702,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 4.486517208162695,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0011699157766997814,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_professional_email",
+            "lineno": 47,
+            "outcome": "passed",
+            "keywords": [
+                "test_professional_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003053336404263973,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 6.662065958138555,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.002208959311246872,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_marketing_email",
+            "lineno": 58,
+            "outcome": "passed",
+            "keywords": [
+                "test_marketing_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004160837270319462,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 24.61887183273211,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0023109158501029015,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_resignation_email",
+            "lineno": 81,
+            "outcome": "passed",
+            "keywords": [
+                "test_resignation_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0006650001741945744,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 6.541201333981007,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0010795830748975277,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_workplace_conflict_email",
+            "lineno": 93,
+            "outcome": "passed",
+            "keywords": [
+                "test_workplace_conflict_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00031404197216033936,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 12.126908834092319,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.001573207788169384,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_bill_dispute_email",
+            "lineno": 105,
+            "outcome": "passed",
+            "keywords": [
+                "test_bill_dispute_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004487503319978714,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 6.5234327907674015,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005135000683367252,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_baby_shower_invite_email",
+            "lineno": 117,
+            "outcome": "passed",
+            "keywords": [
+                "test_baby_shower_invite_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00026625022292137146,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 5.09263345785439,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0015912498347461224,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_urgent_meeting_email",
+            "lineno": 129,
+            "outcome": "passed",
+            "keywords": [
+                "test_urgent_meeting_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004470408894121647,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 12.550662208348513,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0014607910998165607,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_structured_personal_email",
+            "lineno": 141,
+            "outcome": "passed",
+            "keywords": [
+                "test_structured_personal_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00047120917588472366,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 6.985770124942064,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.000610582996159792,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_structured_professional_email",
+            "lineno": 160,
+            "outcome": "passed",
+            "keywords": [
+                "test_structured_professional_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0001765838824212551,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 12.929526208899915,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.001151291187852621,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_email.py::test_structured_marketing_email",
+            "lineno": 179,
+            "outcome": "passed",
+            "keywords": [
+                "test_structured_marketing_email",
+                "asyncio",
+                "pytestmark",
+                "test_only_email.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00033233268186450005,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 10.341702375095338,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.001126208808273077,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

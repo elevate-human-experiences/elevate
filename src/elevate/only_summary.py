@@ -83,7 +83,7 @@ You are a highly skilled Markdown converter, specializing in transforming plain 
 7.  **Conciseness:** Strive for the most concise and efficient representation.
 8.  **No Additional Information:**  Do NOT add any extra text, comments, or explanations. Only return the Markdown output of the TL;DR summary."""
 
-    async def summarize_and_convert_to_markdown(self, input_text: str, summary_type: str) -> str:
+    async def summarize_and_convert_to_markdown(self, input_text: str, summary_type: str = "generic") -> str:
         """Summarizes and Converts the given input text to GitHub Flavored Markdown (GFM) format."""
         system_prompt = self.get_summarization_system_prompt(summary_type)  # Get the system prompt
         return await self.make_llm_call(system_prompt, input_text)

@@ -1,0 +1,129 @@
+{
+    "created": 1752613979.0601559,
+    "duration": 92.75679898262024,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 2,
+        "total": 2,
+        "collected": 2
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_audiocast.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_audiocast.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_audiocast.py::test_create_default_audiocast",
+                    "type": "Coroutine",
+                    "lineno": 35
+                },
+                {
+                    "nodeid": "tests/test_only_audiocast.py::test_create_two_people_podcast",
+                    "type": "Coroutine",
+                    "lineno": 45
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_audiocast.py::test_create_default_audiocast",
+            "lineno": 35,
+            "outcome": "passed",
+            "keywords": [
+                "test_create_default_audiocast",
+                "asyncio",
+                "pytestmark",
+                "test_only_audiocast.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004471251741051674,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: openai/o4-mini\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: openai/o4-mini",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752613886.904059,
+                        "msecs": 904.0,
+                        "relativeCreated": 644.2451477050781,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 48651,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 32.78447824995965,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0009629582054913044,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_audiocast.py::test_create_two_people_podcast",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_create_two_people_podcast",
+                "asyncio",
+                "pytestmark",
+                "test_only_audiocast.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00021312478929758072,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 59.371100292075425,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0009249579161405563,
+                "outcome": "passed"
+            }
+        }
+    ],
+    "warnings": [
+        {
+            "message": "'audioop' is deprecated and slated for removal in Python 3.13",
+            "category": "DeprecationWarning",
+            "when": "collect",
+            "filename": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/pydub/utils.py",
+            "lineno": 14
+        }
+    ]
+}

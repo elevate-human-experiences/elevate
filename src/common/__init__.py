@@ -22,8 +22,57 @@
 
 import atexit
 import logging
+import os
 import sys
+import warnings
 
+
+# Set up comprehensive warning suppression for Pydantic
+os.environ["PYTHONWARNINGS"] = "ignore::UserWarning:pydantic"
+
+
+# 1) suppress Pydantic warnings comprehensively
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic.*")
+warnings.filterwarnings("ignore", category=FutureWarning, module="pydantic")
+warnings.filterwarnings("ignore", category=FutureWarning, module="pydantic.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pydantic")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pydantic.*")
+
+# Suppress specific Pydantic serializer warnings by message content
+warnings.filterwarnings("ignore", message=".*Pydantic serializer warnings.*")
+warnings.filterwarnings("ignore", message=".*PydanticSerializationUnexpectedValue.*")
+warnings.filterwarnings("ignore", message=".*Expected.*fields.*")
+warnings.filterwarnings("ignore", message=".*serialized value.*")
+warnings.filterwarnings("ignore", message=".*StreamingChoices.*")
+
+# Additional catch-all for any pydantic-related warnings
+warnings.filterwarnings("ignore", message=".*pydantic.*")
+warnings.filterwarnings("ignore", message=".*Pydantic.*")
+
+# Suppress warnings from pyproject.toml that were moved here
+# Ignore Pydantic v2 deprecation warnings from dependencies
+warnings.filterwarnings(
+    "ignore", message="Support for class-based `config` is deprecated", category=DeprecationWarning, module="pydantic.*"
+)
+# Ignore litellm importlib deprecation warnings
+warnings.filterwarnings("ignore", message="open_text is deprecated", category=DeprecationWarning, module="litellm.*")
+# Ignore asyncio event loop warnings from litellm
+warnings.filterwarnings(
+    "ignore", message="There is no current event loop", category=DeprecationWarning, module="litellm.*"
+)
+
+# 2) suppress anything logged by Pydantic
+logging.getLogger("pydantic").setLevel(logging.ERROR)
+
+# 3) suppress anything logged by LiteLLM
+logging.getLogger("LiteLLM").setLevel(logging.ERROR)
+
+# 4) suppress anything logged by OpenAI
+logging.getLogger("openai").setLevel(logging.ERROR)
+
+# 5) suppress anything logged by httpx
+logging.getLogger("httpx").setLevel(logging.ERROR)
 
 atexit.register(logging.shutdown)
 

@@ -1,0 +1,306 @@
+{
+    "created": 1752613445.969301,
+    "duration": 48.177424907684326,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 8,
+        "total": 8,
+        "collected": 8
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_summary.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_summary.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_summary.py::test_simple_text_summary",
+                    "type": "Coroutine",
+                    "lineno": 36
+                },
+                {
+                    "nodeid": "tests/test_only_summary.py::test_news_article_summary",
+                    "type": "Coroutine",
+                    "lineno": 49
+                },
+                {
+                    "nodeid": "tests/test_only_summary.py::test_research_paper_summary",
+                    "type": "Coroutine",
+                    "lineno": 62
+                },
+                {
+                    "nodeid": "tests/test_only_summary.py::test_technical_manual_summary",
+                    "type": "Coroutine",
+                    "lineno": 75
+                },
+                {
+                    "nodeid": "tests/test_only_summary.py::test_business_report_summary",
+                    "type": "Coroutine",
+                    "lineno": 87
+                },
+                {
+                    "nodeid": "tests/test_only_summary.py::test_legal_document_summary",
+                    "type": "Coroutine",
+                    "lineno": 100
+                },
+                {
+                    "nodeid": "tests/test_only_summary.py::test_blog_post_summary",
+                    "type": "Coroutine",
+                    "lineno": 113
+                },
+                {
+                    "nodeid": "tests/test_only_summary.py::test_fiction_excerpt_summary",
+                    "type": "Coroutine",
+                    "lineno": 125
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_summary.py::test_simple_text_summary",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_simple_text_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00042216572910547256,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: openai/o4-mini\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: openai/o4-mini",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752613398.3796952,
+                        "msecs": 379.0,
+                        "relativeCreated": 632.8151226043701,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 21204,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 4.121915833093226,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0014995420351624489,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_summary.py::test_news_article_summary",
+            "lineno": 49,
+            "outcome": "passed",
+            "keywords": [
+                "test_news_article_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003546657972037792,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 8.950798250269145,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0019545000977814198,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_summary.py::test_research_paper_summary",
+            "lineno": 62,
+            "outcome": "passed",
+            "keywords": [
+                "test_research_paper_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005219578742980957,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 4.91260041622445,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0006955838762223721,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_summary.py::test_technical_manual_summary",
+            "lineno": 75,
+            "outcome": "passed",
+            "keywords": [
+                "test_technical_manual_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00019533280283212662,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 4.578937334008515,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0013423752970993519,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_summary.py::test_business_report_summary",
+            "lineno": 87,
+            "outcome": "passed",
+            "keywords": [
+                "test_business_report_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004704589955508709,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 7.5221597496420145,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0019237501546740532,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_summary.py::test_legal_document_summary",
+            "lineno": 100,
+            "outcome": "passed",
+            "keywords": [
+                "test_legal_document_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0008232919499278069,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 5.807490500155836,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0013047498650848866,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_summary.py::test_blog_post_summary",
+            "lineno": 113,
+            "outcome": "passed",
+            "keywords": [
+                "test_blog_post_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003442922607064247,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 5.306748750153929,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0019546248950064182,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_summary.py::test_fiction_excerpt_summary",
+            "lineno": 125,
+            "outcome": "passed",
+            "keywords": [
+                "test_fiction_excerpt_summary",
+                "asyncio",
+                "pytestmark",
+                "test_only_summary.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004180828109383583,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 6.367725542280823,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0021660421043634415,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

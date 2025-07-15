@@ -1,0 +1,89 @@
+{
+    "created": 1752613387.4655502,
+    "duration": 5.475020170211792,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 1,
+        "total": 1,
+        "collected": 1
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_shell.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_shell.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_shell.py::test_simple_shell_command",
+                    "type": "Coroutine",
+                    "lineno": 36
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_shell.py::test_simple_shell_command",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_simple_shell_command",
+                "asyncio",
+                "pytestmark",
+                "test_only_shell.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00043508317321538925,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: openai/o4-mini\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: openai/o4-mini",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752613382.681529,
+                        "msecs": 681.0,
+                        "relativeCreated": 752.6261806488037,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 20402,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 4.781766125001013,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0014997078105807304,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

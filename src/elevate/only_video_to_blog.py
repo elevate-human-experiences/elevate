@@ -68,7 +68,11 @@ class OnlyVideoToBlog:
 
         The user will provide the video transcript.  Your output should be a complete and ready-to-publish blog post. """
 
-    async def generate_blog(self, transcript: str, number_of_words: int) -> str:
+    async def generate_blog(self, transcript: str, number_of_words: int = 1200) -> str:
         """Generate a blog post from a given video transcript."""
+        # Validate input transcript
+        if not transcript or not transcript.strip():
+            raise ValueError("Transcript cannot be empty or contain only whitespace")
+
         system_prompt = self.get_blog_generation_system_prompt(number_of_words)
         return await self.make_llm_call(system_prompt, transcript)

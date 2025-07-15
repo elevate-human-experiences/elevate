@@ -32,7 +32,7 @@ from elevate.only_email import OnlyEmail
 from elevate.only_python import OnlyPython
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore

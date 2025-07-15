@@ -31,7 +31,7 @@ from common import setup_logging
 from elevate.only_video_to_blog import OnlyVideoToBlog
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -39,6 +39,26 @@ async def test_simple_blog_generation(settings: Any) -> None:
     """Test the generation of blog of simple text using the OnlyVideoToBlog class."""
     only_video = OnlyVideoToBlog(with_model=settings.with_model)
 
-    transcript = """ """
+    transcript = """
+    Welcome to our tutorial on machine learning. Today we'll be discussing the fundamentals of neural networks.
+    Neural networks are computational models inspired by the human brain. They consist of interconnected nodes
+    called neurons that process information. In this video, we'll explore how these networks learn from data
+    and make predictions. We'll cover topics like backpropagation, gradient descent, and various network architectures.
+    By the end of this session, you'll have a solid understanding of how neural networks work.
+    """
 
     logger.debug(await only_video.generate_blog(transcript))
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_empty_transcript_validation(settings: Any) -> None:
+    """Test that empty or whitespace-only transcripts raise ValueError."""
+    only_video = OnlyVideoToBlog(with_model=settings.with_model)
+
+    # Test completely empty string
+    with pytest.raises(ValueError, match="Transcript cannot be empty or contain only whitespace"):
+        await only_video.generate_blog("")
+
+    # Test whitespace-only string
+    with pytest.raises(ValueError, match="Transcript cannot be empty or contain only whitespace"):
+        await only_video.generate_blog("   \n  \t  ")

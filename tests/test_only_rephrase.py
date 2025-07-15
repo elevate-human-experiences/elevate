@@ -31,7 +31,7 @@ from common import setup_logging
 from elevate.only_rephrase import OnlyRephrase
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore

@@ -22,8 +22,11 @@
 
 """Elevate package."""
 
+import litellm
 from dotenv import load_dotenv
 
+
+litellm.drop_params = True
 
 # Load environment variables
 load_dotenv()

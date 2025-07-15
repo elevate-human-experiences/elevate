@@ -1,0 +1,146 @@
+{
+    "created": 1752612692.006995,
+    "duration": 43.517032861709595,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 2,
+        "total": 2,
+        "collected": 2
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_video.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_video.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_video.py::test_simple_blog_generation",
+                    "type": "Coroutine",
+                    "lineno": 36
+                },
+                {
+                    "nodeid": "tests/test_only_video.py::test_empty_transcript_validation",
+                    "type": "Coroutine",
+                    "lineno": 52
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_video.py::test_simple_blog_generation",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_simple_blog_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_video.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004920000210404396,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: anthropic/claude-sonnet-4-20250514\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: anthropic/claude-sonnet-4-20250514",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752612649.2428522,
+                        "msecs": 242.0,
+                        "relativeCreated": 817.2562122344971,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 77522,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 42.76026254193857,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752612691.954433,
+                        "msecs": 954.0,
+                        "relativeCreated": 43528.83696556091,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 77522,
+                        "taskName": "Task-1"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0015369169414043427,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_video.py::test_empty_transcript_validation",
+            "lineno": 52,
+            "outcome": "passed",
+            "keywords": [
+                "test_empty_transcript_validation",
+                "asyncio",
+                "pytestmark",
+                "test_only_video.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000349375419318676,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0003750002942979336,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00023079197853803635,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

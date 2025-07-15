@@ -1,0 +1,400 @@
+{
+    "created": 1752612441.505993,
+    "duration": 157.9970338344574,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 6,
+        "total": 6,
+        "collected": 6
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_slides.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_slides.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_slides.py::test_pitch_deck_generation",
+                    "type": "Coroutine",
+                    "lineno": 36
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_product_presentation_generation",
+                    "type": "Coroutine",
+                    "lineno": 57
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_sales_deck_generation",
+                    "type": "Coroutine",
+                    "lineno": 77
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_investor_presentation_generation",
+                    "type": "Coroutine",
+                    "lineno": 98
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_training_slides_generation",
+                    "type": "Coroutine",
+                    "lineno": 119
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_minimal_input_slides",
+                    "type": "Coroutine",
+                    "lineno": 140
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_slides.py::test_pitch_deck_generation",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_pitch_deck_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0009963749907910824,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: anthropic/claude-sonnet-4-20250514\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: anthropic/claude-sonnet-4-20250514",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752612284.2433789,
+                        "msecs": 243.0,
+                        "relativeCreated": 803.415060043335,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 55805,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 24.586212957743555,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752612308.82334,
+                        "msecs": 823.0,
+                        "relativeCreated": 25383.376121520996,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 55805,
+                        "taskName": "Task-1"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0018344167619943619,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_product_presentation_generation",
+            "lineno": 57,
+            "outcome": "passed",
+            "keywords": [
+                "test_product_presentation_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004346659407019615,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 18.489163165912032,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752612327.318887,
+                        "msecs": 318.0,
+                        "relativeCreated": 43878.923177719116,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 55805,
+                        "taskName": "Task-7"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0022678328678011894,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_sales_deck_generation",
+            "lineno": 77,
+            "outcome": "passed",
+            "keywords": [
+                "test_sales_deck_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004149172455072403,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 23.65046149957925,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752612350.9736588,
+                        "msecs": 973.0,
+                        "relativeCreated": 67533.69498252869,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 55805,
+                        "taskName": "Task-13"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0014275843277573586,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_investor_presentation_generation",
+            "lineno": 98,
+            "outcome": "passed",
+            "keywords": [
+                "test_investor_presentation_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003980835899710655,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 42.92441970901564,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752612393.892892,
+                        "msecs": 892.0,
+                        "relativeCreated": 110452.92806625366,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 55805,
+                        "taskName": "Task-19"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0019397912546992302,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_training_slides_generation",
+            "lineno": 119,
+            "outcome": "passed",
+            "keywords": [
+                "test_training_slides_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004069581627845764,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 37.00740416627377,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752612430.911744,
+                        "msecs": 911.0,
+                        "relativeCreated": 147471.78030014038,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 55805,
+                        "taskName": "Task-25"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0007422501221299171,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_minimal_input_slides",
+            "lineno": 140,
+            "outcome": "passed",
+            "keywords": [
+                "test_minimal_input_slides",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00018845777958631516,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 10.588050000369549,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752612441.4990919,
+                        "msecs": 499.0,
+                        "relativeCreated": 158059.12804603577,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 55805,
+                        "taskName": "Task-31"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0020317910239100456,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

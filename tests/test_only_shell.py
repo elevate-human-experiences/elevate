@@ -31,7 +31,7 @@ from common import setup_logging
 from elevate.only_shell import OnlyShell
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore

@@ -1,4 +1,3 @@
-import json
 import re
 import subprocess
 import time
@@ -13,24 +12,33 @@ def main(with_model: str = "groq/llama-3.3-70b-versatile") -> None:
     if not re.match(r"^[\w\-\/\.]+$", with_model):
         raise ValueError(f"Invalid model name: {with_model}")
     report_dir = Path(__file__).parent / "reports"
-    report_dir.mkdir(exist_ok=True)
+    if len(with_model.split("/")) > 1:
+        report_dir /= with_model.split("/")[0]
+        model_folder = with_model.split("/")[1]
+    else:
+        report_dir /= "openai"
+        model_folder = with_model
+    report_dir /= model_folder
+    report_dir.mkdir(parents=True, exist_ok=True)
     console = Console()
-    json_file = report_dir / f"report_{with_model}.json"  # Single JSON report file
-
-    # Ensure the JSON report file exists
-    if not json_file.exists():
-        with json_file.open("w") as f:
-            json.dump({}, f)
 
     # Discover all test files
     test_files = [str(x) for x in Path(__file__).parent.parent.glob("tests/test_*.py")]
 
     for test_file in test_files:
+        if test_file.endswith("test_elevate.py"):
+            continue
+        console.print(f"[blue]Running pytest for model={with_model}, file={test_file}...[/blue]")
+        test_json_file = report_dir / Path(test_file).name.replace("test_", "").replace(".py", ".json")
         cmd = [
             "pytest",
             test_file,  # Run only this test file
-            f"--with-model={with_model}",
+            "--with-model",
+            f"{with_model}",
             "--json-report",
+            f"--json-report-file={test_json_file.as_posix()}",
+            "--json-report-indent=4",
+            "--json-report-summary",
             "--durations=0",
         ]
 
@@ -40,40 +48,20 @@ def main(with_model: str = "groq/llama-3.3-70b-versatile") -> None:
             console.print(
                 f"[yellow]⚠ pytest exited with code {result.returncode} for model={with_model}, file={test_file}. Continuing…[/yellow]"
             )
+            # Print the error output
+            if result.stderr:
+                console.print(f"[red]STDERR:[/red]\n{result.stderr}")
+            if result.stdout:
+                console.print(f"[red]STDOUT:[/red]\n{result.stdout}")
         else:
             console.print(
                 f"[green]✔ Completed pytest for model={with_model}, file={test_file}, appending detailed results to JSON report[/green]"
             )
+            if result.stdout:
+                console.print(f"[green]STDOUT:[/green]\n{result.stdout}")
 
-        # Append detailed test results to the JSON report file
-        with json_file.open("r+") as f:
-            try:
-                report_data = json.load(f)  # Load existing data
-            except json.JSONDecodeError:
-                report_data = {}  # Initialize empty data if file is corrupted or empty
-
-            # Add detailed test results for the current test file
-            report_data[test_file] = {
-                "nodeid": test_file,
-                "outcome": "passed" if result.returncode == 0 else "failed",
-                "result": [
-                    {
-                        "nodeid": line.split("::")[0],
-                        "type": "Coroutine",  # Example: Replace with actual type parsing logic
-                        "lineno": int(line.split(":")[-1])
-                        if ":" in line and line.split(":")[-1].strip().isdigit()
-                        else None,
-                    }
-                    for line in result.stdout.splitlines()
-                    if "::" in line
-                ],
-            }
-            f.seek(0)
-            json.dump(report_data, f, indent=4)  # Write updated data
-            f.truncate()
-
-        console.print("[blue]Sleeping for 1 minute to avoid rate limit...[/blue]")
-        time.sleep(60)
+        console.print("[blue]Sleeping for 10s to avoid rate limit...[/blue]")
+        time.sleep(10)
 
 
 if __name__ == "__main__":

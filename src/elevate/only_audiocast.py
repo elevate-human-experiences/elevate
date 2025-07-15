@@ -39,7 +39,7 @@ from common import setup_logging
 from .only_json import OnlyJson
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 class SpeakerConfig(BaseModel):

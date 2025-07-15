@@ -1,9 +1,9 @@
 default_language_version:
-  python: python3.10
+  python: python3.12
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: check-ast
       - id: check-byte-order-marker
@@ -22,50 +22,50 @@ repos:
       - id: requirements-txt-fixer
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.17.0
     hooks:
       - id: mypy
         args: [--strict, --ignore-missing-imports]
         additional_dependencies:
           - "pydantic>=1.10.4"
-        language_version: python3.10  # Explicitly set Python version for this hook
+        language_version: python3.12  # Explicitly set Python version for this hook
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.4.4
+    rev: v0.12.3
     hooks:
       # Run the linter.
       - id: ruff
         args: [--fix]
-        language_version: python3.10  # Explicitly set Python version
+        language_version: python3.12  # Explicitly set Python version
       # Run the formatter.
       - id: ruff-format
-        language_version: python3.10  # Explicitly set Python version
+        language_version: python3.12  # Explicitly set Python version
 
   - repo: https://github.com/econchick/interrogate # Note: repo is econchick, not econchs as in traceback
-    rev: 1.5.0
+    rev: 1.7.0
     hooks:
       - id: interrogate
         files: ^(src|tests)/
         args: [--fail-under=80, --verbose]
         additional_dependencies: [setuptools]
-        language_version: python3.10  # Explicitly set Python version
+        language_version: python3.12  # Explicitly set Python version
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+    rev: v3.20.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
-        language_version: python3.10  # Explicitly set Python version
+        language_version: python3.12  # Explicitly set Python version
 
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
         name: "detect-secrets"
         args: ["--exclude-files", '.*\.ipynb$']
         exclude: suite/reports/.*\.json$
-        language_version: python3.10  # Explicitly set Python version
+        language_version: python3.12  # Explicitly set Python version
       - id: detect-secrets
         name: "detect-secrets-jupyter"
         args:
@@ -75,14 +75,14 @@ repos:
             "--exclude-lines",
             '"(hash|id|authorship_tag|image/\w+)":.*',
           ]
-        language_version: python3.10  # Explicitly set Python version
+        language_version: python3.12  # Explicitly set Python version
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.10
+    rev: v1.5.5
     hooks:
       - id: insert-license
         files: ^(src|tests)/.*\.py$
         args:
           - --license-filepath
           - LICENSE
-        language_version: python3.10  # Explicitly set Python version
+        language_version: python3.12  # Explicitly set Python version

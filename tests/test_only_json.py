@@ -229,7 +229,7 @@ async def test_optional_fields(settings: Any) -> None:
         username: str = Field(..., description="Unique username in string format.")
         bio: str | None = Field(
             None,
-            description="Short bio in string format (optional). For example: 'Love to hike in the Alps.'",
+            description="Short bio in a single sentence (optional). For example: 'Love to hike in the Alps.'",
         )
         website: str | None = Field(None, description="Website URL in string format (optional).")
 

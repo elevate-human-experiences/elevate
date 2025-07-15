@@ -12,18 +12,22 @@ This is a task focused way to do GenAI - you care about particular tasks work, n
 
 | Implemented | Snippet          | Description                      | Uses      | # Tests |
 |:-----------:|------------------|----------------------------------|-----------|---------|
-| ✅          | Only JSON     | Converts text to JSON format     |           | 5       |
-| ✅          | Only AudioCast | Converts text to podcast style format | Only JSON | 5       |
-| ✅          | Only Markdown | Converts text to Markdown format |           | 5       |
-| ✅          | Only Python | Only generates python code, executes it and returns the response |           | 5       |
-|            | Only SQL      | Converts text to SQL query       |           | -       |
+| ✅          | Only AudioCast      | Converts text to podcast style format | Only JSON | 2       |
+| ✅          | Only ELI5          | Write ELI5 summaries        |           | 5       |
+| ✅          | Only Email         | Write better emails        |           | 8       |
+|           | Only Excel         | Understand and execute Financial Models to answer user questions        |           |        |
+|           | Only Forms         | Conversations for form filling       |           |        |
+| ✅          | Only Judge LLMs    | Judge the outputs of LLMs        |           | 5       |
+| ✅          | Only JSON          | Converts text to JSON format     |           | 7       |
+| ✅          | Only Markdown      | Converts text to Markdown format |           | 5       |
+| ✅          | Only Python        | Only generates python code, executes it and returns the response |           | 6       |
+| ✅          | Only QA            | Generates Q&A in Markdown |           | 5       |
 | ✅          | Only Rephrase      | Force grammar and rephrase for the conversation context (e.g. professional email) |           | 8       |
-| ✅          | Only Summaries      | Write summaries        |           | -       |
-|            | Only ELI5      | Write ELI5 summaries        |           | -       |
-| ✅          | Only Email      | Write better emails        |           | 8       |
-|            | Only Forms      | Conversations for form filling       |           | -       |
-|            | Only Excel      | Understand and execute Financial Models to answer user questions        |           | -       |
-|  ✅          | Only Judge LLMs      | Judge the outputs of LLMs        |           | 5       |
+|          | Only SQL           | Converts text to SQL query       |           |        |
+| ✅          | Only Shell         | Converts text to shell command |           | 1       |
+| ✅          | Only Slides        | Converts text to presentation slides in Markdown |           | 6       |
+| ✅          | Only Summaries     | Write summaries        |           | 8       |
+| ✅          | Only VideoToBlog   | Converts video transcript to blog |           | 2       |
 
 ### Only Prompts
 
@@ -86,8 +90,18 @@ uv run agent/cli.py
 
 - Run the helper classes using the default "gold standard" tool and model.
 - Execute tests with `pytest` to ensure speed, cost, accuracy, and determinism.
-    - `uv run pytest` or `uv run pytest -s tests/test_file.py `.
+    - `uv run pytest` or `uv run pytest -s tests/test_file.py --with-model `.
 - Refer to individual module documentation for task-specific instructions.
+
+## Running Test Suite
+Run the test suite with all models you want, one at a time.
+
+```bash
+uv run suite/run_tests.py --with-model anthropic/claude-sonnet-4-20250514
+uv run suite/run_tests.py --with-model openai/o4-mini
+
+uv run suite/summarize_reports.py
+```
 
 ## Contributing
 

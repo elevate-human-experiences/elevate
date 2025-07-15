@@ -36,7 +36,7 @@ from litellm import acompletion
 from common import setup_logging
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 class OnlyMarkdown:

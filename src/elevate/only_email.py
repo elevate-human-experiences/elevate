@@ -23,20 +23,34 @@
 
 import logging
 
+import litellm
 from litellm import acompletion
+from pydantic import BaseModel
 
 from common import setup_logging
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
+
+
+class Email(BaseModel):
+    """Pydantic model representing a structured email."""
+
+    subject: str
+    salutation: str
+    body: str
+    closing: str
+    signature: str
 
 
 class OnlyEmail:
     """Class that returns well formatted emails."""
 
     def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyMarkdown class"""
+        """Initialize the OnlyEmail class"""
         self.model = with_model
+        # Enable JSON schema validation for structured output
+        litellm.enable_json_schema_validation = True
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Make the LLM call using litellm and extract the markdown content."""
@@ -45,21 +59,67 @@ class OnlyEmail:
             {"role": "user", "content": input_text},
         ]
         response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
-        return str(response.choices[0].message.content)
+        content = response.choices[0].message.content
+        return str(content) if content else ""
+
+    async def generate_structured_email(self, message: str, email_type: str) -> Email:
+        """Generate a structured email using JSON schema validation."""
+        system_prompt = self.get_email_prompt(email_type)
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": message},
+        ]
+
+        # Build the JSON schema for the Email model
+        Email.model_rebuild()
+        schema = Email.model_json_schema()
+        schema["type"] = "object"
+        json_schema = {
+            "type": "json_schema",
+            "json_schema": {"name": Email.__name__, "schema": schema},
+        }
+
+        response = await acompletion(
+            model=self.model,
+            messages=messages,
+            response_format=json_schema,
+            temperature=0.1,
+        )
+
+        content = response.choices[0].message.content
+        if not content:
+            raise ValueError("No content received from LLM response")
+
+        return Email.model_validate_json(content)
 
     def get_personal_email_system_prompt(self) -> str:
         """Return a PERSONAL_EMAIL_PROMPT."""
         return """
-You are an expert in crafting engaging and thoughtful personal emails. Your goal is to write a warm and friendly email that is tailored to the recipient and the specific context provided.  You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email itself.
+You are an expert in crafting engaging and thoughtful personal emails. Your goal is to write a warm and friendly email that is tailored to the recipient and the specific context provided.
+
+You must structure your response as a JSON object with the following fields:
+- subject: The email subject line
+- salutation: The greeting (e.g., "Dear John,")
+- body: The main email content
+- closing: The closing line (e.g., "Best regards,")
+- signature: The sender's name/signature
 
 *OUTPUT:*
-Respond *only* with the rephrased message, adhering to the specified instructions.
+Respond with a JSON object containing the structured email components.
 """
 
     def get_professional_email_system_prompt(self) -> str:
         """Return a PROFESSIONAL_EMAIL_PROMPT."""
         return """
-You are an expert in crafting engaging and thoughtful professional emails. Your goal is to write a fomral tone email that is tailored to the recipient and the specific context provided.  You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email itself.
+You are an expert in crafting engaging and thoughtful professional emails. Your goal is to write a formal tone email that is tailored to the recipient and the specific context provided.
+
+You must structure your response as a JSON object with the following fields:
+- subject: The email subject line
+- salutation: The greeting (e.g., "Dear Mr. Smith,")
+- body: The main email content
+- closing: The closing line (e.g., "Sincerely,")
+- signature: The sender's name/signature
 
 **Guidelines for generating an email:**
 1. Start with an interesting subject line
@@ -70,14 +130,20 @@ You are an expert in crafting engaging and thoughtful professional emails. Your 
 6. Showcase professional etiquette
 
 *OUTPUT:*
-Respond *only* with the rephrased message, adhering to the specified instructions.
-
+Respond with a JSON object containing the structured email components.
 """
 
     def get_marketing_email_system_prompt(self) -> str:
         """Return a MARKETING_EMAIL_PROMPT."""
         return """
-You are an expert in crafting persuasive and effective marketing emails designed to promote products, services, and brands, and drive conversions. Your goal is to write an engaging email that captures the recipient's attention, highlights the value proposition, and encourages a specific action (e.g., clicking a link, making a purchase). You must only output the complete email, including a subject line, salutation, body, and closing. Do not include any conversational elements or introductory phrases beyond the email itself.
+You are an expert in crafting persuasive and effective marketing emails designed to promote products, services, and brands, and drive conversions. Your goal is to write an engaging email that captures the recipient's attention, highlights the value proposition, and encourages a specific action (e.g., clicking a link, making a purchase).
+
+You must structure your response as a JSON object with the following fields:
+- subject: The email subject line
+- salutation: The greeting (e.g., "Hello there,")
+- body: The main email content
+- closing: The closing line (e.g., "Best wishes,")
+- signature: The sender's name/signature
 
 **INPUT:**
 
@@ -107,10 +173,10 @@ You are an expert in crafting persuasive and effective marketing emails designed
 1.  **Understand:** Carefully review the "Target Audience," "Product/Service," "Primary Goal," "Key Selling Points," "Call to Action," "Content length" and "Desired Tone" (if provided).
 2.  **Persuade & Engage:** Craft an email that effectively highlights the value proposition, addresses the target audience's needs and desires, and encourages them to take the specified action.
 3.  **Structure:** Follow the guidelines to structure email.
-4.  **Output:** Output ONLY the complete email, including subject line, salutation, body, and closing. Do not include any extra comments or other text.
+4.  **Output:** Output a JSON object with the structured email components.
 
 *OUTPUT:*
-Provide the complete marketing email, ready to be sent.
+Respond with a JSON object containing the structured email components.
 """
 
     def get_email_prompt(self, email_type: str) -> str:

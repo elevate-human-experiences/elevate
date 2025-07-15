@@ -3,22 +3,22 @@ name = "elevate"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
-    "e2b-code-interpreter>=1.2.0",
+    "e2b-code-interpreter>=1.5.2",
     "fire>=0.7.0",
-    "litellm>=1.63.12",
-    "openai>=1.67.0",
+    "litellm>=1.74.3",
+    "openai>=1.96.0",
     "prompt-toolkit>=3.0.51",
-    "pydantic>=2.10.6",
+    "pydantic>=2.11.7",
     "pydub>=0.25.1",
-    "pytest>=8.3.5",
+    "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
     "aiofiles>=24.1.0",
-    "types-aiofiles>=24.1.0.20250516",
+    "types-aiofiles>=24.1.0.20250708",
     "pytest-json-report>=1.5.0",
     "rich>=14.0.0",
-    "pandas>=2.2.3",
+    "pandas>=2.3.1",
     "tabulate>=0.9.0",
 ]
 
@@ -28,6 +28,7 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 dev-dependencies = [
+    "mypy>=1.17.0",
     "pytest>=8.3.5",
 ]
 
@@ -149,3 +150,15 @@ max-complexity = 20
 
 [tool.mypy]
 allow_untyped_decorators = true
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "session"
+filterwarnings = [
+    # Ignore Pydantic serialization warnings
+    "ignore:Pydantic serializer warnings:UserWarning:pydantic.*",
+    "ignore:.*PydanticSerializationUnexpectedValue.*:UserWarning:pydantic.*",
+    "ignore:.*Expected.*fields.*:UserWarning:pydantic.*",
+    "ignore:.*serialized value.*:UserWarning:pydantic.*",
+    # Catch-all for any remaining pydantic UserWarnings
+    "ignore::UserWarning:pydantic.*",
+]

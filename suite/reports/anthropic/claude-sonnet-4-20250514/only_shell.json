@@ -1,0 +1,115 @@
+{
+    "created": 1752611984.587871,
+    "duration": 4.622229099273682,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 1,
+        "total": 1,
+        "collected": 1
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_shell.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_shell.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_shell.py::test_simple_shell_command",
+                    "type": "Coroutine",
+                    "lineno": 36
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_shell.py::test_simple_shell_command",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_simple_shell_command",
+                "asyncio",
+                "pytestmark",
+                "test_only_shell.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00043395813554525375,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: anthropic/claude-sonnet-4-20250514\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: anthropic/claude-sonnet-4-20250514",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752611980.679305,
+                        "msecs": 679.0,
+                        "relativeCreated": 778.2971858978271,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 38091,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 3.905024374835193,
+                "outcome": "passed",
+                "stdout": "INFO: HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"\n",
+                "log": [
+                    {
+                        "name": "httpx",
+                        "msg": "HTTP Request: POST https://api.anthropic.com/v1/messages \"HTTP/1.1 200 OK\"",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/httpx/_client.py",
+                        "filename": "_client.py",
+                        "module": "_client",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 1740,
+                        "funcName": "_send_single_request",
+                        "created": 1752611984.5812259,
+                        "msecs": 581.0,
+                        "relativeCreated": 4680.217981338501,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 38091,
+                        "taskName": "Task-1"
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.002627832815051079,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

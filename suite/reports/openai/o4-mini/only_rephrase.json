@@ -1,0 +1,318 @@
+{
+    "created": 1752613486.88527,
+    "duration": 30.585517168045044,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 8,
+        "total": 8,
+        "collected": 8
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_rephrase.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_formal",
+                    "type": "Coroutine",
+                    "lineno": 36
+                },
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_informal",
+                    "type": "Coroutine",
+                    "lineno": 47
+                },
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_urgent",
+                    "type": "Coroutine",
+                    "lineno": 58
+                },
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_enthusiastic",
+                    "type": "Coroutine",
+                    "lineno": 69
+                },
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_informative",
+                    "type": "Coroutine",
+                    "lineno": 80
+                },
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_apologetic",
+                    "type": "Coroutine",
+                    "lineno": 91
+                },
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_friendly",
+                    "type": "Function",
+                    "lineno": 102
+                },
+                {
+                    "nodeid": "tests/test_only_rephrase.py::test_rephase_text_technical",
+                    "type": "Function",
+                    "lineno": 112
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_formal",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_formal",
+                "asyncio",
+                "pytestmark",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00046216603368520737,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: openai/o4-mini\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: openai/o4-mini",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752613456.893281,
+                        "msecs": 893.0,
+                        "relativeCreated": 641.7667865753174,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 24483,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 4.937572416383773,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0014810003340244293,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_informal",
+            "lineno": 47,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_informal",
+                "asyncio",
+                "pytestmark",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00036570895463228226,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 3.2301252079196274,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0014689168892800808,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_urgent",
+            "lineno": 58,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_urgent",
+                "asyncio",
+                "pytestmark",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003825407475233078,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 4.399777874816209,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0012332499027252197,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_enthusiastic",
+            "lineno": 69,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_enthusiastic",
+                "asyncio",
+                "pytestmark",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00031008385121822357,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 2.838347916956991,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0012364997528493404,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_informative",
+            "lineno": 80,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_informative",
+                "asyncio",
+                "pytestmark",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00032904185354709625,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 6.628783124964684,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.001457334030419588,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_apologetic",
+            "lineno": 91,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_apologetic",
+                "asyncio",
+                "pytestmark",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004349169321358204,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 7.938620375003666,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0013953750021755695,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_friendly",
+            "lineno": 102,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_friendly",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0001776660792529583,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00016733305528759956,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 9.429175406694412e-05,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_rephrase.py::test_rephase_text_technical",
+            "lineno": 112,
+            "outcome": "passed",
+            "keywords": [
+                "test_rephase_text_technical",
+                "test_only_rephrase.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0001837918534874916,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0001405002549290657,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00016291718930006027,
+                "outcome": "passed"
+            }
+        }
+    ],
+    "warnings": [
+        {
+            "message": "coroutine 'OnlyRephrase.rephrase_text' was never awaited",
+            "category": "RuntimeWarning",
+            "when": "runtest",
+            "filename": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/_pytest/python.py",
+            "lineno": 157
+        },
+        {
+            "message": "coroutine 'OnlyRephrase.rephrase_text' was never awaited",
+            "category": "RuntimeWarning",
+            "when": "runtest",
+            "filename": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/.venv/lib/python3.12/site-packages/_pytest/python.py",
+            "lineno": 157
+        }
+    ]
+}

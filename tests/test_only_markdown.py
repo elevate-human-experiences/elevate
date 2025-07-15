@@ -31,7 +31,7 @@ from common import setup_logging
 from elevate.only_markdown import OnlyMarkdown
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -48,7 +48,7 @@ async def test_hastily_copied_html_conversion(settings: Any) -> None:
         "End of README."
     )
     only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = only_markdown.convert_to_markdown(input_text)
+    markdown_output = await only_markdown.convert_to_markdown(input_text)
     logger.debug("HTML Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -66,7 +66,7 @@ async def test_hastily_copied_word_doc_conversion(settings: Any) -> None:
         "End of document."
     )
     only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = only_markdown.convert_to_markdown(input_text)
+    markdown_output = await only_markdown.convert_to_markdown(input_text)
     logger.debug("Word Doc Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -75,7 +75,7 @@ async def test_hastily_copied_db_output_conversion(settings: Any) -> None:
     """Simulate a conversion where tabular data from a database is copy-pasted as plain text."""
     input_text = "Name    Age    Occupation\nAlice   30     Engineer\nBob     25     Designer\nCharlie 35     Manager\n"
     only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = only_markdown.convert_to_markdown(input_text)
+    markdown_output = await only_markdown.convert_to_markdown(input_text)
     logger.debug("DB Output Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -90,7 +90,7 @@ async def test_hastily_copied_blog_post_conversion(settings: Any) -> None:
         "Stay tuned for more updates.  Happy coding and keep exploring!"
     )
     only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = only_markdown.convert_to_markdown(input_text)
+    markdown_output = await only_markdown.convert_to_markdown(input_text)
     logger.debug("Blog Post Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -110,5 +110,5 @@ async def test_hastily_copied_complex_unformatted_conversion(settings: Any) -> N
         "More info: Visit https://example.com for further details."
     )
     only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = only_markdown.convert_to_markdown(input_text)
+    markdown_output = await only_markdown.convert_to_markdown(input_text)
     logger.debug("Complex Unformatted Copy-Paste Conversion:\n%s", markdown_output)

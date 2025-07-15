@@ -37,7 +37,7 @@ from common import setup_logging
 from elevate.only_python_prompt import PYTHON_CODE_GENRATION_PROMPT
 
 
-logger = setup_logging(logging.DEBUG)
+logger = setup_logging(logging.INFO)
 
 
 class OnlyPython:
@@ -83,9 +83,16 @@ class OnlyPython:
         try:
             sandbox = await AsyncSandbox.create(envs=dict(os.environ))
             if pip_installs:
-                pip_result = await sandbox.commands.run(f"pip install {pip_installs}")
+                # Handle case where pip_installs already contains "pip install"
+                if pip_installs.strip().startswith("pip install"):
+                    pip_command = pip_installs.strip()
+                else:
+                    pip_command = f"pip install {pip_installs}"
+                pip_result = await sandbox.commands.run(pip_command)
                 pip_stderr = pip_result.stderr if hasattr(pip_result, "stderr") and pip_result.stderr else ""
-                if pip_stderr:
+                pip_exit_code = pip_result.exit_code if hasattr(pip_result, "exit_code") else 0
+                # Only treat stderr as error if the command actually failed (non-zero exit code)
+                if pip_stderr and pip_exit_code != 0:
                     return f"Error during pip install: {pip_stderr}"
             # Use a secure temp file
             with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as tmp_file:

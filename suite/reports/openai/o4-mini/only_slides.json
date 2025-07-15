@@ -1,0 +1,244 @@
+{
+    "created": 1752613829.059532,
+    "duration": 59.327364921569824,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 6,
+        "total": 6,
+        "collected": 6
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_slides.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_slides.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_slides.py::test_pitch_deck_generation",
+                    "type": "Coroutine",
+                    "lineno": 36
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_product_presentation_generation",
+                    "type": "Coroutine",
+                    "lineno": 57
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_sales_deck_generation",
+                    "type": "Coroutine",
+                    "lineno": 77
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_investor_presentation_generation",
+                    "type": "Coroutine",
+                    "lineno": 98
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_training_slides_generation",
+                    "type": "Coroutine",
+                    "lineno": 119
+                },
+                {
+                    "nodeid": "tests/test_only_slides.py::test_minimal_input_slides",
+                    "type": "Coroutine",
+                    "lineno": 140
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_slides.py::test_pitch_deck_generation",
+            "lineno": 36,
+            "outcome": "passed",
+            "keywords": [
+                "test_pitch_deck_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000505541916936636,
+                "outcome": "passed",
+                "stdout": "INFO: Using model: openai/o4-mini\n",
+                "log": [
+                    {
+                        "name": "conftest",
+                        "msg": "Using model: openai/o4-mini",
+                        "args": null,
+                        "levelname": "INFO",
+                        "levelno": 20,
+                        "pathname": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate/conftest.py",
+                        "filename": "conftest.py",
+                        "module": "conftest",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 39,
+                        "funcName": "settings",
+                        "created": 1752613770.4532092,
+                        "msecs": 453.0,
+                        "relativeCreated": 780.9453010559082,
+                        "thread": 8746278656,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 42023,
+                        "taskName": null
+                    }
+                ]
+            },
+            "call": {
+                "duration": 8.963222959078848,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0015910840593278408,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_product_presentation_generation",
+            "lineno": 57,
+            "outcome": "passed",
+            "keywords": [
+                "test_product_presentation_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00038229115307331085,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 12.578018334228545,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.001698249951004982,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_sales_deck_generation",
+            "lineno": 77,
+            "outcome": "passed",
+            "keywords": [
+                "test_sales_deck_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004327078349888325,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 8.164799792226404,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.002182082738727331,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_investor_presentation_generation",
+            "lineno": 98,
+            "outcome": "passed",
+            "keywords": [
+                "test_investor_presentation_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00044679176062345505,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 10.260194499976933,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0015856670215725899,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_training_slides_generation",
+            "lineno": 119,
+            "outcome": "passed",
+            "keywords": [
+                "test_training_slides_generation",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00048283394426107407,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 11.246180249843746,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0011928328312933445,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_slides.py::test_minimal_input_slides",
+            "lineno": 140,
+            "outcome": "passed",
+            "keywords": [
+                "test_minimal_input_slides",
+                "asyncio",
+                "pytestmark",
+                "test_only_slides.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003193747252225876,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 7.379691082984209,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0013075419701635838,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

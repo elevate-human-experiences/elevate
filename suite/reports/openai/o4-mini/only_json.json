@@ -1,0 +1,342 @@
+{
+    "created": 1752613539.2525609,
+    "duration": 42.0024356842041,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 10,
+        "total": 10,
+        "collected": 10
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_json.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_json.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_json.py::test_calendar_event",
+                    "type": "Coroutine",
+                    "lineno": 33
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_extraction_of_contact_info",
+                    "type": "Coroutine",
+                    "lineno": 57
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_nested_structures",
+                    "type": "Coroutine",
+                    "lineno": 85
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_cyclic_relationships",
+                    "type": "Coroutine",
+                    "lineno": 113
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_conversion_while_extracting",
+                    "type": "Coroutine",
+                    "lineno": 138
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_different_field_descriptions",
+                    "type": "Coroutine",
+                    "lineno": 159
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_data_formats",
+                    "type": "Coroutine",
+                    "lineno": 179
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_datetime_parsing",
+                    "type": "Coroutine",
+                    "lineno": 200
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_optional_fields",
+                    "type": "Coroutine",
+                    "lineno": 221
+                },
+                {
+                    "nodeid": "tests/test_only_json.py::test_special_characters_and_lists",
+                    "type": "Coroutine",
+                    "lineno": 245
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_json.py::test_calendar_event",
+            "lineno": 33,
+            "outcome": "passed",
+            "keywords": [
+                "test_calendar_event",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003270828165113926,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 10.070287375245243,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005898331291973591,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_extraction_of_contact_info",
+            "lineno": 57,
+            "outcome": "passed",
+            "keywords": [
+                "test_extraction_of_contact_info",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00014679133892059326,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 3.3410591669380665,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0023074583150446415,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_nested_structures",
+            "lineno": 85,
+            "outcome": "passed",
+            "keywords": [
+                "test_nested_structures",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004015420563519001,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 4.646507000084966,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0012981249019503593,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_cyclic_relationships",
+            "lineno": 113,
+            "outcome": "passed",
+            "keywords": [
+                "test_cyclic_relationships",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003116251900792122,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 2.8785282499156892,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0015076249837875366,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_conversion_while_extracting",
+            "lineno": 138,
+            "outcome": "passed",
+            "keywords": [
+                "test_conversion_while_extracting",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003863750025629997,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 3.4606539169326425,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.000975457951426506,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_different_field_descriptions",
+            "lineno": 159,
+            "outcome": "passed",
+            "keywords": [
+                "test_different_field_descriptions",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00028254231438040733,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 3.274873166810721,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0009969589300453663,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_data_formats",
+            "lineno": 179,
+            "outcome": "passed",
+            "keywords": [
+                "test_data_formats",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00028954120352864265,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 3.005636583082378,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0009710420854389668,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_datetime_parsing",
+            "lineno": 200,
+            "outcome": "passed",
+            "keywords": [
+                "test_datetime_parsing",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0002943337894976139,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 2.986187625210732,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0012983749620616436,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_optional_fields",
+            "lineno": 221,
+            "outcome": "passed",
+            "keywords": [
+                "test_optional_fields",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003505419008433819,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 2.50483470922336,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0008831247687339783,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_json.py::test_special_characters_and_lists",
+            "lineno": 245,
+            "outcome": "passed",
+            "keywords": [
+                "test_special_characters_and_lists",
+                "asyncio",
+                "pytestmark",
+                "test_only_json.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00026079220697283745,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 5.120134875178337,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0019031669944524765,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

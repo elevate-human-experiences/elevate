@@ -1,0 +1,187 @@
+{
+    "created": 1752611969.605715,
+    "duration": 10.42194414138794,
+    "exitcode": 0,
+    "root": "/Users/rahulparundekar/workspaces/elevate-human-experiences/elevate",
+    "environment": {},
+    "summary": {
+        "passed": 5,
+        "total": 5,
+        "collected": 5
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_judge_llms.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "tests/test_only_judge_llms.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "tests/test_only_judge_llms.py::test_summary_evaluation",
+                    "type": "Coroutine",
+                    "lineno": 30
+                },
+                {
+                    "nodeid": "tests/test_only_judge_llms.py::test_conversational_evaluation",
+                    "type": "Coroutine",
+                    "lineno": 52
+                },
+                {
+                    "nodeid": "tests/test_only_judge_llms.py::test_creative_writing_evaluation",
+                    "type": "Coroutine",
+                    "lineno": 77
+                },
+                {
+                    "nodeid": "tests/test_only_judge_llms.py::test_instructional_evaluation",
+                    "type": "Coroutine",
+                    "lineno": 101
+                },
+                {
+                    "nodeid": "tests/test_only_judge_llms.py::test_poetic_evaluation",
+                    "type": "Coroutine",
+                    "lineno": 125
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "tests/test_only_judge_llms.py::test_summary_evaluation",
+            "lineno": 30,
+            "outcome": "passed",
+            "keywords": [
+                "test_summary_evaluation",
+                "asyncio",
+                "pytestmark",
+                "test_only_judge_llms.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00033179204910993576,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 1.7606642921455204,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0013436670415103436,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_judge_llms.py::test_conversational_evaluation",
+            "lineno": 52,
+            "outcome": "passed",
+            "keywords": [
+                "test_conversational_evaluation",
+                "asyncio",
+                "pytestmark",
+                "test_only_judge_llms.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003359578549861908,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 2.0448190830647945,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0016277092508971691,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_judge_llms.py::test_creative_writing_evaluation",
+            "lineno": 77,
+            "outcome": "passed",
+            "keywords": [
+                "test_creative_writing_evaluation",
+                "asyncio",
+                "pytestmark",
+                "test_only_judge_llms.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00032733380794525146,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 2.034071249887347,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0016716248355805874,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_judge_llms.py::test_instructional_evaluation",
+            "lineno": 101,
+            "outcome": "passed",
+            "keywords": [
+                "test_instructional_evaluation",
+                "asyncio",
+                "pytestmark",
+                "test_only_judge_llms.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003955839201807976,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 1.9319569999352098,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.001155999954789877,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "tests/test_only_judge_llms.py::test_poetic_evaluation",
+            "lineno": 125,
+            "outcome": "passed",
+            "keywords": [
+                "test_poetic_evaluation",
+                "asyncio",
+                "pytestmark",
+                "test_only_judge_llms.py",
+                "tests",
+                "elevate",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003716251812875271,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 1.9010517909191549,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.001233165618032217,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

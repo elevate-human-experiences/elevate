@@ -100,21 +100,23 @@ async def test_rephase_text_apologetic(settings: Any) -> None:
     logger.debug("Apologetic Rephrase:\n%s", rephrased_text)
 
 
-def test_rephase_text_friendly(settings: Any) -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_rephase_text_friendly(settings: Any) -> None:
     """Test the rephrase_text method with a friendly style."""
     input_message = """
     Hey, let's catch up over coffee sometime soon.
     """
     only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = only_rephrase.rephrase_text(input_message, "friendly", "short")
+    rephrased_text = await only_rephrase.rephrase_text(input_message, "friendly", "short")
     logger.debug("Friendly Rephrase:\n%s", rephrased_text)
 
 
-def test_rephase_text_technical(settings: Any) -> None:
+@pytest.mark.asyncio  # type: ignore
+async def test_rephase_text_technical(settings: Any) -> None:
     """Test the rephrase_text method with a technical style."""
     input_message = """
     Our application leverages containerization and orchestration to optimize deployment pipelines.
     """
     only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = only_rephrase.rephrase_text(input_message, "technical", "detailed")
+    rephrased_text = await only_rephrase.rephrase_text(input_message, "technical", "detailed")
     logger.debug("Technical Rephrase:\n%s", rephrased_text)

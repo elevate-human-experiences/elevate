@@ -22,7 +22,10 @@
 
 """OnlyJson class for JSON schema validation using litellm."""
 
+from pathlib import Path
+
 import litellm
+from jinja2 import Template
 from litellm import acompletion
 from pydantic import BaseModel
 
@@ -37,14 +40,28 @@ class OnlyJson:
         # so we need to do it on the client side.
         litellm.enable_json_schema_validation = True
 
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        template_content = template_path.read_text(encoding="utf-8")
+        return Template(template_content)
+
+    def get_system_prompt(self, schema_name: str = "default") -> str:
+        """Return the appropriate system prompt based on the schema type."""
+        template = self._load_prompt_template()
+        return str(template.render(schema_name=schema_name))
+
     async def parse(self, content: str, schema: type[BaseModel], system_prompt: str | None = None) -> BaseModel:
         """Parse the content using the specified schema."""
-        # Updated messages with a system prompt for podcast conversation generation
+        # If no system prompt provided, use the template system
+        if system_prompt is None:
+            system_prompt = self.get_system_prompt(schema.__name__)
+
+        # Updated messages with a system prompt for JSON schema validation
         messages = [
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": content},
         ]
-        if system_prompt:
-            messages.insert(0, {"role": "system", "content": system_prompt})
 
         # Rebuild the model and get the JSON schema
         schema.model_rebuild()

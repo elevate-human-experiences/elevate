@@ -20,21 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 """
-Only demo script module for the Elevate app.
+Only slides module for the Elevate app.
 
-This module provides the OnlyDemoScript class, which is responsible for
-generating prodcut demo script it to Markdown
+This module provides the OnlySlides class, which is responsible for
+generating presentation slides converting them into Markdown
 using the litellm library and the large language model.
 """
 
+import re
+from pathlib import Path
+
+from jinja2 import Template
 from litellm import acompletion
 
 
-class OnlyQA:
-    """Class that only returns demo script in Markdown syntax."""
+class OnlySlides:
+    """Class that only returns slides in Markdown syntax."""
 
     def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyDemoScript class"""
+        """Initialize the OnlySlides class"""
         self.model = with_model
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
@@ -45,15 +49,29 @@ class OnlyQA:
         ]
         response = await acompletion(model=self.model, messages=messages, temperature=0.1)
         # Fix: Use response.content if choices/message is not available
-        return str(response.choices[0].message.content)
+        output = str(response.choices[0].message.content)
+        pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
+        match = re.search(pattern, output, re.DOTALL)
 
-    def get_qa_system_prompt(self) -> str:
-        """Return a system prompt to generate demo script content from the input text into Markdown syntax."""
-        return """ROLE:
-You are a friendly assitant. Your task is to answer the questions asked by users based on the product documentation given as input.
-"""
+        if match:
+            return match.group(1).strip()
+        return output
 
-    async def generate_answers(self, input_text: str) -> str:
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
+
+    def get_slide_generation_system_prompt(self, type_of_slides: str, number_of_slides: int) -> str:
+        """Return a system prompt to generate slide content from the input text into Markdown syntax."""
+        template = self._load_prompt_template()
+        return str(template.render(type_of_slides=type_of_slides, number_of_slides=number_of_slides))
+
+    async def generate_slides(self, input_text: str, type_of_slides: str, number_of_slides: int) -> str:
         """Generate slides from the given input."""
-        system_prompt = self.get_qa_system_prompt()  # Get the system prompt
+        system_prompt = self.get_slide_generation_system_prompt(
+            type_of_slides, number_of_slides
+        )  # Get the system prompt
         return await self.make_llm_call(system_prompt, input_text)

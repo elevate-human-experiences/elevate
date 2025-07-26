@@ -22,7 +22,9 @@
 """OnlyJudgeLLMs: Class to evaluate LLM outputs based on defined scoring criteria."""
 
 import logging
+from pathlib import Path
 
+from jinja2 import Template
 from litellm import acompletion
 from pydantic import BaseModel
 
@@ -48,27 +50,17 @@ class OnlyJudgeLLMs:
         """
         self.model = with_model
 
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
+
     def get_judgment_prompt(self) -> str:
         """Construct a system prompt for LLM evaluation."""
-        return (
-            "You are an expert evaluator of LLM outputs. You have been given multiple criteria, and each "
-            "criterion might use a different method of assessment (e.g., a numerical scale, a boolean check, "
-            "a pass/fail judgment, or something else entirely).\n\n"
-            "Your task is to:\n"
-            "1. Identify the type of rating/assessment required for each criterion as indicated by the schema.\n"
-            "2. Plan how you will judge each criterion based on the provided text.\n"
-            "3. Carefully analyze the text to assess how well it meets each criterion.\n"
-            "4. Assign the correct rating or answer for each criterion (e.g., if it's a numeric scale, choose a value "
-            "within that range; if it's a boolean check, choose the appropriate true/false or pass/fail).\n"
-            "5. Provide a brief factual justification for each rating or assessment, using direct references or "
-            "observations from the text.\n\n"
-            "Important:\n"
-            "- If a numeric scale is provided, use the full range realistically. Do not default to the highest or lowest "
-            "score unless it is justified.\n"
-            "- Return only a valid JSON object that exactly matches the schema—no extra commentary or text outside "
-            "the JSON.\n"
-            "- Do not reveal your internal chain-of-thought; simply provide the final ratings and justifications.\n"
-        )
+        template = self._load_prompt_template()
+        return str(template.render())
 
     async def evaluate(self, text: str, criteria: type[BaseModel], system_prompt: str | None = None) -> BaseModel:
         """

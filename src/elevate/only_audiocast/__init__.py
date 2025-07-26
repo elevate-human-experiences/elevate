@@ -30,13 +30,14 @@ from pathlib import Path
 from secrets import choice as secrets_choice
 
 import yaml  # type: ignore
+from jinja2 import Template
 from openai import OpenAI
 from pydantic import BaseModel, Field
 from pydub import AudioSegment
 
 from common import setup_logging
 
-from .only_json import OnlyJson
+from ..only_json import OnlyJson
 
 
 logger = setup_logging(logging.INFO)
@@ -153,68 +154,34 @@ class OnlyAudiocast:
         ]
         self.with_model = with_model
 
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
+
+    def _load_agent_template(self) -> Template:
+        """Load the Jinja2 template for agent instructions."""
+        template_path = Path(__file__).parent / "agent_instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
+
     def get_system_prompt(self, cast_configuration: CastConfiguration) -> str:
         """Generate a system prompt with cast configuration in YAML."""
         cast_config_yaml = yaml.dump(cast_configuration.model_dump())
-        prompt_content = f"""ROLE:
-You are an experienced dialogue writer creating a natural-sounding conversation based on the provided article. The listener should feel as if they're casually dropping into an ongoing exchange.
+        template = self._load_prompt_template()
+        return str(template.render(cast_config_yaml=cast_config_yaml))
 
-GOAL:
-Craft a conversation that:
-1. Accurately covers all key points from the article, presented organically as part of the ongoing discussion.
-2. Takes ample time to explore each point in depth as described by the article, without introducing new information.
-3. Flows naturally, giving the listener a sense of entering mid-conversation.
-4. Includes subtle contextual clues to orient the listener without explicit introductions, greetings, or farewells.
-5. Ensures each speaker`s dialogue is distinct, engaging, and authentic to their character profile.
-
-REQUIREMENTS:
-- Use short, conversational sentences suitable for speech synthesis.
-- Exclude all last names for privacy.
-- Do not add speakers beyond those specified in the cast configuration.
-- Avoid segments that directly address the listener or acknowledge their presence explicitly.
-- Do not include information outside what is explicitly mentioned in the article.
-- Include natural speech patterns and filler sounds (e.g., um, ah, (pause), (breath)) to enhance realism (but don't make it forced).
-- Present each speaker`s dialogue in complete, coherent paragraphs.
-- Maintain an engaging, informative, and seamless dialogue experience.
-- DO NOT INCLUDE A SEGMENT FOR THE LISTENER.
-
-CAST CONFIGURATION:
-Use the following schema to define speaker and listener profiles:
-- Speaker:
-- name: Name of the speaker
-- background: Background information relevant to the speaker
-- expertise: General expertise area
-- speaking_style: Description of their speaking style
-- level_of_expertise: Detailed expertise level
-- focus_aspect: Specific aspect or angle the speaker emphasizes
-- depth: Depth of content provided
-- Listener:
-- name: Optional name of the listener
-- expertise: General expertise area of the listener
-- summary_of_similar_content: List summarizing similar content known to the listener
-- level_of_expertise: Listener's proficiency level
-- depth: Desired depth of content for the listener
-
-EXAMPLE (Style Reference):
-Imagine dropping into a casual yet intellectually rich conversation between Joe Rogan and Neil deGrasse Tyson discussing space exploration:
-
-Joe:
-"So, Neil, you`re telling me we've got satellites out there, right now, literally mapping planets?"
-
-Neil:
-"(laughs) Yeah, exactly. (pause) It`s mind-blowing. These satellites send back detailed images, data on atmospheric conditions—everything scientists need to understand these worlds remotely."
-
-Joe:
-"Wow. (breath) And they're just floating out there, doing their thing?"
-
-Neil:
-"Precisely. And here`s the fascinating part—some missions even search for signs of life. It completely changes how we see ourselves in the universe."
-
-Here's the cast configuration provided for this conversation:
-{cast_config_yaml}
-"""
-
-        return str(prompt_content)
+    def get_agent_prompt(self, speaker: SpeakerConfig) -> str:
+        """Generate agent instructions prompt using template."""
+        template = self._load_agent_template()
+        return str(
+            template.render(
+                speaker_name=speaker.name, speaker_background=speaker.background, speaker_expertise=speaker.expertise
+            )
+        )
 
     async def cast(
         self,
@@ -246,19 +213,7 @@ Here's the cast configuration provided for this conversation:
 
         agent_map: dict[str, str] = {}
         for sp in cast_config.speakers:
-            agent_prompt = f"""You are a producer/director of a podcast.
-Generate a short paragraph of instructions for the speaker {sp.name} for their persona and how they should speak.
-They have the background: {sp.background}. Their expertise {sp.expertise}.
-Start it with 'You are ...' and include how the speaker should read and pronounce the words, pace, etc.
-
-Here's an example:
-```
-You are an experienced art instructor with a warm and refined tone who specializes in post-modernist impressionism.
-Accent/Affect: Warm, refined, and gently instructive, reminiscent of a friendly art instructor.
-Tone: Calm, encouraging, and articulate, clearly describing each step with patience.
-Pacing: Slow and deliberate, pausing often to allow the listener to follow instructions comfortably.
-```
-"""
+            agent_prompt = self.get_agent_prompt(sp)
             agent_result = await parser.parse(agent_prompt, Instructions, agent_prompt)
             if not isinstance(agent_result, Instructions):
                 raise TypeError("Expected Instructions type")

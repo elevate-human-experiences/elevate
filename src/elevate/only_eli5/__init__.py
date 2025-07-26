@@ -30,7 +30,9 @@ in a Markdown format, suitable for easy understanding.
 """
 
 import re
+from pathlib import Path
 
+from jinja2 import Template
 from litellm import acompletion
 
 
@@ -57,35 +59,17 @@ class OnlyELI5:
             return match.group(1).strip()
         return output
 
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
+
     def get_eli5_system_prompt(self) -> str:
         """Return a system prompt to create ELI5 explanations in Markdown syntax."""
-        return """ROLE:
-You are an expert at explaining complex topics in simple terms that a 5-year-old could understand. You excel at using analogies, simple language, and relatable examples to make difficult concepts accessible.
-
-**Task:**
-Create an "Explain Like I'm 5" (ELI5) explanation of the given topic and format it in clean GitHub Flavored Markdown.
-
-**Instructions:**
-1. **Use Simple Language:** Use words and concepts that a young child would understand
-2. **Use Analogies:** Compare complex concepts to familiar things (toys, animals, food, etc.)
-3. **Be Visual:** Use descriptions that help create mental pictures
-4. **Keep It Short:** Break down complex ideas into small, digestible pieces
-5. **Make It Fun:** Use engaging examples and scenarios
-6. **Markdown Format:** Structure your explanation using proper Markdown formatting
-
-**Guidelines:**
-- Start with "Imagine..." or "Think of it like..." to set up analogies
-- Use simple sentences and avoid jargon
-- Include bullet points or numbered lists for steps
-- Use emojis sparingly to make it more engaging
-- End with a simple summary that ties it all together
-
-**Output Format:**
-Return your response wrapped in markdown code blocks like this:
-```markdown
-# Your ELI5 Explanation Here
-```
-"""
+        template = self._load_prompt_template()
+        return str(template.render())
 
     async def explain(self, input_text: str) -> str:
         """Generate an ELI5 explanation from the given input."""

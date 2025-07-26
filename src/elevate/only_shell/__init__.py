@@ -19,8 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Only rephrase module for the Elevate app."""
+"""Only shell module for the Elevate app."""
 
+from pathlib import Path
+
+from jinja2 import Template
 from litellm import acompletion
 
 
@@ -28,11 +31,11 @@ class OnlyShell:
     """Class that returns a shell command based on users prompt."""
 
     def __init__(self, with_model: str = "gemini/gemini-2.0-flash-lite") -> None:
-        """Initialize the OnlyMarkdown class"""
+        """Initialize the OnlyShell class"""
         self.model = with_model
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
-        """Make the LLM call using litellm and extract the markdown content."""
+        """Make the LLM call using litellm and extract the shell command."""
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
@@ -40,14 +43,17 @@ class OnlyShell:
         response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
         return str(response.choices[0].message.content)
 
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
+
     def get_shell_system_prompt(self) -> str:
         """Return the shell system prompt."""
-        return """
-You are an expert shell command generator. Your task is to translate user requests into precise and efficient shell commands.
-
-*   **Input:** User's description of a task (e.g., "List all files in the current directory").
-*   **Output:** A single, executable shell command that accomplishes the task.  Do not include any introductory text, explanations, or apologies.  Focus solely on the command itself.  Assume a Linux/Unix environment.  Prioritize common and portable commands.  If the task is ambiguous, ask the user for clarification.
-"""
+        template = self._load_prompt_template()
+        return str(template.render())
 
     async def generate_shell_command(self, user_prompt: str) -> str:
         """Generates a shell command based on a user-provided natural language prompt."""

@@ -31,10 +31,10 @@ from pathlib import Path
 
 import aiofiles  # type: ignore
 from e2b import AsyncSandbox
+from jinja2 import Template
 from litellm import acompletion
 
 from common import setup_logging
-from elevate.only_python_prompt import PYTHON_CODE_GENRATION_PROMPT
 
 
 logger = setup_logging(logging.INFO)
@@ -44,8 +44,37 @@ class OnlyPython:
     """Class that returns rephrased text."""
 
     def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyMarkdown class"""
+        """Initialize the OnlyPython class"""
         self.model = with_model
+
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
+
+    def get_python_code_generation_system_prompt(self) -> str:
+        """
+        Returns the code generation system prompt.
+
+        Returns
+        -------
+            str: A string containing the code generation system prompt.
+        """
+        template = self._load_prompt_template()
+        return str(template.render(prompt_type="code_generation"))
+
+    def get_json_conversion_prompt(self) -> str:
+        """
+        Returns the JSON conversion system prompt.
+
+        Returns
+        -------
+            str: A string containing the JSON conversion system prompt.
+        """
+        template = self._load_prompt_template()
+        return str(template.render(prompt_type="json_conversion"))
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Make the LLM call using litellm, extracting the markdown content."""
@@ -132,20 +161,8 @@ class OnlyPython:
                     logger.debug(f"Could not delete temp file: {temp_file_path}")
 
     async def create_json_reponse(self, generated_output: str) -> str:
-        system_prompt = """
-        Your task is convert the given string into a json response. Only process the api response from given input and truncate any other string.
-        """
+        system_prompt = self.get_json_conversion_prompt()
         return await self.make_llm_call(system_prompt, generated_output)
-
-    def get_python_code_generation_system_prompt(self) -> str:
-        """
-        Returns the code generation system prompt.
-
-        Returns
-        -------
-            str: A string containing the code generation system prompt.
-        """
-        return PYTHON_CODE_GENRATION_PROMPT
 
     def print_section_header(self, title: str) -> None:
         """Print a formatted section header."""

@@ -20,23 +20,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 """
-Only sldies module for the Elevate app.
+Only summary module for the Elevate app.
 
-This module provides the OnlySlides class, which is responsible for
-generating presentation slides converting them into Markdown
-using the litellm library and the large language model.
+This module provides the OnlySummary class, which is responsible for
+generating TL;DR summaries and converting them into GitHub Flavored Markdown
+(GFM) using the litellm library and the GPT-4o language model. The class
+offers a method to summarize input text and return the summary in a
+Markdown format, suitable for GitHub rendering.
 """
 
 import re
+from pathlib import Path
 
+from jinja2 import Template
 from litellm import acompletion
 
 
-class OnlySlides:
-    """Class that only returns slides in Markdown syntax."""
+class OnlySummary:
+    """Class that only returns summary in Markdown syntax."""
 
     def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlySlides class"""
+        """Initialize the OnlyMarkdown class"""
         self.model = with_model
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
@@ -55,20 +59,19 @@ class OnlySlides:
             return match.group(1).strip()
         return output
 
-    def get_slide_generation_system_prompt(self, type_of_slides: str, number_of_slides: int) -> str:
-        """Return a system prompt to generate slide content from the input text into Markdown syntax."""
-        return f"""ROLE:
-Create a compelling product pitch deck from provided technical documentation. As an AI presentation specialist, you will receive:
+    def _load_prompt_template(self) -> Template:
+        """Load the Jinja2 template from instructions.j2 file."""
+        template_path = Path(__file__).parent / "instructions.j2"
+        with template_path.open(encoding="utf-8") as f:
+            template_content = f.read()
+        return Template(template_content)
 
-Product Technical Documentation
-Slide Type: {type_of_slides}
-Number of Slides: {number_of_slides}
-Based on this input, generate a {number_of_slides}-slide product pitch deck in Markdown format. The deck should be tailored to the {type_of_slides}. Prioritize clear communication and a visually appealing structure (considering Markdown limitations). Focus on delivering concise and well-organized slide content.
-"""
+    def get_summarization_system_prompt(self, summary_type: str) -> str:
+        """Return a system prompt to summarize and convert input text into Markdown syntax."""
+        template = self._load_prompt_template()
+        return str(template.render(summary_type=summary_type))
 
-    async def generate_slides(self, input_text: str, type_of_slides: str, number_of_slides: int) -> str:
-        """Generate slides from the given input."""
-        system_prompt = self.get_slide_generation_system_prompt(
-            type_of_slides, number_of_slides
-        )  # Get the system prompt
+    async def summarize_and_convert_to_markdown(self, input_text: str, summary_type: str = "generic") -> str:
+        """Summarizes and Converts the given input text to GitHub Flavored Markdown (GFM) format."""
+        system_prompt = self.get_summarization_system_prompt(summary_type)  # Get the system prompt
         return await self.make_llm_call(system_prompt, input_text)

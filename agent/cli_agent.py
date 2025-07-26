@@ -13,9 +13,9 @@ console = Console()
 def select_genai_snippet(menu_input: str) -> str:
     match menu_input:
         case "1":
-            return "only_email.py"
+            return "only_email/__init__.py"
         case "2":
-            return "only_rephrase.py"
+            return "only_rephrase/__init__.py"
         case _:
             raise ValueError("Invalid menu type specified.")
 

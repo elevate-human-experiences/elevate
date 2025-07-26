@@ -183,15 +183,15 @@ class MarketingWorkflow:
     def __init__(self) -> None:
         """Initializes the MarketingWorkflow with language model and tools."""
         llm = "gemini/gemini-2.0-flash-lite"  # Consider making this configurable via CLI
-        self.blog_generator = OnlyVideoToBlog(llm)
-        self.summary_generator = OnlySummary(llm)
-        self.email_generator = OnlyEmail(llm)
-        self.rephrase_tool = OnlyRephrase(llm)
-        self.python_tool = OnlyPython(llm)
-        self.markdown_tool = OnlyMarkdown(llm)
-        self.slide_tool = OnlySlides(llm)
-        self.demo_script_tool = OnlyDemoScript(llm)
-        self.qa_tool = OnlyQA(llm)
+        self.blog_generator = OnlyVideoToBlog(with_model=llm)
+        self.summary_generator = OnlySummary(with_model=llm)
+        self.email_generator = OnlyEmail(with_model=llm)
+        self.rephrase_tool = OnlyRephrase(with_model=llm)
+        self.python_tool = OnlyPython(with_model=llm)
+        self.markdown_tool = OnlyMarkdown(with_model=llm)
+        self.slide_tool = OnlySlides(with_model=llm)
+        self.demo_script_tool = OnlyDemoScript(with_model=llm)
+        self.qa_tool = OnlyQA(with_model=llm)
         self.ui = UIBeautifier()
 
     async def rephrase_content(self, content: str) -> Any:
@@ -220,8 +220,11 @@ class MarketingWorkflow:
                 continue
 
             self.ui.print_colored_text(f"Rephrasing with tone: {tone}, and length: {length}", "cyan")
-            rephrased_content = await self.rephrase_tool.rephrase_text(content, tone, str(length))
-            self.ui.print_content(rephrased_content, title="Rephrased content")
+            from elevate.only_rephrase import RephraseInput
+
+            input_data = RephraseInput(message=content, tone=tone, length=str(length))
+            rephrased_content = await self.rephrase_tool.rephrase_text(input_data)
+            self.ui.print_content(rephrased_content.rephrased_text, title="Rephrased content")
             return rephrased_content
 
     async def process_with_rephrase(
@@ -417,8 +420,11 @@ class MarketingWorkflow:
             The generated answer.
         """
         self.ui.print_section_header("Generating Answers")
-        answer = await self.qa_tool.generate_answers(technical_content + "\n" + question)
-        self.ui.print_content(answer, title="Answer")
+        from elevate.only_qa import QAInput
+
+        input_data = QAInput(input_text=technical_content + "\n" + question)
+        answer = await self.qa_tool.generate_answers(input_data)
+        self.ui.print_content(answer.answers, title="Answer")
         return answer
 
     async def execute(self, technical_content: str, email_type: str = "marketing") -> dict[str, str]:

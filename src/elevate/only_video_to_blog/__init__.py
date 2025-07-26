@@ -25,14 +25,38 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
+
+
+class VideoToBlogConfig(BaseModel):
+    """Configuration for OnlyVideoToBlog class."""
+
+    model: str = Field(default="gemini/gemini-2.0-flash-lite", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class VideoToBlogInput(BaseModel):
+    """Input model for video to blog conversion."""
+
+    transcript: str = Field(..., description="Video transcript to convert to blog")
+    number_of_words: int = Field(default=1200, description="Target number of words for the blog")
+
+
+class VideoToBlogOutput(BaseModel):
+    """Output model for video to blog conversion."""
+
+    blog_post: str = Field(..., description="Generated blog post")
 
 
 class OnlyVideoToBlog:
     """Class that returns blog posts generated from video transcripts."""
 
-    def __init__(self, with_model: str = "gemini/gemini-2.0-flash-lite") -> None:
-        """Initialize the OnlyVideoToBlog class"""
-        self.model = with_model
+    def __init__(self, config: VideoToBlogConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlyVideoToBlog class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = VideoToBlogConfig(model=with_model)
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Make the LLM call using litellm and extract the markdown content."""
@@ -41,7 +65,9 @@ class OnlyVideoToBlog:
             {"role": "user", "content": input_text},
         ]
 
-        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(
+            api_key="", model=self.config.model, messages=messages, temperature=self.config.temperature
+        )
         return str(response.choices[0].message.content)
 
     def _load_prompt_template(self) -> Template:
@@ -56,11 +82,12 @@ class OnlyVideoToBlog:
         template = self._load_prompt_template()
         return str(template.render(number_of_words=number_of_words))
 
-    async def generate_blog(self, transcript: str, number_of_words: int = 1200) -> str:
+    async def generate_blog(self, input_data: VideoToBlogInput) -> VideoToBlogOutput:
         """Generate a blog post from a given video transcript."""
         # Validate input transcript
-        if not transcript or not transcript.strip():
+        if not input_data.transcript or not input_data.transcript.strip():
             raise ValueError("Transcript cannot be empty or contain only whitespace")
 
-        system_prompt = self.get_blog_generation_system_prompt(number_of_words)
-        return await self.make_llm_call(system_prompt, transcript)
+        system_prompt = self.get_blog_generation_system_prompt(input_data.number_of_words)
+        blog_post = await self.make_llm_call(system_prompt, input_data.transcript)
+        return VideoToBlogOutput(blog_post=blog_post)

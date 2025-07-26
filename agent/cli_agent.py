@@ -38,7 +38,12 @@ async def main(with_model: str = "gpt-4o-mini") -> None:
         genai_snippet_code_file_name = "src/elevate/" + select_genai_snippet(menu_input)
         genai_snippet_code = read_geni_snippet(genai_snippet_code_file_name)
         only_python = OnlyPython()
-        output = await only_python.generate_code(user_input, "", False, False, genai_snippet_code)
+        from elevate.only_python import PythonInput
+
+        input_data = PythonInput(
+            message=user_input, framework="", jsonify=False, plot_graph=False, genai_snippet_code=genai_snippet_code
+        )
+        output = await only_python.generate_code(input_data)
         console.print(f"[green]\nOutput:[/green]\n{output}")
 
 

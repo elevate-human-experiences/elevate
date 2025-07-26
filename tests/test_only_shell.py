@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_shell import OnlyShell
+from elevate.only_shell import OnlyShell, ShellConfig, ShellInput
 
 
 logger = setup_logging(logging.INFO)
@@ -47,6 +47,9 @@ async def test_simple_shell_command(settings: Any) -> None:
     input_message = """
     Command to list all files in directory.
     """
-    only_shell = OnlyShell(with_model=settings.with_model)
-    shell_command = await only_shell.generate_shell_command(input_message)
+    config = ShellConfig(model=settings.with_model)
+    only_shell = OnlyShell(config=config)
+    input_data = ShellInput(user_prompt=input_message)
+    result = await only_shell.generate_shell_command(input_data)
+    shell_command = result.command
     logger.debug("Shell command:\n%s", shell_command)

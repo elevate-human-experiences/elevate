@@ -23,19 +23,40 @@
 """OnlyJson class for JSON schema validation using litellm."""
 
 from pathlib import Path
+from typing import Any
 
 import litellm
 from jinja2 import Template
 from litellm import acompletion
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class JsonConfig(BaseModel):
+    """Configuration for OnlyJson class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class JsonInput(BaseModel):
+    """Input model for JSON parsing."""
+
+    model_config = {"arbitrary_types_allowed": True}
+
+    content: str = Field(..., description="Content to parse")
+    schema: Any = Field(..., description="Pydantic schema to use for parsing")
+    system_prompt: str | None = Field(None, description="Optional system prompt override")
 
 
 class OnlyJson:
     """Class that only supports JSON schema validation."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
+    def __init__(self, config: JsonConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlyJson class"""
-        self.model_id = with_model
+        if config:
+            self.config = config
+        else:
+            self.config = JsonConfig(model=with_model)
         # Not all models support JSON schema validation,
         # so we need to do it on the client side.
         litellm.enable_json_schema_validation = True
@@ -51,25 +72,26 @@ class OnlyJson:
         template = self._load_prompt_template()
         return str(template.render(schema_name=schema_name))
 
-    async def parse(self, content: str, schema: type[BaseModel], system_prompt: str | None = None) -> BaseModel:
+    async def parse(self, input_data: JsonInput) -> Any:
         """Parse the content using the specified schema."""
         # If no system prompt provided, use the template system
-        if system_prompt is None:
-            system_prompt = self.get_system_prompt(schema.__name__)
+        system_prompt = input_data.system_prompt or self.get_system_prompt(input_data.schema.__name__)
 
         # Updated messages with a system prompt for JSON schema validation
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": content},
+            {"role": "user", "content": input_data.content},
         ]
 
         # Rebuild the model and get the JSON schema
-        schema.model_rebuild()
-        s = schema.model_json_schema()
+        input_data.schema.model_rebuild()
+        s = input_data.schema.model_json_schema()
         s["type"] = "object"
         json_schema = {
             "type": "json_schema",
-            "json_schema": {"name": schema.__name__, "schema": s},
+            "json_schema": {"name": input_data.schema.__name__, "schema": s},
         }
-        resp = await acompletion(model=self.model_id, messages=messages, response_format=json_schema)
-        return schema.model_validate_json(resp.choices[0].message.content)
+        resp = await acompletion(
+            model=self.config.model, messages=messages, response_format=json_schema, temperature=self.config.temperature
+        )
+        return input_data.schema.model_validate_json(resp.choices[0].message.content)

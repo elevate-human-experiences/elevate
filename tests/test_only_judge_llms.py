@@ -25,7 +25,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel, Field
 
-from elevate.only_judge_llms import OnlyJudgeLLMs
+from elevate.only_judge_llms import JudgeLLMsConfig, JudgeLLMsInput, OnlyJudgeLLMs
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -39,8 +39,10 @@ async def test_summary_evaluation(settings: Any) -> None:
         "The Q3 report indicates a 12% increase in revenue driven by new market strategies, "
         "cost-saving initiatives, and improved operational efficiency, though challenges remain in emerging markets."
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, SummaryCriteria)
+    config = JudgeLLMsConfig(model=settings.with_model)
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(text=sample_text, criteria=SummaryCriteria)
+    result: Any = await judge.evaluate(input_data)
 
     # This text is coherent and factually consistent, so we expect mid-to-high scores
     assert 4 <= result.coherence <= 5
@@ -62,8 +64,10 @@ async def test_conversational_evaluation(settings: Any) -> None:
         "Thanks for reaching out. Honestly, I don't have any details about the product launch right now. "
         "It's a beautiful day, though. How have you been?"
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, ConversationCriteria)
+    config = JudgeLLMsConfig(model=settings.with_model)
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(text=sample_text, criteria=ConversationCriteria)
+    result: Any = await judge.evaluate(input_data)
 
     # Relevance should be lower because it doesn't address the product launch well
     assert 1 <= result.relevance <= 3
@@ -86,8 +90,10 @@ async def test_creative_writing_evaluation(settings: Any) -> None:
         "Amidst the twilight of a fading day, the vibrant hues of an impressionist sky dissolve into whispers of lost dreams. "
         "The city pulses with poetic intensity, each corner revealing a story etched in light and shadow."
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, CreativeCriteria)
+    config = JudgeLLMsConfig(model=settings.with_model)
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(text=sample_text, criteria=CreativeCriteria)
+    result: Any = await judge.evaluate(input_data)
 
     # Quite imaginative; likely high creativity
     assert 4 <= result.creativity <= 5
@@ -110,8 +116,10 @@ async def test_instructional_evaluation(settings: Any) -> None:
     sample_text = (
         "To install the package, first you open your terminal. Then do something with pip. I'm not entirely sure."
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, InstructionCriteria)
+    config = JudgeLLMsConfig(model=settings.with_model)
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(text=sample_text, criteria=InstructionCriteria)
+    result: Any = await judge.evaluate(input_data)
 
     # The instructions aren't very clear
     assert 1 <= result.clarity <= 3
@@ -134,8 +142,10 @@ async def test_poetic_evaluation(settings: Any) -> None:
         "In the gentle embrace of dusk, silver threads of moonlight weave ancient tales; "
         "the cadence of nature whispers secrets where dreams and reality converge into a poetic reverie."
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, PoeticCriteria)
+    config = JudgeLLMsConfig(model=settings.with_model)
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(text=sample_text, criteria=PoeticCriteria)
+    result: Any = await judge.evaluate(input_data)
 
     # The text is fairly elegant, though we allow some variation
     assert 3 <= result.elegance <= 5

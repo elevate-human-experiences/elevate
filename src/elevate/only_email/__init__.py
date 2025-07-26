@@ -27,12 +27,26 @@ from pathlib import Path
 import litellm
 from jinja2 import Template
 from litellm import acompletion
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from common import setup_logging
 
 
 logger = setup_logging(logging.INFO)
+
+
+class EmailConfig(BaseModel):
+    """Configuration for OnlyEmail class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class EmailInput(BaseModel):
+    """Input model for email generation."""
+
+    message: str = Field(..., description="Message content for email generation")
+    email_type: str = Field(..., description="Type of email (personal, professional, marketing)")
 
 
 class Email(BaseModel):
@@ -48,9 +62,12 @@ class Email(BaseModel):
 class OnlyEmail:
     """Class that returns well formatted emails."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyEmail class"""
-        self.model = with_model
+    def __init__(self, config: EmailConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlyEmail class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = EmailConfig(model=with_model)
         # Enable JSON schema validation for structured output
         litellm.enable_json_schema_validation = True
 
@@ -60,17 +77,19 @@ class OnlyEmail:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(
+            api_key="", model=self.config.model, messages=messages, temperature=self.config.temperature
+        )
         content = response.choices[0].message.content
         return str(content) if content else ""
 
-    async def generate_structured_email(self, message: str, email_type: str) -> Email:
+    async def generate_structured_email(self, input_data: EmailInput) -> Email:
         """Generate a structured email using JSON schema validation."""
-        system_prompt = self.get_email_prompt(email_type)
+        system_prompt = self.get_email_prompt(input_data.email_type)
 
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": message},
+            {"role": "user", "content": input_data.message},
         ]
 
         # Build the JSON schema for the Email model
@@ -83,10 +102,10 @@ class OnlyEmail:
         }
 
         response = await acompletion(
-            model=self.model,
+            model=self.config.model,
             messages=messages,
             response_format=json_schema,
-            temperature=0.1,
+            temperature=self.config.temperature,
         )
 
         content = response.choices[0].message.content
@@ -111,11 +130,11 @@ class OnlyEmail:
         template = self._load_prompt_template()
         return str(template.render(email_type=email_type.lower()))
 
-    async def generate_email(self, message: str, email_type: str) -> str:
+    async def generate_email(self, input_data: EmailInput) -> str:
         """Generate an email of the specified type using an LLM."""
         try:
-            system_prompt = self.get_email_prompt(email_type)
-            return await self.make_llm_call(system_prompt, message)
+            system_prompt = self.get_email_prompt(input_data.email_type)
+            return await self.make_llm_call(system_prompt, input_data.message)
         except ValueError as ve:
             logger.debug(f"ValueError: {ve}")
             return "Error: Invalid email type specified."

@@ -26,6 +26,8 @@ from typing import Any
 import pytest
 
 from elevate.only_audiocast import (
+    AudiocastConfig,
+    AudiocastInput,
     CastConfiguration,
     ListenerConfig,
     OnlyAudiocast,
@@ -36,11 +38,13 @@ from elevate.only_audiocast import (
 @pytest.mark.asyncio  # type: ignore
 async def test_create_default_audiocast(settings: Any) -> None:
     content = "San Francisco is a city in California. It is known for the Golden Gate Bridge."
-    audiocast = OnlyAudiocast(with_model=settings.with_model)
-    await audiocast.cast(
-        content,
+    config = AudiocastConfig(model=settings.with_model)
+    audiocast = OnlyAudiocast(config=config)
+    input_data = AudiocastInput(
+        content=content,
         audio_out_path=f"{os.environ['HOME']}/Downloads/",
     )
+    await audiocast.cast(input_data)
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -80,9 +84,11 @@ This theory is resonating within the astrophysics community largely because of i
         ),
     )
 
-    audiocast = OnlyAudiocast(with_model=settings.with_model)
-    await audiocast.cast(
-        content,
+    config = AudiocastConfig(model=settings.with_model)
+    audiocast = OnlyAudiocast(config=config)
+    input_data = AudiocastInput(
+        content=content,
         cast_configuration=cast_configuration,
         audio_out_path=f"{os.environ['HOME']}/Downloads/",
     )
+    await audiocast.cast(input_data)

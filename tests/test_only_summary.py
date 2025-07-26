@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_summary import OnlySummary
+from elevate.only_summary import OnlySummary, SummaryConfig, SummaryInput
 
 
 logger = setup_logging(logging.INFO)
@@ -42,8 +42,11 @@ Effective communication is vital in both personal and professional contexts.
 This short text emphasizes the importance of clarity and brevity in conveying ideas.
 A clear message can make a significant difference in how it is received.
 """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(content)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=content)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("Simple Text Summary (%s):\n%s", settings.with_model, summary_output)
 
 
@@ -55,8 +58,11 @@ async def test_news_article_summary(settings: Any) -> None:
     The policy outlines specific targets to achieve renewable energy milestones by 2030, with strict regulations and incentives for industries.
     Environmental groups have praised the decision, though some critics argue that the measures may burden local businesses and require significant changes to current operations.
     """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(news_text)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=news_text)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("News Article Summary (%s):\n%s", settings.with_model, summary_output)
 
 
@@ -68,8 +74,11 @@ async def test_research_paper_summary(settings: Any) -> None:
     The authors present a series of experiments and theoretical models that suggest a potential path towards reconciling inconsistencies between the
     Preliminary results demonstrate promising directions for future research and indicate possible implications for our understanding of the universe.
     """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(research_text)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=research_text)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("Research Paper Summary:\n%s", summary_output)
 
 
@@ -80,8 +89,11 @@ async def test_technical_manual_summary(settings: Any) -> None:
     User Manual for the XYZ Smartphone: This document provides detailed instructions on setting up the smartphone, including battery installation, initial configuration, and establishing a mobile network connection.
     It includes troubleshooting tips, frequently asked questions, and safety precautions. The manual also explains features such as the high-resolution camera, touch screen, and voice assistant.
     """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(technical_manual_text)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=technical_manual_text)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("Technical Manual Summary:\n%s", summary_output)
 
 
@@ -93,8 +105,11 @@ async def test_business_report_summary(settings: Any) -> None:
     Expansion into new markets and the launch of innovative product lines were significant contributors to this growth.
     The report details market trends, financial performance, and strategic initiatives expected to drive continued progress in the upcoming months.
     """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(business_report_text)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=business_report_text)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("Business Report Summary:\n%s", summary_output)
 
 
@@ -106,8 +121,11 @@ async def test_legal_document_summary(settings: Any) -> None:
     It specifies the responsibilities of both the service provider and the client, including deliverables, payment terms, confidentiality obligations, and dispute resolution procedures.
     The document is legally binding and subject to the jurisdiction of applicable laws.
     """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(legal_document_text)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=legal_document_text)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("Legal Document Summary:\n%s", summary_output)
 
 
@@ -118,8 +136,11 @@ async def test_blog_post_summary(settings: Any) -> None:
     Travel Blog Entry: Last summer, I embarked on a journey across the Mediterranean, experiencing diverse cultures, breathtaking landscapes, and unforgettable culinary delights.
     In this post, I share personal anecdotes, local encounters, and reflective insights from the road, hoping to inspire fellow travelers to explore new destinations with curiosity and an open heart.
     """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(blog_post_text)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=blog_post_text)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("Blog Post Summary:\n%s", summary_output)
 
 
@@ -131,6 +152,9 @@ async def test_fiction_excerpt_summary(settings: Any) -> None:
     As she journeyed along this mysterious trail, she encountered mystical creatures and uncovered secrets that challenged her understanding of the world and her destiny.
     This excerpt sets the stage for an epic tale of magic, self-discovery, and adventure.
     """
-    only_summary_instance = OnlySummary(with_model=settings.with_model)
-    summary_output = await only_summary_instance.summarize_and_convert_to_markdown(fiction_excerpt_text)
+    config = SummaryConfig(model=settings.with_model)
+    only_summary_instance = OnlySummary(config=config)
+    input_data = SummaryInput(input_text=fiction_excerpt_text)
+    result = await only_summary_instance.summarize_and_convert_to_markdown(input_data)
+    summary_output = result.summary
     logger.debug("Fiction Excerpt Summary:\n%s", summary_output)

@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_video_to_blog import OnlyVideoToBlog
+from elevate.only_video_to_blog import OnlyVideoToBlog, VideoToBlogConfig, VideoToBlogInput
 
 
 logger = setup_logging(logging.INFO)
@@ -37,7 +37,8 @@ logger = setup_logging(logging.INFO)
 @pytest.mark.asyncio  # type: ignore
 async def test_simple_blog_generation(settings: Any) -> None:
     """Test the generation of blog of simple text using the OnlyVideoToBlog class."""
-    only_video = OnlyVideoToBlog(with_model=settings.with_model)
+    config = VideoToBlogConfig(model=settings.with_model)
+    only_video = OnlyVideoToBlog(config=config)
 
     transcript = """
     Welcome to our tutorial on machine learning. Today we'll be discussing the fundamentals of neural networks.
@@ -47,18 +48,23 @@ async def test_simple_blog_generation(settings: Any) -> None:
     By the end of this session, you'll have a solid understanding of how neural networks work.
     """
 
-    logger.debug(await only_video.generate_blog(transcript))
+    input_data = VideoToBlogInput(transcript=transcript)
+    result = await only_video.generate_blog(input_data)
+    logger.debug(result.blog_post)
 
 
 @pytest.mark.asyncio  # type: ignore
 async def test_empty_transcript_validation(settings: Any) -> None:
     """Test that empty or whitespace-only transcripts raise ValueError."""
-    only_video = OnlyVideoToBlog(with_model=settings.with_model)
+    config = VideoToBlogConfig(model=settings.with_model)
+    only_video = OnlyVideoToBlog(config=config)
 
     # Test completely empty string
+    input_data = VideoToBlogInput(transcript="")
     with pytest.raises(ValueError, match="Transcript cannot be empty or contain only whitespace"):
-        await only_video.generate_blog("")
+        await only_video.generate_blog(input_data)
 
     # Test whitespace-only string
+    input_data = VideoToBlogInput(transcript="   \n  \t  ")
     with pytest.raises(ValueError, match="Transcript cannot be empty or contain only whitespace"):
-        await only_video.generate_blog("   \n  \t  ")
+        await only_video.generate_blog(input_data)

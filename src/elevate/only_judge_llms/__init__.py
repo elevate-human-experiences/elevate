@@ -26,10 +26,24 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 logger = logging.getLogger(__name__)
+
+
+class JudgeLLMsConfig(BaseModel):
+    """Configuration for OnlyJudgeLLMs class."""
+
+    model: str = Field(default="o3-mini", description="LLM model to use")
+
+
+class JudgeLLMsInput(BaseModel):
+    """Input model for LLM evaluation."""
+
+    text: str = Field(..., description="The LLM output text to be evaluated")
+    criteria: type[BaseModel] = Field(..., description="Pydantic model representing scoring criteria")
+    system_prompt: str | None = Field(default=None, description="Optional custom system prompt")
 
 
 class OnlyJudgeLLMs:
@@ -40,15 +54,15 @@ class OnlyJudgeLLMs:
     evaluation that strictly conforms to a given Pydantic schema (which defines the scoring criteria).
     """
 
-    def __init__(self, with_model: str = "o3-mini") -> None:
+    def __init__(self, config: JudgeLLMsConfig) -> None:
         """
-        Initialize the OnlyJudgeLLMs class with the specified LLM model.
+        Initialize the OnlyJudgeLLMs class with Pydantic config.
 
         Args:
         ----
-            with_model: Identifier for the LLM model.
+            config: Configuration object containing model settings.
         """
-        self.model = with_model
+        self.config = config
 
     def _load_prompt_template(self) -> Template:
         """Load the Jinja2 template from instructions.j2 file."""
@@ -62,7 +76,7 @@ class OnlyJudgeLLMs:
         template = self._load_prompt_template()
         return str(template.render())
 
-    async def evaluate(self, text: str, criteria: type[BaseModel], system_prompt: str | None = None) -> BaseModel:
+    async def evaluate(self, input_data: JudgeLLMsInput) -> BaseModel:
         """
         Evaluates the given text against the scoring criteria defined in the Pydantic model.
 
@@ -71,9 +85,7 @@ class OnlyJudgeLLMs:
 
         Args:
         ----
-            text: The LLM output text to be evaluated.
-            criteria: A Pydantic model representing the scoring criteria.
-            system_prompt: An optional custom system prompt to override the default evaluation prompt.
+            input_data: Input containing text, criteria, and optional system prompt.
 
         Returns:
         -------
@@ -83,16 +95,15 @@ class OnlyJudgeLLMs:
         ------
             ValueError: If the output cannot be parsed according to the criteria schema.
         """
-        if system_prompt is None:
-            system_prompt = self.get_judgment_prompt()
+        system_prompt = input_data.system_prompt or self.get_judgment_prompt()
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": text},
+            {"role": "user", "content": input_data.text},
         ]
         response = await acompletion(
-            model=self.model,
+            model=self.config.model,
             messages=messages,
-            response_format=criteria,
+            response_format=input_data.criteria,
         )
         content = None
         # Try dict-like access
@@ -116,4 +127,4 @@ class OnlyJudgeLLMs:
             except Exception as ex_obj:
                 logger.debug(f"Object-like response parsing failed: {ex_obj}")
 
-        return criteria.model_validate_json(str(content))
+        return input_data.criteria.model_validate_json(str(content))

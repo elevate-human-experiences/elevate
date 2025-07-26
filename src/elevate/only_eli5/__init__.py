@@ -34,14 +34,37 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
+
+
+class ELI5Config(BaseModel):
+    """Configuration for OnlyELI5 class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class ELI5Input(BaseModel):
+    """Input model for ELI5 explanation generation."""
+
+    input_text: str = Field(..., description="Input text to explain in simple terms")
+
+
+class ELI5Output(BaseModel):
+    """Output model for ELI5 explanation generation."""
+
+    explanation: str = Field(..., description="ELI5 explanation in Markdown format")
 
 
 class OnlyELI5:
     """Class that only returns ELI5 explanations in Markdown syntax."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyELI5 class"""
-        self.model = with_model
+    def __init__(self, config: ELI5Config | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlyELI5 class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = ELI5Config(model=with_model)
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Makes the LLM call using litellm, extracting the markdown content."""
@@ -49,7 +72,7 @@ class OnlyELI5:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(model=self.config.model, messages=messages, temperature=self.config.temperature)
         # Fix: Use response.content if choices/message is not available
         output = str(response.choices[0].message.content)
         pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
@@ -71,7 +94,8 @@ class OnlyELI5:
         template = self._load_prompt_template()
         return str(template.render())
 
-    async def explain(self, input_text: str) -> str:
+    async def explain(self, input_data: ELI5Input) -> ELI5Output:
         """Generate an ELI5 explanation from the given input."""
         system_prompt = self.get_eli5_system_prompt()
-        return await self.make_llm_call(system_prompt, input_text)
+        explanation = await self.make_llm_call(system_prompt, input_data.input_text)
+        return ELI5Output(explanation=explanation)

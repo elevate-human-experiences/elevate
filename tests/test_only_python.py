@@ -28,8 +28,8 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_email import OnlyEmail
-from elevate.only_python import OnlyPython
+from elevate.only_email import EmailInput, OnlyEmail
+from elevate.only_python import OnlyPython, PythonInput
 
 
 logger = setup_logging(logging.INFO)
@@ -47,7 +47,9 @@ async def test_generate_code_simple_function_generation(settings: Any) -> None:
   Create a function that adds two numbers and execute that function.
   """
     only_python = OnlyPython(with_model=settings.with_model)
-    output = await only_python.generate_code(input_message, "", False, False)
+    python_input = PythonInput(message=input_message, framework="", jsonify=False, plot_graph=False)
+    python_output = await only_python.generate_code(python_input)
+    output = python_output.result
     logger.debug(output)
 
 
@@ -74,7 +76,9 @@ async def test_api_call(settings: Any) -> None:
   Sample response from the API:{sample_api_response}
   """
     only_python = OnlyPython(with_model=settings.with_model)
-    output = await only_python.generate_code(input_message, "", True, False)
+    python_input = PythonInput(message=input_message, framework="", jsonify=True, plot_graph=False)
+    python_output = await only_python.generate_code(python_input)
+    output = python_output.result
     logger.debug(f"\n{'*' * 20} Printing Final Output {'*' * 20}\n")
     logger.debug(f"\nOutput:\n{output}")
     logger.debug(f"\n{'*' * 20} End of Printing {'*' * 20}\n")
@@ -92,7 +96,9 @@ async def test_internet_connection(settings: Any) -> None:
   Create a function to send request to google.com.
   """
     only_python = OnlyPython(with_model=settings.with_model)
-    output = await only_python.generate_code(input_message, "", False, False)
+    python_input = PythonInput(message=input_message, framework="", jsonify=False, plot_graph=False)
+    python_output = await only_python.generate_code(python_input)
+    output = python_output.result
     logger.debug(f"\n{'*' * 20} Printing Final Output {'*' * 20}\n")
     logger.debug(f"\nOutput:\n{output}")
     logger.debug(f"\n{'*' * 20} End of Printing {'*' * 20}\n")
@@ -114,7 +120,9 @@ async def test_data_structure_code(settings: Any) -> None:
 5. Prints the resulting linked list values as a json array.
 """
     only_python = OnlyPython(with_model=settings.with_model)
-    output = await only_python.generate_code(input_message, "", True, False)
+    python_input = PythonInput(message=input_message, framework="", jsonify=True, plot_graph=False)
+    python_output = await only_python.generate_code(python_input)
+    output = python_output.result
     logger.debug(f"\n{'*' * 20} Printing Final Output {'*' * 20}\n")
     logger.debug(f"\nOutput:\n{output}")
     logger.debug(f"\n{'*' * 20} End of Printing {'*' * 20}\n")
@@ -134,7 +142,9 @@ async def test_data_visualization(settings: Any) -> None:
   y value: [2,4,6,8,10]
   """
     only_python = OnlyPython(with_model=settings.with_model)
-    output = await only_python.generate_code(input_message, "", False, True)
+    python_input = PythonInput(message=input_message, framework="", jsonify=False, plot_graph=True)
+    python_output = await only_python.generate_code(python_input)
+    output = python_output.result
     logger.debug(f"\n{'*' * 20} Printing Final Output {'*' * 20}\n")
     logger.debug(f"\nOutput:\n{output}")
     logger.debug(f"\n{'*' * 20} End of Printing {'*' * 20}\n")
@@ -152,5 +162,6 @@ async def test_only_email_code_generation(settings: Any) -> None:
     A wedding anuversary message to John and Jane.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(personal_email_input_message, "personal")
+    email_input = EmailInput(message=personal_email_input_message, email_type="personal")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)

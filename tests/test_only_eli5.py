@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_eli5 import OnlyELI5
+from elevate.only_eli5 import ELI5Config, ELI5Input, OnlyELI5
 
 
 logger = setup_logging(logging.INFO)
@@ -44,8 +44,11 @@ async def test_eli5_complex_technology(settings: Any) -> None:
         "of the previous block, a timestamp, and transaction data. By design, a blockchain is resistant to "
         "modification of data and operates without a central authority through a distributed consensus mechanism."
     )
-    only_eli5 = OnlyELI5(with_model=settings.with_model)
-    eli5_output = await only_eli5.explain(input_text)
+    config = ELI5Config(model=settings.with_model)
+    only_eli5 = OnlyELI5(config=config)
+    input_data = ELI5Input(input_text=input_text)
+    eli5_result = await only_eli5.explain(input_data)
+    eli5_output = eli5_result.explanation
     logger.debug("ELI5 Technology Output:\n%s", eli5_output)
 
     # Basic validation
@@ -63,8 +66,11 @@ async def test_eli5_scientific_concept(settings: Any) -> None:
         "generates oxygen as a byproduct. The chemical energy produced is stored in carbohydrate molecules, "
         "such as sugars, which are synthesized from carbon dioxide and water."
     )
-    only_eli5 = OnlyELI5(with_model=settings.with_model)
-    eli5_output = await only_eli5.explain(input_text)
+    config = ELI5Config(model=settings.with_model)
+    only_eli5 = OnlyELI5(config=config)
+    input_data = ELI5Input(input_text=input_text)
+    eli5_result = await only_eli5.explain(input_data)
+    eli5_output = eli5_result.explanation
     logger.debug("ELI5 Science Output:\n%s", eli5_output)
 
     # Basic validation
@@ -82,8 +88,11 @@ async def test_eli5_financial_concept(settings: Any) -> None:
         "in the next period is then earned on the principal sum plus previously accumulated interest. The frequency "
         "of compounding affects the total amount of interest earned."
     )
-    only_eli5 = OnlyELI5(with_model=settings.with_model)
-    eli5_output = await only_eli5.explain(input_text)
+    config = ELI5Config(model=settings.with_model)
+    only_eli5 = OnlyELI5(config=config)
+    input_data = ELI5Input(input_text=input_text)
+    eli5_result = await only_eli5.explain(input_data)
+    eli5_output = eli5_result.explanation
     logger.debug("ELI5 Finance Output:\n%s", eli5_output)
 
     # Basic validation
@@ -101,8 +110,11 @@ async def test_eli5_physics_concept(settings: Any) -> None:
         "of the state of the others, even when the particles are separated by a large distance. When a measurement "
         "is performed on one particle, it instantaneously affects the state of the entangled partner."
     )
-    only_eli5 = OnlyELI5(with_model=settings.with_model)
-    eli5_output = await only_eli5.explain(input_text)
+    config = ELI5Config(model=settings.with_model)
+    only_eli5 = OnlyELI5(config=config)
+    input_data = ELI5Input(input_text=input_text)
+    eli5_result = await only_eli5.explain(input_data)
+    eli5_output = eli5_result.explanation
     logger.debug("ELI5 Physics Output:\n%s", eli5_output)
 
     # Basic validation
@@ -120,8 +132,11 @@ async def test_eli5_medical_concept(settings: Any) -> None:
         "of all known living organisms and many viruses. DNA and ribonucleic acid (RNA) are nucleic acids. The four "
         "bases found in DNA are adenine (A), cytosine (C), guanine (G) and thymine (T)."
     )
-    only_eli5 = OnlyELI5(with_model=settings.with_model)
-    eli5_output = await only_eli5.explain(input_text)
+    config = ELI5Config(model=settings.with_model)
+    only_eli5 = OnlyELI5(config=config)
+    input_data = ELI5Input(input_text=input_text)
+    eli5_result = await only_eli5.explain(input_data)
+    eli5_output = eli5_result.explanation
     logger.debug("ELI5 Medical Output:\n%s", eli5_output)
 
     # Basic validation

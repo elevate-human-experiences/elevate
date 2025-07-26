@@ -34,14 +34,38 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
+
+
+class SummaryConfig(BaseModel):
+    """Configuration for OnlySummary class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class SummaryInput(BaseModel):
+    """Input model for summary generation."""
+
+    input_text: str = Field(..., description="Input text to summarize")
+    summary_type: str = Field(default="generic", description="Type of summary to generate")
+
+
+class SummaryOutput(BaseModel):
+    """Output model for summary generation."""
+
+    summary: str = Field(..., description="Generated summary in Markdown format")
 
 
 class OnlySummary:
     """Class that only returns summary in Markdown syntax."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyMarkdown class"""
-        self.model = with_model
+    def __init__(self, config: SummaryConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlySummary class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = SummaryConfig(model=with_model)
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Makes the LLM call using litellm, extracting the markdown content."""
@@ -49,7 +73,7 @@ class OnlySummary:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(model=self.config.model, messages=messages, temperature=self.config.temperature)
         # Fix: Use response.content if choices/message is not available
         output = str(response.choices[0].message.content)
         pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
@@ -71,7 +95,8 @@ class OnlySummary:
         template = self._load_prompt_template()
         return str(template.render(summary_type=summary_type))
 
-    async def summarize_and_convert_to_markdown(self, input_text: str, summary_type: str = "generic") -> str:
+    async def summarize_and_convert_to_markdown(self, input_data: SummaryInput) -> SummaryOutput:
         """Summarizes and Converts the given input text to GitHub Flavored Markdown (GFM) format."""
-        system_prompt = self.get_summarization_system_prompt(summary_type)  # Get the system prompt
-        return await self.make_llm_call(system_prompt, input_text)
+        system_prompt = self.get_summarization_system_prompt(input_data.summary_type)
+        summary = await self.make_llm_call(system_prompt, input_data.input_text)
+        return SummaryOutput(summary=summary)

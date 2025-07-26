@@ -31,14 +31,37 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
+
+
+class QAConfig(BaseModel):
+    """Configuration for OnlyQA class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class QAInput(BaseModel):
+    """Input model for Q&A generation."""
+
+    input_text: str = Field(..., description="Input text to generate answers from")
+
+
+class QAOutput(BaseModel):
+    """Output model for Q&A generation."""
+
+    answers: str = Field(..., description="Generated answers")
 
 
 class OnlyQA:
     """Class that only returns answers based on product documentation."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyQA class"""
-        self.model = with_model
+    def __init__(self, config: QAConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlyQA class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = QAConfig(model=with_model)
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Makes the LLM call using litellm, extracting the markdown content."""
@@ -46,7 +69,7 @@ class OnlyQA:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(model=self.config.model, messages=messages, temperature=self.config.temperature)
         # Fix: Use response.content if choices/message is not available
         return str(response.choices[0].message.content)
 
@@ -62,7 +85,8 @@ class OnlyQA:
         template = self._load_prompt_template()
         return str(template.render())
 
-    async def generate_answers(self, input_text: str) -> str:
+    async def generate_answers(self, input_data: QAInput) -> QAOutput:
         """Generate answers from the given input."""
-        system_prompt = self.get_qa_system_prompt()  # Get the system prompt
-        return await self.make_llm_call(system_prompt, input_text)
+        system_prompt = self.get_qa_system_prompt()
+        answers = await self.make_llm_call(system_prompt, input_data.input_text)
+        return QAOutput(answers=answers)

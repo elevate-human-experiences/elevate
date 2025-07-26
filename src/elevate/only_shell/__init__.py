@@ -25,14 +25,34 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
+
+
+class ShellConfig(BaseModel):
+    """Configuration for OnlyShell class."""
+
+    model: str = Field(default="gemini/gemini-2.0-flash-lite", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class ShellInput(BaseModel):
+    """Input model for shell command generation."""
+
+    user_prompt: str = Field(..., description="Natural language prompt for shell command")
+
+
+class ShellOutput(BaseModel):
+    """Output model for shell command generation."""
+
+    command: str = Field(..., description="Generated shell command")
 
 
 class OnlyShell:
     """Class that returns a shell command based on users prompt."""
 
-    def __init__(self, with_model: str = "gemini/gemini-2.0-flash-lite") -> None:
-        """Initialize the OnlyShell class"""
-        self.model = with_model
+    def __init__(self, config: ShellConfig) -> None:
+        """Initialize the OnlyShell class with Pydantic config."""
+        self.config = config
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Make the LLM call using litellm and extract the shell command."""
@@ -40,7 +60,9 @@ class OnlyShell:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(
+            api_key="", model=self.config.model, messages=messages, temperature=self.config.temperature
+        )
         return str(response.choices[0].message.content)
 
     def _load_prompt_template(self) -> Template:
@@ -55,8 +77,9 @@ class OnlyShell:
         template = self._load_prompt_template()
         return str(template.render())
 
-    async def generate_shell_command(self, user_prompt: str) -> str:
+    async def generate_shell_command(self, input_data: ShellInput) -> ShellOutput:
         """Generates a shell command based on a user-provided natural language prompt."""
         system_prompt = self.get_shell_system_prompt()
-        message = "\n<UserPrompt>" + user_prompt + "</UserPrompt>\n\n"
-        return await self.make_llm_call(system_prompt, message)
+        message = "\n<UserPrompt>" + input_data.user_prompt + "</UserPrompt>\n\n"
+        command = await self.make_llm_call(system_prompt, message)
+        return ShellOutput(command=command)

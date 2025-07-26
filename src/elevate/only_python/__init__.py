@@ -33,6 +33,7 @@ import aiofiles  # type: ignore
 from e2b import AsyncSandbox
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
 
 from common import setup_logging
 
@@ -40,12 +41,38 @@ from common import setup_logging
 logger = setup_logging(logging.INFO)
 
 
+class PythonConfig(BaseModel):
+    """Configuration for OnlyPython class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class PythonInput(BaseModel):
+    """Input model for Python code generation."""
+
+    message: str = Field(..., description="Message/prompt for code generation")
+    framework: str = Field(default="", description="Framework to use")
+    jsonify: bool = Field(default=True, description="Whether to return JSON output")
+    plot_graph: bool = Field(default=False, description="Whether to generate graphs")
+    genai_snippet_code: str = Field(default="", description="Existing code snippet")
+
+
+class PythonOutput(BaseModel):
+    """Output model for Python code generation."""
+
+    result: str = Field(..., description="Generated code execution result")
+
+
 class OnlyPython:
     """Class that returns rephrased text."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyPython class"""
-        self.model = with_model
+    def __init__(self, config: PythonConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlyPython class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = PythonConfig(model=with_model)
 
     def _load_prompt_template(self) -> Template:
         """Load the Jinja2 template from instructions.j2 file."""
@@ -82,7 +109,7 @@ class OnlyPython:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(model=self.config.model, messages=messages, temperature=self.config.temperature)
         output = str(response.choices[0].message.content)
         pattern = r"```python\n((?:(?!```).|\n)*?)```"
         match = re.search(pattern, output, re.DOTALL)
@@ -168,33 +195,26 @@ class OnlyPython:
         """Print a formatted section header."""
         logger.debug("%s", f"\n{'*' * 20} {title} {'*' * 20}\n")
 
-    async def generate_code(
-        self,
-        message: str,
-        framework: str = "",
-        jsonify: bool = True,
-        plot_graph: bool = False,
-        genai_snippet_code: str = "",
-    ) -> str:
+    async def generate_code(self, input_data: PythonInput) -> PythonOutput:
         """
         Generate code for user given prompt with the specified field and framework.
 
         Args:
         ----
-            message (str): The message to rephrase.
+            input_data: Input containing code generation parameters.
 
         Returns:
         -------
-            str: The generated python code.
+            PythonOutput: The generated python code execution result.
         """
         system_prompt = self.get_python_code_generation_system_prompt()
 
-        message = "\n<Prompt>" + message + "</Prompt>\n\n"
-        if framework:
-            message += "<Framework> " + framework + " </Framework>"
-        if genai_snippet_code:
-            message += "<Code>" + genai_snippet_code + " </Code>"
-        if jsonify:
+        message = "\n<Prompt>" + input_data.message + "</Prompt>\n\n"
+        if input_data.framework:
+            message += "<Framework> " + input_data.framework + " </Framework>"
+        if input_data.genai_snippet_code:
+            message += "<Code>" + input_data.genai_snippet_code + " </Code>"
+        if input_data.jsonify:
             message += "\n<OutputFormat>json</OutputFormat>"
         else:
             message += "\n<OutputFormat>str</OutputFormat>"
@@ -222,7 +242,7 @@ class OnlyPython:
                 python_imports,
                 "# -" * 40,
                 "# Original code.",
-                genai_snippet_code,
+                input_data.genai_snippet_code,
                 "# -" * 40,
                 "# Generated Completion",
                 python_code,
@@ -237,13 +257,15 @@ class OnlyPython:
         logger.debug("%s", "-" * 40)
 
         self.print_section_header("Executing Generated Code")
-        generated_code_output = await self.execute_code_using_e2b_sandbox(full_code, pip_installs, plot_graph)
+        generated_code_output = await self.execute_code_using_e2b_sandbox(
+            full_code, pip_installs, input_data.plot_graph
+        )
         generated_code_output = generated_code_output.strip()
         logger.debug("\nOutput of Execution:\n")
         logger.debug(generated_code_output)
 
         self.print_section_header("End of Execution")
-        if jsonify:
+        if input_data.jsonify:
             generated_code_output = json.loads(generated_code_output)
 
-        return generated_code_output
+        return PythonOutput(result=str(generated_code_output))

@@ -37,7 +37,7 @@ from pydub import AudioSegment
 
 from common import setup_logging
 
-from ..only_json import OnlyJson
+from ..only_json import JsonConfig, OnlyJson
 
 
 logger = setup_logging(logging.INFO)
@@ -135,10 +135,31 @@ class AudiocastFFmpegNotInstalledError(Exception):
     """Raised when ffmpeg is not installed for audio processing."""
 
 
+class AudiocastConfig(BaseModel):
+    """Configuration for OnlyAudiocast class."""
+
+    model: str = Field(default="o1", description="LLM model to use")
+
+
+class AudiocastInput(BaseModel):
+    """Input model for audiocast generation."""
+
+    content: str = Field(..., description="Content to convert to audiocast")
+    audio_out_path: str = Field(..., description="Output path for audio file")
+    cast_configuration: CastConfiguration | None = Field(default=None, description="Cast configuration")
+
+
+class AudiocastOutput(BaseModel):
+    """Output model for audiocast generation."""
+
+    filename: str = Field(..., description="Generated audio filename")
+    file_path: str = Field(..., description="Full path to generated audio file")
+
+
 class OnlyAudiocast:
     """Converts text into an audio file using the GPT-4o model."""
 
-    def __init__(self, with_model: str = "o1") -> None:
+    def __init__(self, config: AudiocastConfig) -> None:
         """Initialize OnlyAudiocast and verify ffmpeg installation."""
         if not AudioSegment.ffmpeg:
             raise AudiocastFFmpegNotInstalledError(
@@ -152,7 +173,7 @@ class OnlyAudiocast:
             "nova",
             "shimmer",
         ]
-        self.with_model = with_model
+        self.config = config
 
     def _load_prompt_template(self) -> Template:
         """Load the Jinja2 template from instructions.j2 file."""
@@ -183,14 +204,9 @@ class OnlyAudiocast:
             )
         )
 
-    async def cast(
-        self,
-        content: str,
-        audio_out_path: str,
-        cast_configuration: CastConfiguration | None = None,
-    ) -> tuple[str, str]:
+    async def cast(self, input_data: AudiocastInput) -> AudiocastOutput:
         """Convert text into a conversation and generate an audio file."""
-        cast_config = cast_configuration or default_cast_configuration
+        cast_config = input_data.cast_configuration or default_cast_configuration
 
         available_voice_options = self.available_voices.copy()
         speaker_voice_map: dict[str, str] = {}
@@ -206,15 +222,21 @@ class OnlyAudiocast:
                 speaker_voice_map[speaker.name] = selected_voice
 
         system_prompt = self.get_system_prompt(cast_config)
-        parser = OnlyJson(with_model=self.with_model)
-        conversation_obj = await parser.parse(content, Conversation, system_prompt)
+        parser = OnlyJson(config=JsonConfig(model=self.config.model))
+        from ..only_json import JsonInput
+
+        conversation_obj = await parser.parse(
+            JsonInput(content=input_data.content, schema=Conversation, system_prompt=system_prompt)
+        )
         if not isinstance(conversation_obj, Conversation):
             raise TypeError("Expected Conversation type")
 
         agent_map: dict[str, str] = {}
         for sp in cast_config.speakers:
             agent_prompt = self.get_agent_prompt(sp)
-            agent_result = await parser.parse(agent_prompt, Instructions, agent_prompt)
+            agent_result = await parser.parse(
+                JsonInput(content=agent_prompt, schema=Instructions, system_prompt=agent_prompt)
+            )
             if not isinstance(agent_result, Instructions):
                 raise TypeError("Expected Instructions type")
 
@@ -248,14 +270,14 @@ class OnlyAudiocast:
             combined_audio += audio_segment
             logger.debug(f"Audio segment added for {entry.speaker}.")
 
-        title_model = AudiocastTitle.generate(content)
+        title_model = AudiocastTitle.generate(input_data.content)
         # Use UTC timestamp for filenames
         timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")  # noqa: UP017
         filename = f"{timestamp}_{title_model.generated_title}.wav"
 
-        audio_out_folder = audio_out_path or Path("generated_podcast") / "podcast_out"
+        audio_out_folder = input_data.audio_out_path or Path("generated_podcast") / "podcast_out"
         Path(audio_out_folder).mkdir(parents=True, exist_ok=True)
         audio_file_path = Path(audio_out_folder) / filename
         combined_audio.export(str(audio_file_path), format="wav")
         logger.debug(f"Audio file saved to {audio_file_path}")
-        return filename, str(audio_file_path)
+        return AudiocastOutput(filename=filename, file_path=str(audio_file_path))

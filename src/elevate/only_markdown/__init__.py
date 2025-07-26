@@ -34,6 +34,7 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
 
 from common import setup_logging
 
@@ -41,12 +42,34 @@ from common import setup_logging
 logger = setup_logging(logging.INFO)
 
 
+class MarkdownConfig(BaseModel):
+    """Configuration for OnlyMarkdown class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class MarkdownInput(BaseModel):
+    """Input model for markdown conversion."""
+
+    input_text: str = Field(..., description="Input text to convert to Markdown")
+
+
+class MarkdownOutput(BaseModel):
+    """Output model for markdown conversion."""
+
+    markdown: str = Field(..., description="Converted text in Markdown format")
+
+
 class OnlyMarkdown:
     """Class that only supports Markdown syntax."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyMarkdown class"""
-        self.model = with_model
+    def __init__(self, config: MarkdownConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlyMarkdown class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = MarkdownConfig(model=with_model)
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Make the LLM call using litellm and extract the markdown content."""
@@ -55,7 +78,7 @@ class OnlyMarkdown:
             {"role": "user", "content": input_text},
         ]
 
-        response = await acompletion(model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(model=self.config.model, messages=messages, temperature=self.config.temperature)
         # Fix: Use response.content if choices/message is not available
         output = str(getattr(response, "content", response))
         pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
@@ -77,15 +100,17 @@ class OnlyMarkdown:
         template = self._load_prompt_template()
         return str(template.render())
 
-    async def convert_to_markdown(self, input_text: str) -> str:
+    async def convert_to_markdown(self, input_data: MarkdownInput) -> MarkdownOutput:
         """Convert the given input text to GitHub Flavored Markdown (GFM) format."""
         system_prompt = self.get_conversion_system_prompt()
-        return await self.make_llm_call(system_prompt, input_text)
+        markdown = await self.make_llm_call(system_prompt, input_data.input_text)
+        return MarkdownOutput(markdown=markdown)
 
-    async def summarize_and_convert_to_markdown(self, input_text: str) -> str:
+    async def summarize_and_convert_to_markdown(self, input_data: MarkdownInput) -> MarkdownOutput:
         """Summarize and convert the given input text to GitHub Flavored Markdown (GFM) format."""
         system_prompt = self.get_conversion_system_prompt()
-        return await self.make_llm_call(system_prompt, input_text)
+        markdown = await self.make_llm_call(system_prompt, input_data.input_text)
+        return MarkdownOutput(markdown=markdown)
 
     def print_section_header(self, title: str) -> None:
         """Print a formatted section header."""

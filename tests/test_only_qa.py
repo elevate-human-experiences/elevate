@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_qa import OnlyQA
+from elevate.only_qa import OnlyQA, QAConfig, QAInput
 
 
 logger = setup_logging(logging.INFO)
@@ -45,8 +45,11 @@ async def test_qa_generation_from_product_docs(settings: Any) -> None:
         "System requirements: Windows 10+, macOS 10.15+, or Linux Ubuntu 18.04+. "
         "Support is available 24/7 via chat, email, and phone."
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(input_text=input_text)
+    result = await only_qa.generate_answers(input_data)
+    qa_output = result.answers
     logger.debug("Q&A Generation Output:\n%s", qa_output)
 
     # Basic validation - ensure output contains typical Q&A patterns
@@ -66,8 +69,11 @@ async def test_qa_generation_from_technical_docs(settings: Any) -> None:
         "Rate limiting: 100 requests per minute per IP. "
         "Error codes: 401 (unauthorized), 403 (forbidden), 429 (rate limit exceeded), 500 (server error)."
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(input_text=input_text)
+    result = await only_qa.generate_answers(input_data)
+    qa_output = result.answers
     logger.debug("Technical Q&A Generation Output:\n%s", qa_output)
 
     # Basic validation
@@ -87,8 +93,11 @@ async def test_qa_generation_from_user_manual(settings: Any) -> None:
         "Troubleshooting: If device won't pair, ensure it's in pairing mode and within 30 feet of controller. "
         "For connection issues, restart both the controller and your router."
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(input_text=input_text)
+    result = await only_qa.generate_answers(input_data)
+    qa_output = result.answers
     logger.debug("User Manual Q&A Generation Output:\n%s", qa_output)
 
     # Basic validation
@@ -108,8 +117,11 @@ async def test_qa_generation_from_faq_content(settings: Any) -> None:
         "Additional info: The app also provides personalized recommendations to reduce your environmental impact. "
         "Premium features include detailed analytics, goal setting, and community challenges."
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(input_text=input_text)
+    result = await only_qa.generate_answers(input_data)
+    qa_output = result.answers
     logger.debug("FAQ Enhancement Output:\n%s", qa_output)
 
     # Basic validation
@@ -121,8 +133,11 @@ async def test_qa_generation_from_faq_content(settings: Any) -> None:
 async def test_qa_generation_empty_input(settings: Any) -> None:
     """Test Q&A generation with empty input."""
     input_text = ""
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(input_text=input_text)
+    result = await only_qa.generate_answers(input_data)
+    qa_output = result.answers
     logger.debug("Empty Input Q&A Output:\n%s", qa_output)
 
     # Should handle empty input gracefully

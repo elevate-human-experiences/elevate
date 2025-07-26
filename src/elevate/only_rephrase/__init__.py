@@ -26,14 +26,39 @@ from pathlib import Path
 
 from jinja2 import Template
 from litellm import acompletion
+from pydantic import BaseModel, Field
+
+
+class RephraseConfig(BaseModel):
+    """Configuration for OnlyRephrase class."""
+
+    model: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    temperature: float = Field(default=0.1, description="Temperature for LLM calls")
+
+
+class RephraseInput(BaseModel):
+    """Input model for text rephrasing."""
+
+    message: str = Field(..., description="Message to rephrase")
+    tone: str = Field(..., description="Desired tone for the rephrased message")
+    length: str = Field(..., description="Desired length for the rephrased message")
+
+
+class RephraseOutput(BaseModel):
+    """Output model for text rephrasing."""
+
+    rephrased_text: str = Field(..., description="Rephrased message")
 
 
 class OnlyRephrase:
     """Class that returns rephrased text."""
 
-    def __init__(self, with_model: str = "gpt-4o-mini") -> None:
-        """Initialize the OnlyRephrase class"""
-        self.model = with_model
+    def __init__(self, config: RephraseConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
+        """Initialize the OnlyRephrase class with Pydantic config."""
+        if config:
+            self.config = config
+        else:
+            self.config = RephraseConfig(model=with_model)
 
     async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
         """Make the LLM call using litellm and extract the markdown content."""
@@ -41,7 +66,9 @@ class OnlyRephrase:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(
+            api_key="", model=self.config.model, messages=messages, temperature=self.config.temperature
+        )
         # Fix: Use response.content if choices/message is not available
         return str(getattr(response, "content", response))
 
@@ -57,24 +84,23 @@ class OnlyRephrase:
         template = self._load_prompt_template()
         return str(template.render())
 
-    async def rephrase_text(self, message: str, tone: str, length: str) -> str:
+    async def rephrase_text(self, input_data: RephraseInput) -> RephraseOutput:
         """
         Rephrases the given message with the specified tone and length.
 
         Args:
         ----
-            message (str): The message to rephrase.
-            tone (str): The desired tone for the rephrased message.
-            length (str): The desired length for the rephrased message.
+            input_data: Input containing message, tone, and length parameters.
 
         Returns:
         -------
-            str: The rephrased message.
+            RephraseOutput: The rephrased message.
         """
         system_prompt = self.get_rephrase_system_prompt()
 
-        message = "\n<Message>" + message + "</Message>\n\n"
-        message += "<Tone> " + tone + " </Tone>\n\n"
-        message += "<Length> " + length + " </Length>"
+        message = "\n<Message>" + input_data.message + "</Message>\n\n"
+        message += "<Tone> " + input_data.tone + " </Tone>\n\n"
+        message += "<Length> " + input_data.length + " </Length>"
 
-        return await self.make_llm_call(system_prompt, message)
+        rephrased_text = await self.make_llm_call(system_prompt, message)
+        return RephraseOutput(rephrased_text=rephrased_text)

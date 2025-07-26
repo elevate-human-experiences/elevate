@@ -28,7 +28,7 @@ from typing import Any, Optional
 import pytest
 from pydantic import BaseModel, ConfigDict, Field
 
-from elevate.only_json import OnlyJson
+from elevate.only_json import JsonConfig, JsonInput, OnlyJson
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -50,8 +50,10 @@ async def test_calendar_event(settings: Any) -> None:
 
         events: list[CalendarEvent] = Field(..., description="A JSON array of CalendarEvent objects.")
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    events_list = await only_json.parse(content="List 5 important events in the XIX century", schema=EventsList)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content="List 5 important events in the XIX century", schema=EventsList, system_prompt=None)
+    events_list = await only_json.parse(input_data)
     assert isinstance(events_list, EventsList)
 
 
@@ -77,8 +79,10 @@ async def test_extraction_of_contact_info(settings: Any) -> None:
         " I'll be available most weekdays."
     )
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    contact = await only_json.parse(content=text, schema=ContactInfo)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=ContactInfo, system_prompt=None)
+    contact = await only_json.parse(input_data)
     assert isinstance(contact, ContactInfo)
     assert contact.name == "John Doe"
 
@@ -105,8 +109,10 @@ async def test_nested_structures(settings: Any) -> None:
         "The second is Marketing, managed by Bob Smith with 15 people."
     )
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    company = await only_json.parse(content=text, schema=Company)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=Company, system_prompt=None)
+    company = await only_json.parse(input_data)
     assert isinstance(company, Company)
     assert len(company.departments) == 2
 
@@ -127,8 +133,10 @@ async def test_cyclic_relationships(settings: Any) -> None:
 
     text = "Employee: Jane Smith. Manager: John Wilson. Manager of John Wilson is none."
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    employee = await only_json.parse(content=text, schema=Employee)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=Employee, system_prompt=None)
+    employee = await only_json.parse(input_data)
     assert isinstance(employee, Employee)
     assert employee.name == "Jane Smith"
     assert employee.manager is not None
@@ -151,8 +159,10 @@ async def test_conversion_while_extracting(settings: Any) -> None:
 
     text = "The temperature in Berlin is 86 degrees Fahrenheit today."
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    reading = await only_json.parse(content=text, schema=TemperatureReading)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=TemperatureReading, system_prompt=None)
+    reading = await only_json.parse(input_data)
     assert isinstance(reading, TemperatureReading)
     assert 29 <= reading.temperature_celsius <= 31
 
@@ -170,8 +180,10 @@ async def test_different_field_descriptions(settings: Any) -> None:
 
     text = "We have a new product called UltraWidget. SKU: UW-001. We currently have 500 pieces in inventory."
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    product = await only_json.parse(content=text, schema=Product)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=Product, system_prompt=None)
+    product = await only_json.parse(input_data)
     assert isinstance(product, Product)
     assert product.title == "UltraWidget"
     assert product.quantity == 500
@@ -190,8 +202,10 @@ async def test_data_formats(settings: Any) -> None:
 
     text = "Item: Fancy Pen. Price: $5.99. Stock: 100 units available."
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    item = await only_json.parse(content=text, schema=StoreItem)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=StoreItem, system_prompt=None)
+    item = await only_json.parse(input_data)
     assert isinstance(item, StoreItem)
     assert item.name == "Fancy Pen"
     assert abs(item.price - 5.99) < 0.001
@@ -210,8 +224,10 @@ async def test_datetime_parsing(settings: Any) -> None:
 
     text = "Meeting about budget planning on March 10, 2025 at 2:30 PM."
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    meeting = await only_json.parse(content=text, schema=Meeting)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=Meeting, system_prompt=None)
+    meeting = await only_json.parse(input_data)
     assert isinstance(meeting, Meeting)
     assert meeting.start_time.year == 2025
     assert meeting.start_time.month == 3
@@ -235,8 +251,10 @@ async def test_optional_fields(settings: Any) -> None:
 
     text = "Username: techguy. Bio: Loves coding in Python. (No website provided)."
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    profile = await only_json.parse(content=text, schema=Profile)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=Profile, system_prompt=None)
+    profile = await only_json.parse(input_data)
     assert isinstance(profile, Profile)
     assert profile.username == "techguy"
     assert profile.bio == "Loves coding in Python."
@@ -254,8 +272,10 @@ async def test_special_characters_and_lists(settings: Any) -> None:
 
     text = "Today's grocery list:\n• Apples\n• 2% Milk\n• Honey\n• Eggs (a dozen)\nEnd of list."
 
-    only_json = OnlyJson(with_model=settings.with_model)
-    grocery_list = await only_json.parse(content=text, schema=GroceryList)
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(content=text, schema=GroceryList, system_prompt=None)
+    grocery_list = await only_json.parse(input_data)
     assert isinstance(grocery_list, GroceryList)
     assert len(grocery_list.items) == 4
     assert "2% Milk" in grocery_list.items

@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_email import Email, OnlyEmail
+from elevate.only_email import Email, EmailInput, OnlyEmail
 
 
 logger = setup_logging(logging.INFO)
@@ -41,7 +41,8 @@ async def test_personal_email(settings: Any) -> None:
     A birthday wishes for John Doe.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(personal_email_input_message, "personal")
+    email_input = EmailInput(message=personal_email_input_message, email_type="personal")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -52,7 +53,8 @@ async def test_professional_email(settings: Any) -> None:
     Email to boss regarding, asking a sick leave for 3 days.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(professional_email_input_message, "professional")
+    email_input = EmailInput(message=professional_email_input_message, email_type="professional")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -75,7 +77,8 @@ async def test_marketing_email(settings: Any) -> None:
     7. Desired Tone: A light and energetic tone.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(marketing_email_input_message, "marketing")
+    email_input = EmailInput(message=marketing_email_input_message, email_type="marketing")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -87,7 +90,8 @@ async def test_resignation_email(settings: Any) -> None:
     and would like to express my gratitude for the opportunities provided. I am willing to help with the transition.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(resignation_input_message, "professional")
+    email_input = EmailInput(message=resignation_input_message, email_type="professional")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -99,7 +103,8 @@ async def test_workplace_conflict_email(settings: Any) -> None:
     regarding recent interactions, propose a meeting to discuss the issues, and aim for a resolution while remaining professional.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(conflict_input_message, "professional")
+    email_input = EmailInput(message=conflict_input_message, email_type="professional")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -111,7 +116,8 @@ async def test_bill_dispute_email(settings: Any) -> None:
     request a prompt review or cancellation of the charges.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(bill_input_message, "professional")
+    email_input = EmailInput(message=bill_input_message, email_type="professional")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -123,7 +129,8 @@ async def test_baby_shower_invite_email(settings: Any) -> None:
     inviting close friends and family to join in the celebration.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(baby_shower_input_message, "personal")
+    email_input = EmailInput(message=baby_shower_input_message, email_type="personal")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -135,7 +142,8 @@ async def test_urgent_meeting_email(settings: Any) -> None:
     Please include proposed meeting times and emphasize the urgency of the situation.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    generated_email = await only_email.generate_email(urgent_meeting_input_message, "professional")
+    email_input = EmailInput(message=urgent_meeting_input_message, email_type="professional")
+    generated_email = await only_email.generate_email(email_input)
     logger.debug(generated_email)
 
 
@@ -146,7 +154,8 @@ async def test_structured_personal_email(settings: Any) -> None:
     A birthday wishes for John Doe.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    structured_email = await only_email.generate_structured_email(personal_email_input_message, "personal")
+    email_input = EmailInput(message=personal_email_input_message, email_type="personal")
+    structured_email = await only_email.generate_structured_email(email_input)
     logger.debug(f"Structured Personal Email: {structured_email}")
 
     # Validate that we got an Email object with all required fields
@@ -165,7 +174,8 @@ async def test_structured_professional_email(settings: Any) -> None:
     Email to boss regarding, asking a sick leave for 3 days.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    structured_email = await only_email.generate_structured_email(professional_email_input_message, "professional")
+    email_input = EmailInput(message=professional_email_input_message, email_type="professional")
+    structured_email = await only_email.generate_structured_email(email_input)
     logger.debug(f"Structured Professional Email: {structured_email}")
 
     # Validate that we got an Email object with all required fields
@@ -196,7 +206,8 @@ async def test_structured_marketing_email(settings: Any) -> None:
     7. Desired Tone: A light and energetic tone.
     """
     only_email = OnlyEmail(with_model=settings.with_model)
-    structured_email = await only_email.generate_structured_email(marketing_email_input_message, "marketing")
+    email_input = EmailInput(message=marketing_email_input_message, email_type="marketing")
+    structured_email = await only_email.generate_structured_email(email_input)
     logger.debug(f"Structured Marketing Email: {structured_email}")
 
     # Validate that we got an Email object with all required fields

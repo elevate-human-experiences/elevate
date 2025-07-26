@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_rephrase import OnlyRephrase
+from elevate.only_rephrase import OnlyRephrase, RephraseConfig, RephraseInput
 
 
 logger = setup_logging(logging.INFO)
@@ -40,8 +40,11 @@ async def test_rephase_text_formal(settings: Any) -> None:
     input_message = """
     I need 2 days of sick leave.
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "formal", "lengthy")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="formal", length="lengthy")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Formal Rephrase:\n%s", rephrased_text)
 
 
@@ -51,8 +54,11 @@ async def test_rephase_text_informal(settings: Any) -> None:
     input_message = """
     I need 2 days of sick leave.
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "informal", "short")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="informal", length="short")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Informal Rephrase:\n%s", rephrased_text)
 
 
@@ -62,8 +68,11 @@ async def test_rephase_text_urgent(settings: Any) -> None:
     input_message = """
     This is a serious problem that needs to be addressed immediately.
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "urgent", "lengthy")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="urgent", length="lengthy")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Urgent Rephrase:\n%s", rephrased_text)
 
 
@@ -73,8 +82,11 @@ async def test_rephase_text_enthusiastic(settings: Any) -> None:
     input_message = """
     I'm so excited about this project!
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "enthusiastic", "medium")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="enthusiastic", length="medium")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Enthusiastic Rephrase:\n%s", rephrased_text)
 
 
@@ -84,8 +96,11 @@ async def test_rephase_text_informative(settings: Any) -> None:
     input_message = """
     The system utilizes a multi-threaded architecture to improve performance.
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "informative", "lengthy")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="informative", length="lengthy")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Informative Rephrase:\n%s", rephrased_text)
 
 
@@ -95,8 +110,11 @@ async def test_rephase_text_apologetic(settings: Any) -> None:
     input_message = """
     I apologize for the delay in my response. I understand that this has caused inconvenience, and I am truly sorry.
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "apologetic", "lengthy")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="apologetic", length="lengthy")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Apologetic Rephrase:\n%s", rephrased_text)
 
 
@@ -106,8 +124,11 @@ async def test_rephase_text_friendly(settings: Any) -> None:
     input_message = """
     Hey, let's catch up over coffee sometime soon.
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "friendly", "short")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="friendly", length="short")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Friendly Rephrase:\n%s", rephrased_text)
 
 
@@ -117,6 +138,9 @@ async def test_rephase_text_technical(settings: Any) -> None:
     input_message = """
     Our application leverages containerization and orchestration to optimize deployment pipelines.
     """
-    only_rephrase = OnlyRephrase(with_model=settings.with_model)
-    rephrased_text = await only_rephrase.rephrase_text(input_message, "technical", "detailed")
+    config = RephraseConfig(model=settings.with_model)
+    only_rephrase = OnlyRephrase(config=config)
+    input_data = RephraseInput(message=input_message, tone="technical", length="detailed")
+    result = await only_rephrase.rephrase_text(input_data)
+    rephrased_text = result.rephrased_text
     logger.debug("Technical Rephrase:\n%s", rephrased_text)

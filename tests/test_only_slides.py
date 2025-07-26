@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_slides import OnlySlides
+from elevate.only_slides import OnlySlides, SlidesConfig, SlidesInput
 
 
 logger = setup_logging(logging.INFO)
@@ -46,8 +46,11 @@ async def test_pitch_deck_generation(settings: Any) -> None:
         "Business model: freemium with premium analytics and advanced features. "
         "Competitive advantage: AI-powered recommendations and gamification elements."
     )
-    only_slides = OnlySlides(with_model=settings.with_model)
-    slides_output = await only_slides.generate_slides(input_text, "pitch deck", 5)
+    config = SlidesConfig(model=settings.with_model)
+    only_slides = OnlySlides(config=config)
+    input_data = SlidesInput(input_text=input_text, type_of_slides="pitch deck", number_of_slides=5)
+    result = await only_slides.generate_slides(input_data)
+    slides_output = result.slides
     logger.debug("Pitch Deck Slides Output:\n%s", slides_output)
 
     # Basic validation
@@ -66,8 +69,11 @@ async def test_product_presentation_generation(settings: Any) -> None:
         "Infrastructure: AWS-based with 99.9% uptime SLA, global CDN, and disaster recovery. "
         "Pricing: Enterprise plans starting at $10/user/month with volume discounts available."
     )
-    only_slides = OnlySlides(with_model=settings.with_model)
-    slides_output = await only_slides.generate_slides(input_text, "product presentation", 6)
+    config = SlidesConfig(model=settings.with_model)
+    only_slides = OnlySlides(config=config)
+    input_data = SlidesInput(input_text=input_text, type_of_slides="product presentation", number_of_slides=6)
+    result = await only_slides.generate_slides(input_data)
+    slides_output = result.slides
     logger.debug("Product Presentation Slides Output:\n%s", slides_output)
 
     # Basic validation
@@ -87,8 +93,11 @@ async def test_sales_deck_generation(settings: Any) -> None:
         "Market size: $8B workflow automation market growing 20% annually. "
         "Competitive landscape: Zapier, Microsoft Power Automate, but we offer enterprise-grade security."
     )
-    only_slides = OnlySlides(with_model=settings.with_model)
-    slides_output = await only_slides.generate_slides(input_text, "sales deck", 8)
+    config = SlidesConfig(model=settings.with_model)
+    only_slides = OnlySlides(config=config)
+    input_data = SlidesInput(input_text=input_text, type_of_slides="sales deck", number_of_slides=8)
+    result = await only_slides.generate_slides(input_data)
+    slides_output = result.slides
     logger.debug("Sales Deck Slides Output:\n%s", slides_output)
 
     # Basic validation
@@ -108,8 +117,11 @@ async def test_investor_presentation_generation(settings: Any) -> None:
         "Funding: Seeking $10M Series A to expand sales team and accelerate product development. "
         "Financial projections: $20M ARR by year 3, path to profitability by year 4."
     )
-    only_slides = OnlySlides(with_model=settings.with_model)
-    slides_output = await only_slides.generate_slides(input_text, "investor presentation", 10)
+    config = SlidesConfig(model=settings.with_model)
+    only_slides = OnlySlides(config=config)
+    input_data = SlidesInput(input_text=input_text, type_of_slides="investor presentation", number_of_slides=10)
+    result = await only_slides.generate_slides(input_data)
+    slides_output = result.slides
     logger.debug("Investor Presentation Slides Output:\n%s", slides_output)
 
     # Basic validation
@@ -129,8 +141,11 @@ async def test_training_slides_generation(settings: Any) -> None:
         "Interactive elements: Security assessment quiz, password strength checker demo, "
         "phishing email examples, case studies of security breaches."
     )
-    only_slides = OnlySlides(with_model=settings.with_model)
-    slides_output = await only_slides.generate_slides(input_text, "training presentation", 7)
+    config = SlidesConfig(model=settings.with_model)
+    only_slides = OnlySlides(config=config)
+    input_data = SlidesInput(input_text=input_text, type_of_slides="training presentation", number_of_slides=7)
+    result = await only_slides.generate_slides(input_data)
+    slides_output = result.slides
     logger.debug("Training Slides Output:\n%s", slides_output)
 
     # Basic validation
@@ -142,8 +157,11 @@ async def test_training_slides_generation(settings: Any) -> None:
 async def test_minimal_input_slides(settings: Any) -> None:
     """Test slide generation with minimal input content."""
     input_text = "Product: Simple Todo App. Features: task creation, due dates, reminders."
-    only_slides = OnlySlides(with_model=settings.with_model)
-    slides_output = await only_slides.generate_slides(input_text, "product overview", 3)
+    config = SlidesConfig(model=settings.with_model)
+    only_slides = OnlySlides(config=config)
+    input_data = SlidesInput(input_text=input_text, type_of_slides="product overview", number_of_slides=3)
+    result = await only_slides.generate_slides(input_data)
+    slides_output = result.slides
     logger.debug("Minimal Input Slides Output:\n%s", slides_output)
 
     # Basic validation

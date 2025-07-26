@@ -28,7 +28,7 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_markdown import OnlyMarkdown
+from elevate.only_markdown import MarkdownConfig, MarkdownInput, OnlyMarkdown
 
 
 logger = setup_logging(logging.INFO)
@@ -47,8 +47,11 @@ async def test_hastily_copied_html_conversion(settings: Any) -> None:
         "<tr><td>README.txt</td><td>This file.</td></tr><tr><td>/examples</td><td>Code examples.</td></tr></table>"
         "End of README."
     )
-    only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = await only_markdown.convert_to_markdown(input_text)
+    config = MarkdownConfig(model=settings.with_model)
+    only_markdown = OnlyMarkdown(config=config)
+    input_data = MarkdownInput(input_text=input_text)
+    result = await only_markdown.convert_to_markdown(input_data)
+    markdown_output = result.markdown
     logger.debug("HTML Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -65,8 +68,11 @@ async def test_hastily_copied_word_doc_conversion(settings: Any) -> None:
         "README.txt  This file.   /examples  Code examples.  "
         "End of document."
     )
-    only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = await only_markdown.convert_to_markdown(input_text)
+    config = MarkdownConfig(model=settings.with_model)
+    only_markdown = OnlyMarkdown(config=config)
+    input_data = MarkdownInput(input_text=input_text)
+    result = await only_markdown.convert_to_markdown(input_data)
+    markdown_output = result.markdown
     logger.debug("Word Doc Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -74,8 +80,11 @@ async def test_hastily_copied_word_doc_conversion(settings: Any) -> None:
 async def test_hastily_copied_db_output_conversion(settings: Any) -> None:
     """Simulate a conversion where tabular data from a database is copy-pasted as plain text."""
     input_text = "Name    Age    Occupation\nAlice   30     Engineer\nBob     25     Designer\nCharlie 35     Manager\n"
-    only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = await only_markdown.convert_to_markdown(input_text)
+    config = MarkdownConfig(model=settings.with_model)
+    only_markdown = OnlyMarkdown(config=config)
+    input_data = MarkdownInput(input_text=input_text)
+    result = await only_markdown.convert_to_markdown(input_data)
+    markdown_output = result.markdown
     logger.debug("DB Output Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -89,8 +98,11 @@ async def test_hastily_copied_blog_post_conversion(settings: Any) -> None:
         "My Experience  I began coding in college and since then the landscape of technology has never ceased to amaze me.  "
         "Stay tuned for more updates.  Happy coding and keep exploring!"
     )
-    only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = await only_markdown.convert_to_markdown(input_text)
+    config = MarkdownConfig(model=settings.with_model)
+    only_markdown = OnlyMarkdown(config=config)
+    input_data = MarkdownInput(input_text=input_text)
+    result = await only_markdown.convert_to_markdown(input_data)
+    markdown_output = result.markdown
     logger.debug("Blog Post Copy-Paste Conversion:\n%s", markdown_output)
 
 
@@ -109,6 +121,9 @@ async def test_hastily_copied_complex_unformatted_conversion(settings: Any) -> N
         "Code: def example(): return 'Hello, Markdown!'  "
         "More info: Visit https://example.com for further details."
     )
-    only_markdown = OnlyMarkdown(with_model=settings.with_model)
-    markdown_output = await only_markdown.convert_to_markdown(input_text)
+    config = MarkdownConfig(model=settings.with_model)
+    only_markdown = OnlyMarkdown(config=config)
+    input_data = MarkdownInput(input_text=input_text)
+    result = await only_markdown.convert_to_markdown(input_data)
+    markdown_output = result.markdown
     logger.debug("Complex Unformatted Copy-Paste Conversion:\n%s", markdown_output)

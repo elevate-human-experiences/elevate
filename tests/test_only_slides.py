@@ -35,135 +35,149 @@ logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_pitch_deck_generation(settings: Any) -> None:
-    """Test generation of a pitch deck from product documentation."""
-    input_text = (
-        "Product: EcoTracker - Sustainable Living App\n"
-        "EcoTracker helps users monitor and reduce their environmental impact through daily activity tracking. "
-        "The app tracks carbon footprint from transportation, energy usage, and consumption habits. "
-        "Key features: real-time tracking, personalized recommendations, goal setting, community challenges, "
-        "and detailed analytics. Target market: environmentally conscious millennials and Gen Z. "
-        "Business model: freemium with premium analytics and advanced features. "
-        "Competitive advantage: AI-powered recommendations and gamification elements."
-    )
+async def test_entrepreneur_pitch_to_investors(settings: Any) -> None:
+    """Test realistic scenario: entrepreneur pitching sustainable app to investors."""
     config = SlidesConfig(model=settings.with_model)
     only_slides = OnlySlides(config=config)
-    input_data = SlidesInput(input_text=input_text, type_of_slides="pitch deck", number_of_slides=5)
-    result = await only_slides.generate_slides(input_data)
-    slides_output = result.slides
-    logger.debug("Pitch Deck Slides Output:\n%s", slides_output)
 
-    # Basic validation
-    assert slides_output is not None
-    assert len(slides_output.strip()) > 0
+    input_data = SlidesInput(
+        topic="EcoTracker - an app that helps people reduce their carbon footprint through daily habit tracking",
+        audience="potential investors",
+        purpose="get seed funding for our startup",
+        context="We've built an MVP and have 1000 beta users showing 40% weekly engagement",
+        slide_count=6,
+        style="professional",
+    )
+
+    result = await only_slides.generate_slides(input_data)
+    logger.debug("Entrepreneur Pitch Slides:\n%s", result.slides)
+    logger.debug("Insights: %s", result.key_insights)
+    logger.debug("Tips: %s", result.presentation_tips)
+
+    # Validate complete output structure
+    assert result.slides is not None
+    assert len(result.slides.strip()) > 0
+    assert len(result.key_insights) >= 1
+    assert len(result.presentation_tips) >= 1
+    assert len(result.next_steps) >= 1
+    assert "minute" in result.estimated_duration.lower()
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_product_presentation_generation(settings: Any) -> None:
-    """Test generation of a product presentation from technical specs."""
-    input_text = (
-        "Product: CloudSync Pro - Enterprise File Synchronization\n"
-        "Technical specifications: 256-bit AES encryption, real-time sync across unlimited devices, "
-        "API integrations with 50+ business tools, automated backup schedules, version control, "
-        "collaborative workspaces, admin controls, compliance with SOC 2 Type II, GDPR, and HIPAA. "
-        "Infrastructure: AWS-based with 99.9% uptime SLA, global CDN, and disaster recovery. "
-        "Pricing: Enterprise plans starting at $10/user/month with volume discounts available."
-    )
+async def test_sales_manager_presenting_to_enterprise_client(settings: Any) -> None:
+    """Test realistic scenario: sales manager presenting cloud solution to IT director."""
     config = SlidesConfig(model=settings.with_model)
     only_slides = OnlySlides(config=config)
-    input_data = SlidesInput(input_text=input_text, type_of_slides="product presentation", number_of_slides=6)
-    result = await only_slides.generate_slides(input_data)
-    slides_output = result.slides
-    logger.debug("Product Presentation Slides Output:\n%s", slides_output)
 
-    # Basic validation
-    assert slides_output is not None
-    assert len(slides_output.strip()) > 0
+    input_data = SlidesInput(
+        topic="CloudSync Pro - secure file sync solution that keeps your team's work safe and accessible",
+        audience="IT directors and CTO",
+        purpose="convince them to choose our solution over competitors",
+        context="They're migrating from outdated file servers and need enterprise-grade security",
+        slide_count=5,
+        style="professional",
+    )
+
+    result = await only_slides.generate_slides(input_data)
+    logger.debug("Sales Presentation Slides:\n%s", result.slides)
+
+    # Validate structure
+    assert result.slides is not None
+    assert len(result.slides.strip()) > 0
+    assert len(result.key_insights) >= 1
+    assert len(result.presentation_tips) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_sales_deck_generation(settings: Any) -> None:
-    """Test generation of a sales deck from company information."""
-    input_text = (
-        "Company: TechFlow Solutions - B2B Automation Platform\n"
-        "Problem: Businesses waste 40% of time on repetitive manual tasks. "
-        "Solution: TechFlow automates workflows across departments with no-code solutions. "
-        "Benefits: 60% reduction in processing time, 90% fewer errors, $50K average annual savings per client. "
-        "Customer testimonials: 'TechFlow transformed our operations' - Fortune 500 client. "
-        "Market size: $8B workflow automation market growing 20% annually. "
-        "Competitive landscape: Zapier, Microsoft Power Automate, but we offer enterprise-grade security."
-    )
+async def test_manager_explaining_new_system_to_team(settings: Any) -> None:
+    """Test realistic scenario: manager introducing workflow automation to skeptical employees."""
     config = SlidesConfig(model=settings.with_model)
     only_slides = OnlySlides(config=config)
-    input_data = SlidesInput(input_text=input_text, type_of_slides="sales deck", number_of_slides=8)
-    result = await only_slides.generate_slides(input_data)
-    slides_output = result.slides
-    logger.debug("Sales Deck Slides Output:\n%s", slides_output)
 
-    # Basic validation
-    assert slides_output is not None
-    assert len(slides_output.strip()) > 0
+    input_data = SlidesInput(
+        topic="TechFlow - the new automation tool that will save us hours each week",
+        audience="my team members",
+        purpose="get everyone excited about using this new system",
+        context="Some people are worried it's too complicated or will replace their jobs",
+        slide_count=4,
+        style="casual",
+    )
+
+    result = await only_slides.generate_slides(input_data)
+    logger.debug("Team Presentation Slides:\n%s", result.slides)
+
+    # Validate structure
+    assert result.slides is not None
+    assert len(result.slides.strip()) > 0
+    assert len(result.key_insights) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_investor_presentation_generation(settings: Any) -> None:
-    """Test generation of an investor presentation from startup information."""
-    input_text = (
-        "Startup: GreenTech Innovations - Renewable Energy Management\n"
-        "Market opportunity: $150B renewable energy market with 15% CAGR. "
-        "Product: AI-powered energy optimization platform for commercial buildings. "
-        "Traction: $2M ARR, 150+ enterprise customers, 40% month-over-month growth. "
-        "Team: Former Tesla, Google, and McKinsey executives with 20+ years combined experience. "
-        "Funding: Seeking $10M Series A to expand sales team and accelerate product development. "
-        "Financial projections: $20M ARR by year 3, path to profitability by year 4."
-    )
+async def test_student_presenting_research_to_professors(settings: Any) -> None:
+    """Test realistic scenario: student presenting final project to academic panel."""
     config = SlidesConfig(model=settings.with_model)
     only_slides = OnlySlides(config=config)
-    input_data = SlidesInput(input_text=input_text, type_of_slides="investor presentation", number_of_slides=10)
-    result = await only_slides.generate_slides(input_data)
-    slides_output = result.slides
-    logger.debug("Investor Presentation Slides Output:\n%s", slides_output)
 
-    # Basic validation
-    assert slides_output is not None
-    assert len(slides_output.strip()) > 0
+    input_data = SlidesInput(
+        topic="How AI can optimize energy usage in smart buildings",
+        audience="my professors and classmates",
+        purpose="demonstrate my research findings and get a good grade",
+        context="This is my capstone project and I need to show both the technical work and real-world impact",
+        slide_count=8,
+        style="technical",
+    )
+
+    result = await only_slides.generate_slides(input_data)
+    logger.debug("Student Research Slides:\n%s", result.slides)
+
+    # Validate structure
+    assert result.slides is not None
+    assert len(result.slides.strip()) > 0
+    assert len(result.key_insights) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_training_slides_generation(settings: Any) -> None:
-    """Test generation of training slides from educational content."""
-    input_text = (
-        "Training Topic: Cybersecurity Best Practices for Remote Workers\n"
-        "Learning objectives: Identify common security threats, implement strong password policies, "
-        "recognize phishing attempts, secure home Wi-Fi networks, use VPN properly. "
-        "Key concepts: Multi-factor authentication, zero-trust security model, social engineering, "
-        "data encryption, incident response procedures. "
-        "Interactive elements: Security assessment quiz, password strength checker demo, "
-        "phishing email examples, case studies of security breaches."
-    )
+async def test_trainer_teaching_cybersecurity_to_remote_workers(settings: Any) -> None:
+    """Test realistic scenario: corporate trainer educating employees about online security."""
     config = SlidesConfig(model=settings.with_model)
     only_slides = OnlySlides(config=config)
-    input_data = SlidesInput(input_text=input_text, type_of_slides="training presentation", number_of_slides=7)
-    result = await only_slides.generate_slides(input_data)
-    slides_output = result.slides
-    logger.debug("Training Slides Output:\n%s", slides_output)
 
-    # Basic validation
-    assert slides_output is not None
-    assert len(slides_output.strip()) > 0
+    input_data = SlidesInput(
+        topic="Staying safe online while working from home",
+        audience="remote employees from various departments",
+        purpose="teach everyone essential security habits to protect our company",
+        context="We've had some close calls with phishing emails and people need practical, easy-to-follow advice",
+        slide_count=6,
+        style="professional",
+    )
+
+    result = await only_slides.generate_slides(input_data)
+    logger.debug("Training Slides:\n%s", result.slides)
+
+    # Validate structure
+    assert result.slides is not None
+    assert len(result.slides.strip()) > 0
+    assert len(result.key_insights) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_minimal_input_slides(settings: Any) -> None:
-    """Test slide generation with minimal input content."""
-    input_text = "Product: Simple Todo App. Features: task creation, due dates, reminders."
+async def test_quick_informal_presentation_to_friends(settings: Any) -> None:
+    """Test realistic scenario: casual presentation about a simple app idea."""
     config = SlidesConfig(model=settings.with_model)
     only_slides = OnlySlides(config=config)
-    input_data = SlidesInput(input_text=input_text, type_of_slides="product overview", number_of_slides=3)
-    result = await only_slides.generate_slides(input_data)
-    slides_output = result.slides
-    logger.debug("Minimal Input Slides Output:\n%s", slides_output)
 
-    # Basic validation
-    assert slides_output is not None
-    assert len(slides_output.strip()) > 0
+    input_data = SlidesInput(
+        topic="My simple todo app idea that actually works",
+        audience="friends who might want to try it",
+        purpose="show them why this app is worth downloading",
+        slide_count=3,
+        style="casual",
+    )
+
+    result = await only_slides.generate_slides(input_data)
+    logger.debug("Casual App Demo Slides:\n%s", result.slides)
+
+    # Validate basic structure works even with minimal input
+    assert result.slides is not None
+    assert len(result.slides.strip()) > 0
+    assert len(result.key_insights) >= 1

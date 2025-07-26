@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Only rephrase module for the Elevate app."""
+"""Communication coaching tool that helps people write better messages that connect with their audience and achieve their goals."""
 
 from pathlib import Path
 
@@ -37,21 +37,46 @@ class RephraseConfig(BaseModel):
 
 
 class RephraseInput(BaseModel):
-    """Input model for text rephrasing."""
+    """Input model for text rephrasing with user-friendly fields."""
 
-    message: str = Field(..., description="Message to rephrase")
-    tone: str = Field(..., description="Desired tone for the rephrased message")
-    length: str = Field(..., description="Desired length for the rephrased message")
+    original_text: str = Field(..., description="The text you want to rephrase")
+    audience: str = Field(
+        ..., description="Who you're writing for (e.g., 'my boss', 'team members', 'clients', 'friends')"
+    )
+    purpose: str = Field(
+        ..., description="What you want to achieve (e.g., 'request time off', 'explain a delay', 'share good news')"
+    )
+    tone: str = Field(
+        ..., description="How you want to sound (e.g., 'professional', 'friendly', 'apologetic', 'confident')"
+    )
+    format: str = Field(
+        default="email", description="Type of communication (e.g., 'email', 'text message', 'presentation', 'letter')"
+    )
+    context: str = Field(default="", description="Any additional context about your situation (optional)")
 
 
 class RephraseOutput(BaseModel):
-    """Output model for text rephrasing."""
+    """Enhanced output model for text rephrasing with user-valuable insights."""
 
-    rephrased_text: str = Field(..., description="Rephrased message")
+    rephrased_text: str = Field(..., description="Your improved message, ready to send")
+    key_improvements: list[str] = Field(default_factory=list, description="What we improved in your message")
+    tone_analysis: str = Field(default="", description="How your message comes across to the reader")
+    alternative_versions: list[str] = Field(default_factory=list, description="Other ways to say the same thing")
+    confidence_level: str = Field(default="high", description="How well this matches your intended purpose")
 
 
 class OnlyRephrase:
-    """Class that returns rephrased text."""
+    """
+    Your personal communication coach - helps you write messages that get results.
+
+    Perfect for:
+    • Getting time off approved by your boss
+    • Following up with clients without being pushy
+    • Explaining delays or mistakes professionally
+    • Making requests that people actually say yes to
+    • Turning awkward messages into confident communication
+    • Adapting your writing style for different audiences
+    """
 
     def __init__(self, config: RephraseConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlyRephrase class with Pydantic config."""
@@ -86,21 +111,31 @@ class OnlyRephrase:
 
     async def rephrase_text(self, input_data: RephraseInput) -> RephraseOutput:
         """
-        Rephrases the given message with the specified tone and length.
+        Perfect for: Writing better emails, messages, and communications that connect with your audience.
+
+        • Requesting time off from your boss
+        • Following up with clients professionally
+        • Apologizing for delays or mistakes
+        • Sharing updates with your team
+        • Making asks that get results
 
         Args:
         ----
-            input_data: Input containing message, tone, and length parameters.
+            input_data: Your original text with context about audience and purpose.
 
         Returns:
         -------
-            RephraseOutput: The rephrased message.
+            RephraseOutput: Enhanced message with improvements and alternatives.
         """
         system_prompt = self.get_rephrase_system_prompt()
 
-        message = "\n<Message>" + input_data.message + "</Message>\n\n"
-        message += "<Tone> " + input_data.tone + " </Tone>\n\n"
-        message += "<Length> " + input_data.length + " </Length>"
+        message = f"\n<OriginalText>{input_data.original_text}</OriginalText>\n\n"
+        message += f"<Audience>{input_data.audience}</Audience>\n\n"
+        message += f"<Purpose>{input_data.purpose}</Purpose>\n\n"
+        message += f"<Tone>{input_data.tone}</Tone>\n\n"
+        message += f"<Format>{input_data.format}</Format>\n\n"
+        if input_data.context:
+            message += f"<Context>{input_data.context}</Context>"
 
         rephrased_text = await self.make_llm_call(system_prompt, message)
         return RephraseOutput(rephrased_text=rephrased_text)

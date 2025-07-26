@@ -23,6 +23,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from jinja2 import Template
 from litellm import acompletion
@@ -39,19 +40,46 @@ class JudgeLLMsConfig(BaseModel):
 
 
 class JudgeLLMsInput(BaseModel):
-    """Input model for LLM evaluation."""
+    """Input for evaluating content quality and performance."""
 
-    text: str = Field(..., description="The LLM output text to be evaluated")
-    criteria: type[BaseModel] = Field(..., description="Pydantic model representing scoring criteria")
-    system_prompt: str | None = Field(default=None, description="Optional custom system prompt")
+    content: str = Field(..., description="The text, message, or document you want to evaluate")
+    context: str | None = Field(
+        default=None,
+        description="What you're using this content for (e.g., 'presentation to my team', 'blog post', 'customer email')",
+    )
+    purpose: str | None = Field(
+        default=None,
+        description="Your specific goal or situation (e.g., 'need to sound professional', 'explaining to beginners', 'marketing copy')",
+    )
+    criteria: type[BaseModel] = Field(..., description="Evaluation criteria model")
+    custom_instructions: str | None = Field(
+        default=None, description="Any specific evaluation guidance or requirements"
+    )
+
+
+class JudgeLLMsOutput(BaseModel):
+    """Enhanced output with user-valuable insights beyond basic scoring."""
+
+    scores: BaseModel = Field(..., description="Detailed scoring results based on your criteria")
+    summary: str = Field(..., description="Overall assessment of your content's strengths and areas for improvement")
+    key_insights: list[str] = Field(..., description="Most important takeaways about your content's performance")
+    recommendations: list[str] = Field(..., description="Specific suggestions to improve your content")
+    next_steps: list[str] = Field(
+        default_factory=list, description="Actionable steps you can take to enhance your content"
+    )
 
 
 class OnlyJudgeLLMs:
     """
-    Class to evaluate LLM outputs based on defined scoring criteria.
+    AI-powered content evaluator to help you improve your writing and communication.
 
-    This evaluation uses an LLM call to transform the provided text into a structured JSON
-    evaluation that strictly conforms to a given Pydantic schema (which defines the scoring criteria).
+    Perfect for:
+    • Reviewing emails, presentations, and documents before sending
+    • Getting objective feedback on your writing quality and effectiveness
+    • Evaluating content against specific criteria (clarity, professionalism, engagement)
+    • Improving team communications and marketing materials
+    • Quality assurance for customer-facing content
+    • Getting actionable suggestions to enhance your messaging
     """
 
     def __init__(self, config: JudgeLLMsConfig) -> None:
@@ -76,35 +104,8 @@ class OnlyJudgeLLMs:
         template = self._load_prompt_template()
         return str(template.render())
 
-    async def evaluate(self, input_data: JudgeLLMsInput) -> BaseModel:
-        """
-        Evaluates the given text against the scoring criteria defined in the Pydantic model.
-
-        This method builds an evaluation prompt (unless one is provided), makes an LLM call, and then parses
-        the resulting JSON into an instance of the scoring criteria model.
-
-        Args:
-        ----
-            input_data: Input containing text, criteria, and optional system prompt.
-
-        Returns:
-        -------
-            An instance of the criteria model populated with the evaluation metrics.
-
-        Raises:
-        ------
-            ValueError: If the output cannot be parsed according to the criteria schema.
-        """
-        system_prompt = input_data.system_prompt or self.get_judgment_prompt()
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": input_data.text},
-        ]
-        response = await acompletion(
-            model=self.config.model,
-            messages=messages,
-            response_format=input_data.criteria,
-        )
+    def _extract_response_content(self, response: dict[str, Any] | object) -> str | None:
+        """Extract content from LLM response, handling both dict and object formats."""
         content = None
         # Try dict-like access
         try:
@@ -116,6 +117,7 @@ class OnlyJudgeLLMs:
                         content = message.get("content")
         except Exception as ex_dict:
             logger.debug(f"Dict-like response parsing failed: {ex_dict}")
+
         # Try object-like access
         if content is None:
             try:
@@ -127,4 +129,99 @@ class OnlyJudgeLLMs:
             except Exception as ex_obj:
                 logger.debug(f"Object-like response parsing failed: {ex_obj}")
 
-        return input_data.criteria.model_validate_json(str(content))
+        return content
+
+    def _build_insights_prompt(self, input_data: JudgeLLMsInput, scores: BaseModel) -> str:
+        """Build prompt for generating user-focused insights and recommendations."""
+        context_info = ""
+        if input_data.context:
+            context_info += f"Context: {input_data.context}\n"
+        if input_data.purpose:
+            context_info += f"Purpose: {input_data.purpose}\n"
+
+        return f"""You are a helpful writing coach providing actionable feedback to help someone improve their content.
+
+{context_info}
+Based on the detailed scoring results, provide practical insights and recommendations.
+
+Focus on:
+- What's working well and what needs improvement
+- Specific actionable suggestions they can implement
+- Next steps to enhance their content's effectiveness
+
+Be supportive, constructive, and specific in your feedback. Remember they want to use this content for: {input_data.context or "general purposes"}.
+
+Scoring results: {scores.model_dump_json(indent=2)}"""
+
+    async def evaluate(self, input_data: JudgeLLMsInput) -> JudgeLLMsOutput:
+        """
+        Get comprehensive feedback on your content to help you improve it.
+
+        Analyzes your text against the criteria you care about and provides actionable insights
+        including detailed scores, key takeaways, and specific recommendations for improvement.
+
+        Args:
+        ----
+            input_data: Your content with context about how you plan to use it.
+
+        Returns:
+        -------
+            Detailed evaluation with scores, insights, and actionable recommendations.
+
+        Raises:
+        ------
+            ValueError: If evaluation fails or content cannot be analyzed.
+        """
+        system_prompt = input_data.custom_instructions or self.get_judgment_prompt()
+
+        # Build user message with context and purpose
+        user_message = f"Content to evaluate: {input_data.content}"
+        if input_data.context:
+            user_message += f"\n\nContext: {input_data.context}"
+        if input_data.purpose:
+            user_message += f"\n\nPurpose: {input_data.purpose}"
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ]
+        # Get basic criteria scoring
+        criteria_response = await acompletion(
+            model=self.config.model,
+            messages=messages,
+            response_format=input_data.criteria,
+        )
+
+        # Parse criteria response
+        criteria_content = self._extract_response_content(criteria_response)
+        scores = input_data.criteria.model_validate_json(str(criteria_content))
+
+        # Generate enhanced insights
+        insights_prompt = self._build_insights_prompt(input_data, scores)
+        insights_messages = [
+            {"role": "system", "content": insights_prompt},
+            {"role": "user", "content": user_message},
+        ]
+
+        class InsightsModel(BaseModel):
+            summary: str = Field(..., description="Overall assessment")
+            key_insights: list[str] = Field(..., description="Key takeaways")
+            recommendations: list[str] = Field(..., description="Improvement suggestions")
+            next_steps: list[str] = Field(..., description="Actionable steps")
+
+        insights_response = await acompletion(
+            model=self.config.model,
+            messages=insights_messages,
+            response_format=InsightsModel,
+        )
+
+        insights_content = self._extract_response_content(insights_response)
+        insights = InsightsModel.model_validate_json(str(insights_content))
+
+        return JudgeLLMsOutput(
+            scores=scores,
+            summary=insights.summary,
+            key_insights=insights.key_insights,
+            recommendations=insights.recommendations,
+            next_steps=insights.next_steps,
+        )

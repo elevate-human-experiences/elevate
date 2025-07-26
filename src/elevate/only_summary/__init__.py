@@ -45,20 +45,41 @@ class SummaryConfig(BaseModel):
 
 
 class SummaryInput(BaseModel):
-    """Input model for summary generation."""
+    """Input model for summary generation with user-friendly fields."""
 
-    input_text: str = Field(..., description="Input text to summarize")
-    summary_type: str = Field(default="generic", description="Type of summary to generate")
+    content: str = Field(..., description="The text, article, document, or content you want summarized")
+    context: str = Field(
+        default="", description="Optional context about why you need this summary or how you'll use it"
+    )
+    purpose: str = Field(
+        default="general", description="What you need this for: presentation, email, meeting, study, etc."
+    )
+    audience: str = Field(
+        default="general", description="Who will read this: team, executives, students, general audience, etc."
+    )
 
 
 class SummaryOutput(BaseModel):
-    """Output model for summary generation."""
+    """Output model for summary generation with enhanced user value."""
 
-    summary: str = Field(..., description="Generated summary in Markdown format")
+    summary: str = Field(..., description="Main summary in clean Markdown format")
+    key_insights: list[str] = Field(default=[], description="Most important takeaways from the content")
+    word_count: int = Field(..., description="Word count of the original vs summary")
+    reading_time: str = Field(..., description="Estimated reading time for the summary")
 
 
 class OnlySummary:
-    """Class that only returns summary in Markdown syntax."""
+    """
+    Transform any content into clear, actionable summaries.
+
+    Perfect for:
+    • Condensing long articles, reports, or documents for quick consumption
+    • Creating executive summaries for presentations and meetings
+    • Extracting key insights from research papers or technical docs
+    • Converting verbose content into digestible formats for your team
+    • Preparing study notes or briefing materials
+    • Making complex information accessible to different audiences
+    """
 
     def __init__(self, config: SummaryConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlySummary class with Pydantic config."""
@@ -83,6 +104,28 @@ class OnlySummary:
             return match.group(1).strip()
         return output
 
+    def _extract_key_insights(self, summary: str) -> list[str]:
+        """Extract key insights from the summary text."""
+        insights = []
+        lines = summary.split("\n")
+
+        for line in lines:
+            line = line.strip()
+            # Look for bullet points, numbered lists, or strong statements
+            if line.startswith(("- ", "* ", "• ", "1. ", "2. ", "3. ", "4. ", "5. ", "6. ", "7. ", "8. ", "9. ")):
+                clean_line = re.sub(r"^[-*•]\s*|^\d+\.\s*", "", line)
+                if len(clean_line) > 10:  # Only meaningful insights
+                    insights.append(clean_line)
+            elif line.startswith("**") and line.endswith("**") and len(line) > 10:
+                insights.append(line.strip("*"))
+
+        # If no structured insights found, return first few sentences
+        if not insights:
+            sentences = summary.split(". ")
+            insights = [s.strip() + "." for s in sentences[:3] if len(s.strip()) > 20]
+
+        return insights[:5]  # Limit to top 5 insights
+
     def _load_prompt_template(self) -> Template:
         """Load the Jinja2 template from instructions.j2 file."""
         template_path = Path(__file__).parent / "instructions.j2"
@@ -90,13 +133,26 @@ class OnlySummary:
             template_content = f.read()
         return Template(template_content)
 
-    def get_summarization_system_prompt(self, summary_type: str) -> str:
-        """Return a system prompt to summarize and convert input text into Markdown syntax."""
+    def get_summarization_system_prompt(self, purpose: str, audience: str, context: str) -> str:
+        """Generate a user-focused system prompt for summarization."""
         template = self._load_prompt_template()
-        return str(template.render(summary_type=summary_type))
+        return str(template.render(purpose=purpose, audience=audience, context=context))
 
     async def summarize_and_convert_to_markdown(self, input_data: SummaryInput) -> SummaryOutput:
-        """Summarizes and Converts the given input text to GitHub Flavored Markdown (GFM) format."""
-        system_prompt = self.get_summarization_system_prompt(input_data.summary_type)
-        summary = await self.make_llm_call(system_prompt, input_data.input_text)
-        return SummaryOutput(summary=summary)
+        """Transform your content into a clear, actionable summary with key insights."""
+        system_prompt = self.get_summarization_system_prompt(
+            input_data.purpose, input_data.audience, input_data.context
+        )
+        summary = await self.make_llm_call(system_prompt, input_data.content)
+
+        # Extract key insights from the summary
+        key_insights = self._extract_key_insights(summary)
+
+        # Calculate metrics
+        original_words = len(input_data.content.split())
+        summary_words = len(summary.split())
+        reading_time = f"{max(1, summary_words // 200)} min read"
+
+        return SummaryOutput(
+            summary=summary, key_insights=key_insights, word_count=original_words, reading_time=reading_time
+        )

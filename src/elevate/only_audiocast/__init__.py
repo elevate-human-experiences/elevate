@@ -144,9 +144,15 @@ class AudiocastConfig(BaseModel):
 class AudiocastInput(BaseModel):
     """Input model for audiocast generation."""
 
-    content: str = Field(..., description="Content to convert to audiocast")
-    audio_out_path: str = Field(..., description="Output path for audio file")
-    cast_configuration: CastConfiguration | None = Field(default=None, description="Cast configuration")
+    topic: str = Field(..., description="Main topic or subject you want to discuss")
+    content: str = Field(..., description="Article, document, or information you want transformed into a conversation")
+    context: str | None = Field(
+        default=None, description="Why you're creating this - presentation, learning, sharing with team, etc."
+    )
+    purpose: str | None = Field(default=None, description="How you plan to use this audiocast")
+    target_audience: str | None = Field(default=None, description="Who will be listening to this")
+    audio_out_path: str = Field(..., description="Where to save your generated audio file")
+    cast_configuration: CastConfiguration | None = Field(default=None, description="Custom speaker setup (optional)")
 
 
 class AudiocastOutput(BaseModel):
@@ -154,10 +160,27 @@ class AudiocastOutput(BaseModel):
 
     filename: str = Field(..., description="Generated audio filename")
     file_path: str = Field(..., description="Full path to generated audio file")
+    duration_minutes: float = Field(..., description="Length of the generated audiocast in minutes")
+    key_insights: list[str] = Field(default_factory=list, description="Main points covered in the conversation")
+    summary: str = Field(..., description="Brief overview of what the audiocast discusses")
+    speakers_used: list[str] = Field(default_factory=list, description="Names of the speakers in the conversation")
+    next_steps: list[str] = Field(default_factory=list, description="Suggested actions or follow-up topics")
+    related_topics: list[str] = Field(default_factory=list, description="Additional subjects you might want to explore")
 
 
 class OnlyAudiocast:
-    """Converts text into an audio file using the GPT-4o model."""
+    """
+    Transform your articles, documents, and ideas into engaging conversational audio content.
+
+    Perfect for:
+    • Creating podcast episodes from blog posts or articles
+    • Converting research papers into digestible audio content for commutes
+    • Making educational materials more accessible for visual learners
+    • Preparing presentation material that feels natural and conversational
+    • Sharing complex topics with your team in an engaging audio format
+    • Building audio content for social media or marketing campaigns
+    • Learning difficult concepts through natural conversation flow
+    """
 
     def __init__(self, config: AudiocastConfig) -> None:
         """Initialize OnlyAudiocast and verify ffmpeg installation."""
@@ -225,9 +248,10 @@ class OnlyAudiocast:
         parser = OnlyJson(config=JsonConfig(model=self.config.model))
         from ..only_json import JsonInput
 
-        conversation_obj = await parser.parse(
-            JsonInput(content=input_data.content, schema=Conversation, system_prompt=system_prompt)
+        conversation_result = await parser.parse(
+            JsonInput(text=input_data.content, schema=Conversation, custom_instructions=system_prompt)
         )
+        conversation_obj = conversation_result.data
         if not isinstance(conversation_obj, Conversation):
             raise TypeError("Expected Conversation type")
 
@@ -235,13 +259,13 @@ class OnlyAudiocast:
         for sp in cast_config.speakers:
             agent_prompt = self.get_agent_prompt(sp)
             agent_result = await parser.parse(
-                JsonInput(content=agent_prompt, schema=Instructions, system_prompt=agent_prompt)
+                JsonInput(text=agent_prompt, schema=Instructions, custom_instructions=agent_prompt)
             )
-            if not isinstance(agent_result, Instructions):
+            if not isinstance(agent_result.data, Instructions):
                 raise TypeError("Expected Instructions type")
 
-            logger.debug(f"Agent instructions generated for {sp.name}: {agent_result.instructions}")
-            agent_map[sp.name] = agent_result.instructions
+            logger.debug(f"Agent instructions generated for {sp.name}: {agent_result.data.instructions}")
+            agent_map[sp.name] = agent_result.data.instructions
 
         combined_audio = AudioSegment.empty()
 
@@ -280,4 +304,64 @@ class OnlyAudiocast:
         audio_file_path = Path(audio_out_folder) / filename
         combined_audio.export(str(audio_file_path), format="wav")
         logger.debug(f"Audio file saved to {audio_file_path}")
-        return AudiocastOutput(filename=filename, file_path=str(audio_file_path))
+
+        # Calculate duration in minutes
+        duration_minutes = len(combined_audio) / (1000 * 60)  # milliseconds to minutes
+
+        # Extract key information from conversation
+        key_insights = []
+        speakers_used = []
+
+        for entry in conversation_obj.entries:
+            if entry.speaker and entry.speaker not in speakers_used:
+                speakers_used.append(entry.speaker)
+            # Extract key insights from first sentence of longer messages
+            if len(entry.message) > 100:
+                first_sentence = entry.message.split(".")[0] + "."
+                if first_sentence not in key_insights and len(first_sentence) > 20:
+                    key_insights.append(first_sentence)
+
+        # Generate summary based on topic and content
+        summary = f"A conversational discussion about {input_data.topic}"
+        if input_data.context:
+            summary += f" for {input_data.context}"
+
+        # Suggest next steps based on purpose
+        next_steps = []
+        if input_data.purpose:
+            if "presentation" in input_data.purpose.lower():
+                next_steps = ["Review key points for your presentation", "Practice with the audio", "Prepare for Q&A"]
+            elif "team" in input_data.purpose.lower():
+                next_steps = ["Share with team members", "Schedule follow-up discussion", "Identify action items"]
+            elif "learning" in input_data.purpose.lower():
+                next_steps = [
+                    "Take notes on key concepts",
+                    "Research additional resources",
+                    "Apply concepts to current projects",
+                ]
+
+        if not next_steps:
+            next_steps = ["Listen and take notes", "Share with others", "Explore related topics"]
+
+        # Generate related topics based on content
+        related_topics = []
+        content_words = input_data.content.lower().split()
+        if any(word in content_words for word in ["technology", "tech", "digital"]):
+            related_topics.append("Technology trends")
+        if any(word in content_words for word in ["business", "company", "market"]):
+            related_topics.append("Business strategy")
+        if any(word in content_words for word in ["science", "research", "study"]):
+            related_topics.append("Latest research")
+        if not related_topics:
+            related_topics = ["Similar topics", "Deep dive analysis", "Expert interviews"]
+
+        return AudiocastOutput(
+            filename=filename,
+            file_path=str(audio_file_path),
+            duration_minutes=round(duration_minutes, 1),
+            key_insights=key_insights[:5],  # Limit to top 5 insights
+            summary=summary,
+            speakers_used=speakers_used,
+            next_steps=next_steps[:3],  # Limit to 3 next steps
+            related_topics=related_topics[:4],  # Limit to 4 related topics
+        )

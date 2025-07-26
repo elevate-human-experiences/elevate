@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module to test the ELI5 explanation functionality of the OnlyELI5 class."""
+"""Test the ELI5 explanation functionality from a user perspective."""
 
 import logging
 from typing import Any
@@ -35,110 +35,210 @@ logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_eli5_complex_technology(settings: Any) -> None:
-    """Test ELI5 explanation of complex technology concepts."""
-    input_text = (
-        "Blockchain Technology: "
-        "A blockchain is a distributed ledger technology that maintains a continuously growing list of records, "
-        "called blocks, which are linked and secured using cryptography. Each block contains a cryptographic hash "
-        "of the previous block, a timestamp, and transaction data. By design, a blockchain is resistant to "
-        "modification of data and operates without a central authority through a distributed consensus mechanism."
-    )
+async def test_eli5_parent_helping_child_with_homework(settings: Any) -> None:
+    """Test parent trying to help their child understand a complex topic."""
     config = ELI5Config(model=settings.with_model)
     only_eli5 = OnlyELI5(config=config)
-    input_data = ELI5Input(input_text=input_text)
+    input_data = ELI5Input(
+        topic="blockchain technology",
+        purpose="help my 10-year-old understand this for a school project",
+        current_knowledge="I've heard the term but don't really get how it works",
+        learning_style="analogies",
+        audience_age=10,
+    )
     eli5_result = await only_eli5.explain(input_data)
-    eli5_output = eli5_result.explanation
-    logger.debug("ELI5 Technology Output:\n%s", eli5_output)
 
-    # Basic validation
-    assert eli5_output is not None
-    assert len(eli5_output.strip()) > 0
+    logger.debug("ELI5 Parent-Child Scenario Output:\n%s", eli5_result.explanation)
+    logger.debug("Key Takeaway: %s", eli5_result.key_takeaway)
+    logger.debug("Main Concepts: %s", eli5_result.main_concepts)
+    logger.debug("Real-world Examples: %s", eli5_result.real_world_examples)
+
+    # Comprehensive validation for enhanced output
+    assert eli5_result.explanation is not None
+    assert len(eli5_result.explanation.strip()) > 0
+    assert eli5_result.key_takeaway is not None
+    assert len(eli5_result.key_takeaway.strip()) > 0
+    assert isinstance(eli5_result.main_concepts, list)
+    assert len(eli5_result.main_concepts) >= 1
+    assert isinstance(eli5_result.real_world_examples, list)
+    assert len(eli5_result.real_world_examples) >= 1
+    assert eli5_result.difficulty_level in ["simple", "moderate", "advanced"]
+    assert isinstance(eli5_result.next_steps, list)
+    assert len(eli5_result.next_steps) >= 1
+    assert isinstance(eli5_result.follow_up_questions, list)
+    assert len(eli5_result.follow_up_questions) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_eli5_scientific_concept(settings: Any) -> None:
-    """Test ELI5 explanation of scientific concepts."""
-    input_text = (
-        "Photosynthesis: "
-        "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize "
-        "foods from carbon dioxide and water. The process generally involves the green pigment chlorophyll and "
-        "generates oxygen as a byproduct. The chemical energy produced is stored in carbohydrate molecules, "
-        "such as sugars, which are synthesized from carbon dioxide and water."
-    )
+async def test_eli5_curious_child_nature_question(settings: Any) -> None:
+    """Test explaining nature concepts to a genuinely curious child."""
     config = ELI5Config(model=settings.with_model)
     only_eli5 = OnlyELI5(config=config)
-    input_data = ELI5Input(input_text=input_text)
+    input_data = ELI5Input(
+        topic="photosynthesis",
+        purpose="my 6-year-old keeps asking how plants eat and I want to give a good answer",
+        current_knowledge="I know plants need sunlight and water but not much more",
+        learning_style="stories",
+        audience_age=6,
+    )
     eli5_result = await only_eli5.explain(input_data)
-    eli5_output = eli5_result.explanation
-    logger.debug("ELI5 Science Output:\n%s", eli5_output)
 
-    # Basic validation
-    assert eli5_output is not None
-    assert len(eli5_output.strip()) > 0
+    logger.debug("ELI5 Curious Child Output:\n%s", eli5_result.explanation)
+    logger.debug("Difficulty Level: %s", eli5_result.difficulty_level)
+    logger.debug("Next Steps: %s", eli5_result.next_steps)
+
+    # Comprehensive validation
+    assert eli5_result.explanation is not None
+    assert len(eli5_result.explanation.strip()) > 0
+    assert eli5_result.key_takeaway is not None
+    assert len(eli5_result.main_concepts) >= 1
+    assert len(eli5_result.real_world_examples) >= 1
+    assert eli5_result.difficulty_level in ["simple", "moderate", "advanced"]
+    assert len(eli5_result.next_steps) >= 1
+    assert len(eli5_result.follow_up_questions) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_eli5_financial_concept(settings: Any) -> None:
-    """Test ELI5 explanation of financial concepts."""
-    input_text = (
-        "Compound Interest: "
-        "Compound interest is the addition of interest to the principal sum of a loan or deposit, or in other words, "
-        "interest on interest. It is the result of reinvesting interest, rather than paying it out, so that interest "
-        "in the next period is then earned on the principal sum plus previously accumulated interest. The frequency "
-        "of compounding affects the total amount of interest earned."
-    )
+async def test_eli5_professional_preparing_for_meeting(settings: Any) -> None:
+    """Test professional trying to understand a concept before explaining it to others."""
     config = ELI5Config(model=settings.with_model)
     only_eli5 = OnlyELI5(config=config)
-    input_data = ELI5Input(input_text=input_text)
+    input_data = ELI5Input(
+        topic="compound interest",
+        purpose="explain to my team why our investment strategy makes sense",
+        current_knowledge="I understand the basics but want to be really clear about it",
+        learning_style="step-by-step",
+        audience_age=12,
+    )
     eli5_result = await only_eli5.explain(input_data)
-    eli5_output = eli5_result.explanation
-    logger.debug("ELI5 Finance Output:\n%s", eli5_output)
 
-    # Basic validation
-    assert eli5_output is not None
-    assert len(eli5_output.strip()) > 0
+    logger.debug("ELI5 Professional Meeting Prep Output:\n%s", eli5_result.explanation)
+    logger.debug("Main Concepts: %s", eli5_result.main_concepts)
+
+    # Comprehensive validation
+    assert eli5_result.explanation is not None
+    assert len(eli5_result.explanation.strip()) > 0
+    assert eli5_result.key_takeaway is not None
+    assert len(eli5_result.main_concepts) >= 1
+    assert len(eli5_result.real_world_examples) >= 1
+    assert eli5_result.difficulty_level in ["simple", "moderate", "advanced"]
+    assert len(eli5_result.next_steps) >= 1
+    assert len(eli5_result.follow_up_questions) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_eli5_physics_concept(settings: Any) -> None:
-    """Test ELI5 explanation of physics concepts."""
-    input_text = (
-        "Quantum Entanglement: "
-        "Quantum entanglement is a phenomenon where pairs or groups of particles are generated, interact, or share "
-        "spatial proximity in ways such that the quantum state of each particle cannot be described independently "
-        "of the state of the others, even when the particles are separated by a large distance. When a measurement "
-        "is performed on one particle, it instantaneously affects the state of the entangled partner."
-    )
+async def test_eli5_sci_fi_fan_reality_check(settings: Any) -> None:
+    """Test someone trying to separate science fiction from science fact."""
     config = ELI5Config(model=settings.with_model)
     only_eli5 = OnlyELI5(config=config)
-    input_data = ELI5Input(input_text=input_text)
+    input_data = ELI5Input(
+        topic="quantum entanglement",
+        purpose="figure out what's real science vs Hollywood in the movies I watch",
+        current_knowledge="I've seen it in movies but don't know if it's actually possible",
+        learning_style="examples",
+        audience_age=12,
+    )
     eli5_result = await only_eli5.explain(input_data)
-    eli5_output = eli5_result.explanation
-    logger.debug("ELI5 Physics Output:\n%s", eli5_output)
 
-    # Basic validation
-    assert eli5_output is not None
-    assert len(eli5_output.strip()) > 0
+    logger.debug("ELI5 Sci-Fi Reality Check Output:\n%s", eli5_result.explanation)
+    logger.debug("Real-world Examples: %s", eli5_result.real_world_examples)
+
+    # Comprehensive validation
+    assert eli5_result.explanation is not None
+    assert len(eli5_result.explanation.strip()) > 0
+    assert eli5_result.key_takeaway is not None
+    assert len(eli5_result.main_concepts) >= 1
+    assert len(eli5_result.real_world_examples) >= 1
+    assert eli5_result.difficulty_level in ["simple", "moderate", "advanced"]
+    assert len(eli5_result.next_steps) >= 1
+    assert len(eli5_result.follow_up_questions) >= 1
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_eli5_medical_concept(settings: Any) -> None:
-    """Test ELI5 explanation of medical concepts."""
-    input_text = (
-        "DNA: "
-        "Deoxyribonucleic acid (DNA) is a molecule composed of two polynucleotide chains that coil around each other "
-        "to form a double helix carrying genetic instructions for the development, functioning, growth and reproduction "
-        "of all known living organisms and many viruses. DNA and ribonucleic acid (RNA) are nucleic acids. The four "
-        "bases found in DNA are adenine (A), cytosine (C), guanine (G) and thymine (T)."
-    )
+async def test_eli5_student_struggling_with_complex_topic(settings: Any) -> None:
+    """Test student trying to understand a challenging school subject."""
     config = ELI5Config(model=settings.with_model)
     only_eli5 = OnlyELI5(config=config)
-    input_data = ELI5Input(input_text=input_text)
+    input_data = ELI5Input(
+        topic="DNA",
+        purpose="understand this for my biology test next week",
+        current_knowledge="complete beginner - this stuff is really confusing in my textbook",
+        learning_style="analogies",
+        audience_age=9,
+    )
     eli5_result = await only_eli5.explain(input_data)
-    eli5_output = eli5_result.explanation
-    logger.debug("ELI5 Medical Output:\n%s", eli5_output)
 
-    # Basic validation
-    assert eli5_output is not None
-    assert len(eli5_output.strip()) > 0
+    logger.debug("ELI5 Student Biology Test Prep Output:\n%s", eli5_result.explanation)
+    logger.debug("Next Steps for Learning: %s", eli5_result.next_steps)
+
+    # Comprehensive validation
+    assert eli5_result.explanation is not None
+    assert len(eli5_result.explanation.strip()) > 0
+    assert eli5_result.key_takeaway is not None
+    assert len(eli5_result.main_concepts) >= 1
+    assert len(eli5_result.real_world_examples) >= 1
+    assert eli5_result.difficulty_level in ["simple", "moderate", "advanced"]
+    assert len(eli5_result.next_steps) >= 1
+    assert len(eli5_result.follow_up_questions) >= 1
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_eli5_different_learning_styles_same_topic(settings: Any) -> None:
+    """Test that different learning styles produce appropriately tailored explanations."""
+    config = ELI5Config(model=settings.with_model)
+    only_eli5 = OnlyELI5(config=config)
+
+    # Test analogies learning style
+    input_analogies = ELI5Input(
+        topic="gravity",
+        purpose="understand why things fall down",
+        current_knowledge="I know things fall but don't know why",
+        learning_style="analogies",
+        audience_age=7,
+    )
+    result_analogies = await only_eli5.explain(input_analogies)
+
+    # Test step-by-step learning style
+    input_step_by_step = ELI5Input(
+        topic="gravity",
+        purpose="understand why things fall down",
+        current_knowledge="I know things fall but don't know why",
+        learning_style="step-by-step",
+        audience_age=7,
+    )
+    result_step_by_step = await only_eli5.explain(input_step_by_step)
+
+    # Both should have comprehensive outputs
+    for result in [result_analogies, result_step_by_step]:
+        assert result.explanation is not None
+        assert result.key_takeaway is not None
+        assert len(result.main_concepts) >= 1
+        assert len(result.real_world_examples) >= 1
+        assert result.difficulty_level in ["simple", "moderate", "advanced"]
+        assert len(result.next_steps) >= 1
+        assert len(result.follow_up_questions) >= 1
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_eli5_pure_curiosity_minimal_context(settings: Any) -> None:
+    """Test someone with pure curiosity asking about a natural phenomenon."""
+    config = ELI5Config(model=settings.with_model)
+    only_eli5 = OnlyELI5(config=config)
+    input_data = ELI5Input(
+        topic="rainbows",
+        purpose="satisfy my curiosity - I just think they're amazing",
+        current_knowledge="I see them after rain but don't know how they work",
+    )
+    eli5_result = await only_eli5.explain(input_data)
+
+    logger.debug("ELI5 Pure Curiosity Output:\n%s", eli5_result.explanation)
+
+    # Should provide comprehensive explanation even with minimal context
+    assert eli5_result.explanation is not None
+    assert len(eli5_result.explanation.strip()) > 0
+    assert eli5_result.key_takeaway is not None
+    assert len(eli5_result.main_concepts) >= 1
+    assert len(eli5_result.real_world_examples) >= 1
+    assert eli5_result.difficulty_level in ["simple", "moderate", "advanced"]
+    assert len(eli5_result.next_steps) >= 1
+    assert len(eli5_result.follow_up_questions) >= 1

@@ -28,93 +28,135 @@ from typing import Any, Optional
 import pytest
 from pydantic import BaseModel, ConfigDict, Field
 
-from elevate.only_json import JsonConfig, JsonInput, OnlyJson
+from elevate.only_json import JsonConfig, JsonInput, JsonOutput, OnlyJson
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_calendar_event(settings: Any) -> None:
-    """Test the OnlyJson class with a CalendarEvent schema for listing events."""
+async def test_organizing_meeting_notes(settings: Any) -> None:
+    """Test organizing messy meeting notes into structured calendar events."""
 
-    class CalendarEvent(BaseModel):
-        """A calendar event with relevant details (name, date, participants)."""
+    class MeetingEvent(BaseModel):
+        """A scheduled meeting with key details."""
 
-        name: str = Field(..., description="Name of the event in string format.")
-        date: str = Field(
-            ...,
-            description="Date of the event in 'YYYY-MM-DD' or similar string format.",
-        )
-        participants: list[str] = Field(..., description="List of participants; each participant name is a string.")
+        title: str = Field(..., description="Meeting title or topic")
+        date: str = Field(..., description="Meeting date in YYYY-MM-DD format")
+        time: str = Field(..., description="Meeting time")
+        attendees: list[str] = Field(..., description="List of attendee names")
+        location: str | None = Field(None, description="Meeting location")
 
-    class EventsList(BaseModel):
-        """A container for multiple CalendarEvent objects, stored in a list."""
+    class MeetingSchedule(BaseModel):
+        """List of upcoming meetings extracted from notes."""
 
-        events: list[CalendarEvent] = Field(..., description="A JSON array of CalendarEvent objects.")
+        meetings: list[MeetingEvent] = Field(..., description="Scheduled meetings")
+
+    messy_notes = """
+    Next week looks busy! Monday morning 9:30 standup with the dev team (Sarah, Mike, Alex) in conference room B.
+    Then Thursday March 15th at 2pm quarterly review with Jennifer and Tom - think that's remote.
+    Oh and Friday 10am coffee chat with Lisa from marketing, probably at the cafe downstairs.
+    """
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content="List 5 important events in the XIX century", schema=EventsList, system_prompt=None)
-    events_list = await only_json.parse(input_data)
-    assert isinstance(events_list, EventsList)
-
-
-@pytest.mark.asyncio  # type: ignore
-async def test_extraction_of_contact_info(settings: Any) -> None:
-    """Test extracting basic contact information from unstructured text."""
-
-    class ContactInfo(BaseModel):
-        """Basic contact information with mandatory fields: name, email, phone."""
-
-        name: str = Field(..., description="The contact's full name in string format.")
-        email: str = Field(
-            ...,
-            description="The contact's email address in string format, e.g., 'johndoe@example.com'.",
-        )
-        phone: str = Field(
-            ...,
-            description="The contact's phone number in string format, e.g., '555-1234'.",
-        )
-
-    text = (
-        "Hello, my name is John Doe. You can reach me at johndoe@example.com or call me at 555-1234."
-        " I'll be available most weekdays."
+    input_data = JsonInput(
+        text=messy_notes,
+        purpose="organizing my calendar for next week",
+        context="I just got back from vacation and need to make sense of these meeting notes",
+        schema=MeetingSchedule,
     )
-
-    config = JsonConfig(model=settings.with_model)
-    only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=ContactInfo, system_prompt=None)
-    contact = await only_json.parse(input_data)
-    assert isinstance(contact, ContactInfo)
-    assert contact.name == "John Doe"
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, MeetingSchedule)
+    assert len(result.data.meetings) >= 2  # Should find at least 2 meetings
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_nested_structures(settings: Any) -> None:
-    """Test parsing nested objects (Companies with multiple Departments)."""
+async def test_extracting_client_contact_from_email(settings: Any) -> None:
+    """Test extracting client contact info from a business email for CRM entry."""
 
-    class Department(BaseModel):
-        """Data about a single department, including its name, manager, and headcount."""
+    class ClientContact(BaseModel):
+        """Contact information for a potential client."""
 
-        name: str = Field(..., description="Name of the department in string format.")
-        manager: str = Field(..., description="Full name of the manager in string format.")
-        headcount: int = Field(..., description="Number of people in the department as an integer.")
+        name: str = Field(..., description="Full name of the contact person")
+        email: str = Field(..., description="Business email address")
+        phone: str | None = Field(None, description="Phone number if provided")
+        company: str | None = Field(None, description="Company name")
+        role: str | None = Field(None, description="Job title or role")
 
-    class Company(BaseModel):
-        """Represents a single company, including a list of its departments."""
+    business_email = """
+    Hi there,
 
-        company_name: str = Field(..., description="Name of the company in string format.")
-        departments: list[Department] = Field(..., description="A JSON array of Department objects.")
+    I'm reaching out from Acme Solutions regarding your software development services.
+    I'm Maria Rodriguez, the CTO here, and we're looking for a partner for our upcoming project.
 
-    text = (
-        "Acme Corp has 2 departments. The first is R&D, managed by Alice Johnson with 25 people. "
-        "The second is Marketing, managed by Bob Smith with 15 people."
-    )
+    Feel free to call me at (555) 123-4567 or just reply to this email (m.rodriguez@acmesolutions.com).
+
+    Looking forward to hearing from you!
+
+    Best regards,
+    Maria Rodriguez
+    Chief Technology Officer
+    Acme Solutions Inc.
+    """
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=Company, system_prompt=None)
-    company = await only_json.parse(input_data)
-    assert isinstance(company, Company)
-    assert len(company.departments) == 2
+    input_data = JsonInput(
+        text=business_email,
+        purpose="adding to my CRM system",
+        context="This is a potential client inquiry I received today",
+        schema=ClientContact,
+    )
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, ClientContact)
+    assert "maria" in result.data.name.lower()
+    assert "rodriguez" in result.data.name.lower()
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_organizing_team_feedback(settings: Any) -> None:
+    """Test organizing employee feedback survey into structured departmental insights."""
+
+    class TeamFeedback(BaseModel):
+        """Feedback summary for a specific team."""
+
+        team_name: str = Field(..., description="Name of the team")
+        lead: str = Field(..., description="Team lead or manager name")
+        satisfaction_score: float | None = Field(None, description="Overall satisfaction rating (1-10)")
+        main_concerns: list[str] = Field(default_factory=list, description="Key issues raised by team")
+        positive_highlights: list[str] = Field(default_factory=list, description="Things the team is doing well")
+
+    class OrganizationFeedback(BaseModel):
+        """Consolidated feedback across all teams."""
+
+        teams: list[TeamFeedback] = Field(..., description="Feedback from each team")
+
+    survey_results = """
+    Here's what came back from our Q1 feedback survey:
+
+    Engineering team (led by Sarah Chen) scored 8.2/10 overall. They love the new dev tools but are concerned about
+    sprint planning being too aggressive and want better work-life balance. The team appreciated the recent hackathon event.
+
+    Marketing team under David Park gave us 6.8/10. They're frustrated with the approval process taking too long
+    and feel understaffed for current campaign load. However, they're excited about the new brand guidelines
+    and collaboration with the design team has improved.
+
+    Sales team (Manager: Lisa Wong) rated 7.5/10. Main complaint is the CRM system being slow and outdated.
+    They're happy with the new commission structure and feel supported by management.
+    """
+
+    config = JsonConfig(model=settings.with_model)
+    only_json = OnlyJson(config=config)
+    input_data = JsonInput(
+        text=survey_results,
+        purpose="preparing executive summary for leadership team",
+        context="Q1 employee satisfaction survey results just came in",
+        schema=OrganizationFeedback,
+    )
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, OrganizationFeedback)
+    assert len(result.data.teams) == 3  # Should identify 3 teams
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -135,13 +177,14 @@ async def test_cyclic_relationships(settings: Any) -> None:
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=Employee, system_prompt=None)
-    employee = await only_json.parse(input_data)
-    assert isinstance(employee, Employee)
-    assert employee.name == "Jane Smith"
-    assert employee.manager is not None
-    assert employee.manager.name == "John Wilson"
-    assert employee.manager.manager is None
+    input_data = JsonInput(text=text, schema=Employee)
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, Employee)
+    assert result.data.name == "Jane Smith"
+    assert result.data.manager is not None
+    assert result.data.manager.name == "John Wilson"
+    assert result.data.manager.manager is None
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -161,10 +204,11 @@ async def test_conversion_while_extracting(settings: Any) -> None:
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=TemperatureReading, system_prompt=None)
-    reading = await only_json.parse(input_data)
-    assert isinstance(reading, TemperatureReading)
-    assert 29 <= reading.temperature_celsius <= 31
+    input_data = JsonInput(text=text, schema=TemperatureReading)
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, TemperatureReading)
+    assert 29 <= result.data.temperature_celsius <= 31
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -182,34 +226,63 @@ async def test_different_field_descriptions(settings: Any) -> None:
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=Product, system_prompt=None)
-    product = await only_json.parse(input_data)
-    assert isinstance(product, Product)
-    assert product.title == "UltraWidget"
-    assert product.quantity == 500
+    input_data = JsonInput(text=text, schema=Product)
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, Product)
+    assert result.data.title == "UltraWidget"
+    assert result.data.quantity == 500
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_data_formats(settings: Any) -> None:
-    """Test parsing various data formats such as price in currency and converting them into the correct type (float)."""
+async def test_expense_tracking_from_receipt(settings: Any) -> None:
+    """Test extracting expense data from receipt text for expense reporting."""
 
-    class StoreItem(BaseModel):
-        """Represents a store item with a name, price, and available stock."""
+    class ExpenseItem(BaseModel):
+        """A single expense item from a receipt."""
 
-        name: str = Field(..., description="Item name in string format.")
-        price: float = Field(..., description="Item price as a float (e.g., 5.99).")
-        stock: int = Field(..., description="Number of items in stock as an integer.")
+        description: str = Field(..., description="What was purchased")
+        amount: float = Field(..., description="Cost in dollars")
+        category: str | None = Field(None, description="Expense category (meals, office supplies, etc.)")
 
-    text = "Item: Fancy Pen. Price: $5.99. Stock: 100 units available."
+    class Receipt(BaseModel):
+        """Expense report data from a business receipt."""
+
+        vendor: str = Field(..., description="Business/vendor name")
+        date: str | None = Field(None, description="Date of purchase")
+        items: list[ExpenseItem] = Field(..., description="Individual expense items")
+        total: float = Field(..., description="Total amount spent")
+
+    receipt_text = """
+    OFFICE DEPOT
+    Receipt #12345
+    Date: March 15, 2024
+
+    2x Notebooks @ $3.49 each = $6.98
+    Printer paper (1 ream) = $8.50
+    Blue pens (pack of 10) = $12.99
+    Coffee for office = $15.75
+
+    Subtotal: $44.22
+    Tax: $3.54
+    TOTAL: $47.76
+
+    Thank you for shopping with us!
+    """
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=StoreItem, system_prompt=None)
-    item = await only_json.parse(input_data)
-    assert isinstance(item, StoreItem)
-    assert item.name == "Fancy Pen"
-    assert abs(item.price - 5.99) < 0.001
-    assert item.stock == 100
+    input_data = JsonInput(
+        text=receipt_text,
+        purpose="submitting monthly expense report",
+        context="Need to categorize this office supply run for accounting",
+        schema=Receipt,
+    )
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, Receipt)
+    assert abs(result.data.total - 47.76) < 0.01
+    assert len(result.data.items) >= 3  # Should identify multiple items
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -226,13 +299,14 @@ async def test_datetime_parsing(settings: Any) -> None:
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=Meeting, system_prompt=None)
-    meeting = await only_json.parse(input_data)
-    assert isinstance(meeting, Meeting)
-    assert meeting.start_time.year == 2025
-    assert meeting.start_time.month == 3
-    assert meeting.start_time.day == 10
-    assert meeting.start_time.hour == 14
+    input_data = JsonInput(text=text, schema=Meeting)
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, Meeting)
+    assert result.data.start_time.year == 2025
+    assert result.data.start_time.month == 3
+    assert result.data.start_time.day == 10
+    assert result.data.start_time.hour == 14
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -253,12 +327,13 @@ async def test_optional_fields(settings: Any) -> None:
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=Profile, system_prompt=None)
-    profile = await only_json.parse(input_data)
-    assert isinstance(profile, Profile)
-    assert profile.username == "techguy"
-    assert profile.bio == "Loves coding in Python."
-    assert profile.website is None
+    input_data = JsonInput(text=text, schema=Profile)
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, Profile)
+    assert result.data.username == "techguy"
+    assert result.data.bio == "Loves coding in Python."
+    assert result.data.website is None
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -274,8 +349,9 @@ async def test_special_characters_and_lists(settings: Any) -> None:
 
     config = JsonConfig(model=settings.with_model)
     only_json = OnlyJson(config=config)
-    input_data = JsonInput(content=text, schema=GroceryList, system_prompt=None)
-    grocery_list = await only_json.parse(input_data)
-    assert isinstance(grocery_list, GroceryList)
-    assert len(grocery_list.items) == 4
-    assert "2% Milk" in grocery_list.items
+    input_data = JsonInput(text=text, schema=GroceryList)
+    result = await only_json.parse(input_data)
+    assert isinstance(result, JsonOutput)
+    assert isinstance(result.data, GroceryList)
+    assert len(result.data.items) == 4
+    assert "2% Milk" in result.data.items

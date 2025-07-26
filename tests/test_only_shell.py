@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module to test the text rephrasing functionalities of the OnlyShell class."""
+"""Module to test the shell command generation functionalities of the OnlyShell class."""
 
 import logging
 from typing import Any
@@ -35,21 +35,110 @@ logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_simple_shell_command(settings: Any) -> None:
+async def test_developer_debugging_scenario(settings: Any) -> None:
     """
-    Tests the generation of a simple shell command from a natural language description using the `OnlyShell` class.
+    Test scenario: A developer trying to debug a failing build by finding error logs.
 
-    This function creates an `OnlyShell` instance, provides it with a textual description
-    of the desired shell command (listing files in a directory), generates the corresponding
-    shell command, and prints the generated command to the console.  It serves as a basic
-    example of how to use the `OnlyShell` class to translate natural language into shell commands.
-    """
-    input_message = """
-    Command to list all files in directory.
+    Real user situation: Developer notices their CI/CD pipeline failed and needs to quickly
+    find recent error logs to understand what went wrong.
     """
     config = ShellConfig(model=settings.with_model)
     only_shell = OnlyShell(config=config)
-    input_data = ShellInput(user_prompt=input_message)
+
+    input_data = ShellInput(
+        task_description="find all error logs from the last hour",
+        context="my build is failing and I need to debug what went wrong",
+        environment="linux",
+        skill_level="intermediate",
+    )
+
     result = await only_shell.generate_shell_command(input_data)
-    shell_command = result.command
-    logger.debug("Shell command:\n%s", shell_command)
+
+    # Verify we get a complete response with all expected fields
+    assert result.command
+    assert result.explanation
+    assert "error" in result.explanation.lower() or "log" in result.explanation.lower()
+    logger.info("Developer scenario - Command: %s", result.command)
+    logger.info("Developer scenario - Explanation: %s", result.explanation)
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_sysadmin_server_management(settings: Any) -> None:
+    """
+    Test scenario: System administrator monitoring server disk usage during high traffic.
+
+    Real user situation: Sysadmin gets alerts about disk space and needs to quickly identify
+    which directories are consuming the most space.
+    """
+    config = ShellConfig(model=settings.with_model)
+    only_shell = OnlyShell(config=config)
+
+    input_data = ShellInput(
+        task_description="show me which directories are using the most disk space",
+        context="getting disk space alerts and need to free up space quickly",
+        environment="linux",
+        skill_level="advanced",
+    )
+
+    result = await only_shell.generate_shell_command(input_data)
+
+    assert result.command
+    assert result.explanation
+    assert result.safety_notes is not None  # Should warn about disk operations
+    logger.info("Sysadmin scenario - Command: %s", result.command)
+    logger.info("Sysadmin scenario - Safety notes: %s", result.safety_notes)
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_data_scientist_file_processing(settings: Any) -> None:
+    """
+    Test scenario: Data scientist needs to process CSV files for analysis.
+
+    Real user situation: Data scientist received a folder of CSV files from different sources
+    and needs to combine them for analysis while handling potential formatting issues.
+    """
+    config = ShellConfig(model=settings.with_model)
+    only_shell = OnlyShell(config=config)
+
+    input_data = ShellInput(
+        task_description="combine all CSV files in a folder into one file",
+        context="preparing data for analysis and the files have different sources",
+        environment="macos",
+        skill_level="beginner",
+    )
+
+    result = await only_shell.generate_shell_command(input_data)
+
+    assert result.command
+    assert result.explanation
+    assert result.next_steps  # Should suggest what to do after combining files
+    assert len(result.related_commands) > 0  # Should suggest related commands
+    logger.info("Data scientist scenario - Command: %s", result.command)
+    logger.info("Data scientist scenario - Next steps: %s", result.next_steps)
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_devops_deployment_prep(settings: Any) -> None:
+    """
+    Test scenario: DevOps engineer preparing for deployment by checking running processes.
+
+    Real user situation: Before deploying a new version, engineer needs to see what services
+    are currently running and their resource usage to plan the deployment.
+    """
+    config = ShellConfig(model=settings.with_model)
+    only_shell = OnlyShell(config=config)
+
+    input_data = ShellInput(
+        task_description="show me all running processes sorted by memory usage",
+        context="preparing for deployment and need to check current system resources",
+        environment="linux",
+        skill_level="intermediate",
+    )
+
+    result = await only_shell.generate_shell_command(input_data)
+
+    assert result.command
+    assert result.explanation
+    assert result.example_output  # Should show what the output looks like
+    logger.info("DevOps scenario - Command: %s", result.command)
+    logger.info("DevOps scenario - Example output: %s", result.example_output)

@@ -50,19 +50,40 @@ class MarkdownConfig(BaseModel):
 
 
 class MarkdownInput(BaseModel):
-    """Input model for markdown conversion."""
+    """User-friendly input for markdown conversion."""
 
-    input_text: str = Field(..., description="Input text to convert to Markdown")
+    content: str = Field(..., description="The text content you want to convert to Markdown")
+    context: str | None = Field(
+        default=None,
+        description="Optional context about where you'll use this (e.g., 'for my team presentation', 'in documentation')",
+    )
+    purpose: str | None = Field(
+        default=None, description="Optional purpose or goal (e.g., 'make it more readable', 'format for GitHub')"
+    )
 
 
 class MarkdownOutput(BaseModel):
-    """Output model for markdown conversion."""
+    """Enhanced output with user-valuable insights."""
 
-    markdown: str = Field(..., description="Converted text in Markdown format")
+    markdown: str = Field(..., description="Your content converted to clean Markdown format")
+    formatting_improvements: list[str] = Field(
+        default_factory=list, description="Key formatting improvements made to enhance readability"
+    )
+    summary: str | None = Field(default=None, description="Brief summary of the content structure")
+    next_steps: list[str] = Field(default_factory=list, description="Suggested next steps for using this markdown")
 
 
 class OnlyMarkdown:
-    """Class that only supports Markdown syntax."""
+    """
+    Transform messy text into beautiful, professional Markdown formatting.
+
+    Perfect for:
+    • Converting copy-pasted content from websites, Word docs, or emails
+    • Cleaning up unformatted text for GitHub documentation
+    • Preparing content for team wikis, README files, or blog posts
+    • Transforming database outputs or reports into readable formats
+    • Making presentation notes more structured and visually appealing
+    """
 
     def __init__(self, config: MarkdownConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlyMarkdown class with Pydantic config."""
@@ -71,22 +92,49 @@ class OnlyMarkdown:
         else:
             self.config = MarkdownConfig(model=with_model)
 
-    async def make_llm_call(self, system_prompt: str, input_text: str) -> str:
-        """Make the LLM call using litellm and extract the markdown content."""
+    async def make_llm_call(self, system_prompt: str, user_message: str) -> dict[str, str | list[str] | None]:
+        """Make the LLM call and extract both markdown and metadata."""
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": input_text},
+            {"role": "user", "content": user_message},
         ]
 
         response = await acompletion(model=self.config.model, messages=messages, temperature=self.config.temperature)
-        # Fix: Use response.content if choices/message is not available
         output = str(getattr(response, "content", response))
-        pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
-        match = re.search(pattern, output, re.DOTALL)
 
-        if match:
-            return match.group(1).strip()
-        return output
+        # Extract markdown content
+        markdown_pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
+        markdown_match = re.search(markdown_pattern, output, re.DOTALL)
+        markdown = markdown_match.group(1).strip() if markdown_match else output
+
+        # Extract formatting improvements
+        improvements_pattern = r"IMPROVEMENTS:(.*?)(?=SUMMARY:|NEXT_STEPS:|$)"
+        improvements_match = re.search(improvements_pattern, output, re.DOTALL)
+        improvements = []
+        if improvements_match:
+            improvements = [
+                imp.strip()
+                for imp in improvements_match.group(1).strip().split("\n")
+                if imp.strip() and not imp.strip().startswith("-")
+            ]
+
+        # Extract summary
+        summary_pattern = r"SUMMARY:(.*?)(?=NEXT_STEPS:|$)"
+        summary_match = re.search(summary_pattern, output, re.DOTALL)
+        summary = summary_match.group(1).strip() if summary_match else None
+
+        # Extract next steps
+        next_steps_pattern = r"NEXT_STEPS:(.*?)$"
+        next_steps_match = re.search(next_steps_pattern, output, re.DOTALL)
+        next_steps = []
+        if next_steps_match:
+            next_steps = [
+                step.strip()
+                for step in next_steps_match.group(1).strip().split("\n")
+                if step.strip() and not step.strip().startswith("-")
+            ]
+
+        return {"markdown": markdown, "improvements": improvements, "summary": summary, "next_steps": next_steps}
 
     def _load_prompt_template(self) -> Template:
         """Load the Jinja2 template from instructions.j2 file."""
@@ -95,22 +143,50 @@ class OnlyMarkdown:
             template_content = f.read()
         return Template(template_content)
 
-    def get_conversion_system_prompt(self) -> str:
-        """Return a system prompt to convert input text into Markdown syntax."""
+    def get_conversion_system_prompt(self, context: str | None = None, purpose: str | None = None) -> str:
+        """Return a user-focused system prompt for markdown conversion."""
         template = self._load_prompt_template()
-        return str(template.render())
+        return str(template.render(context=context, purpose=purpose))
 
     async def convert_to_markdown(self, input_data: MarkdownInput) -> MarkdownOutput:
-        """Convert the given input text to GitHub Flavored Markdown (GFM) format."""
-        system_prompt = self.get_conversion_system_prompt()
-        markdown = await self.make_llm_call(system_prompt, input_data.input_text)
-        return MarkdownOutput(markdown=markdown)
+        """Transform your content into beautiful, professional Markdown."""
+        system_prompt = self.get_conversion_system_prompt(input_data.context, input_data.purpose)
+
+        # Create user message with context
+        user_message = input_data.content
+        if input_data.context or input_data.purpose:
+            context_info = []
+            if input_data.context:
+                context_info.append(f"Context: {input_data.context}")
+            if input_data.purpose:
+                context_info.append(f"Purpose: {input_data.purpose}")
+            user_message = f"{' | '.join(context_info)}\n\nContent to convert:\n{input_data.content}"
+
+        result = await self.make_llm_call(system_prompt, user_message)
+
+        # Ensure correct types for MarkdownOutput
+        markdown = result["markdown"] if isinstance(result["markdown"], str) else ""
+        improvements = result["improvements"] if isinstance(result["improvements"], list) else []
+        summary = result["summary"] if isinstance(result["summary"], str) else None
+        next_steps = result["next_steps"] if isinstance(result["next_steps"], list) else []
+
+        return MarkdownOutput(
+            markdown=markdown,
+            formatting_improvements=improvements,
+            summary=summary,
+            next_steps=next_steps,
+        )
 
     async def summarize_and_convert_to_markdown(self, input_data: MarkdownInput) -> MarkdownOutput:
-        """Summarize and convert the given input text to GitHub Flavored Markdown (GFM) format."""
-        system_prompt = self.get_conversion_system_prompt()
-        markdown = await self.make_llm_call(system_prompt, input_data.input_text)
-        return MarkdownOutput(markdown=markdown)
+        """Create a concise, well-formatted summary in Markdown."""
+        # Add summarization context to the purpose
+        enhanced_purpose = "create a concise summary"
+        if input_data.purpose:
+            enhanced_purpose = f"{input_data.purpose} with a concise summary"
+
+        enhanced_input = MarkdownInput(content=input_data.content, context=input_data.context, purpose=enhanced_purpose)
+
+        return await self.convert_to_markdown(enhanced_input)
 
     def print_section_header(self, title: str) -> None:
         """Print a formatted section header."""

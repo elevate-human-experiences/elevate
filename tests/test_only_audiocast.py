@@ -36,59 +36,88 @@ from elevate.only_audiocast import (
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_create_default_audiocast(settings: Any) -> None:
-    content = "San Francisco is a city in California. It is known for the Golden Gate Bridge."
+async def test_create_travel_recommendation_audiocast(settings: Any) -> None:
+    """Test creating an audiocast for travel planning - realistic user scenario."""
+    content = """I'm planning a trip to San Francisco next month and want to make the most of my 3-day visit. San Francisco is known for its iconic Golden Gate Bridge, which offers stunning views especially at sunrise and sunset. The city's famous cable cars provide a unique way to navigate the steep hills while taking in the sights. Fisherman's Wharf is a popular tourist destination with fresh seafood, street performers, and sea lions at Pier 39. For a more local experience, explore the Mission District for amazing Mexican food and colorful murals. Don't miss Lombard Street, known as the "crookedest street in the world," and consider taking a ferry to Alcatraz Island for a fascinating historical tour."""
+
     config = AudiocastConfig(model=settings.with_model)
     audiocast = OnlyAudiocast(config=config)
     input_data = AudiocastInput(
+        topic="San Francisco Travel Guide",
         content=content,
+        context="planning my first trip to San Francisco",
+        purpose="travel planning and preparation",
+        target_audience="first-time visitors",
         audio_out_path=f"{os.environ['HOME']}/Downloads/",
     )
-    await audiocast.cast(input_data)
+    result = await audiocast.cast(input_data)
+
+    # Verify enhanced output fields are populated
+    assert result.duration_minutes > 0
+    assert result.summary
+    assert "San Francisco" in result.summary
+    assert len(result.speakers_used) >= 1
+    assert len(result.next_steps) > 0
+    assert len(result.related_topics) > 0
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_create_two_people_podcast(settings: Any) -> None:
-    content = """The standard cosmological model rests on a foundational assumption: that the universe is homogeneous and isotropic on large scales. However, this assumption has long been questioned due to observable evidence of substantial cosmic inhomogeneities—galaxy clusters, vast voids, and filamentary structures spanning billions of light-years. Such uneven distributions of matter challenge the premise that the universe expands uniformly. Post-doctorate astrophysics researchers are increasingly examining the implications of these structures, realizing that overlooking them might significantly distort our understanding of cosmic expansion.
+async def test_create_team_training_audiocast(settings: Any) -> None:
+    """Test creating an audiocast for team training - realistic workplace scenario."""
+    content = """Remote work has fundamentally changed how we communicate and collaborate in the workplace. With teams spread across different time zones, traditional meeting structures don't always work effectively. Successful remote teams have learned to prioritize asynchronous communication - using tools like shared documents, recorded video updates, and detailed written summaries. This allows team members to contribute when they're most productive, rather than forcing everyone into the same meeting slots.
 
-One emerging theory gaining traction is timescape cosmology, which offers a compelling alternative to the elusive concept of dark energy. Timescape theory posits that different regions of the universe experience their own distinct "timescapes"—unique expansion histories shaped by local gravitational environments. In this model, what appears to be an accelerating universe (currently explained by invoking dark energy) is instead interpreted as an observational artifact arising from comparing clocks and rulers in regions with varying gravitational conditions. Essentially, the accelerated expansion emerges naturally from general relativity when accounting properly for gravitational inhomogeneities, eliminating the need for mysterious forms of energy.
+Clear documentation becomes critical when you can't just tap someone on the shoulder for a quick question. Teams that excel at remote work create comprehensive project briefs, maintain updated status dashboards, and use collaborative tools that track decisions and changes. Regular check-ins are still important, but they focus on outcomes and obstacles rather than just status updates. Many companies find that rotating meeting times helps ensure all team members can participate in real-time discussions occasionally.
 
-This theory is resonating within the astrophysics community largely because of its elegant explanatory power and reduction in speculative components. Timescape cosmology aligns closely with recent astronomical observations highlighting significant cosmic structures, offering an interpretation firmly grounded in established physics rather than unknown entities. As post-doc students delve deeper into the precision cosmology era, leveraging data from advanced telescopes and gravitational-wave observatories, exploring and refining timescape models becomes a promising frontier—one that may reshape our fundamental understanding of the universe and its evolution."""
+The key is establishing rhythm and predictability. When everyone knows when updates are expected, which tools to use for different types of communication, and how decisions get made, remote teams can actually move faster than traditional in-office teams. The elimination of impromptu interruptions and the ability to work during peak energy hours often leads to higher productivity and better work quality."""
 
     cast_configuration = CastConfiguration(
         speakers=[
             SpeakerConfig(
-                name="Professor Mitchell",
-                background="Expert in astrophysics focusing on gravitational inhomogeneities",
-                expertise="high",
-                speaking_style="interview",
-                level_of_expertise="post-doc",
-                focus_aspect="timescape cosmology",
-                depth="high",
+                name="Sarah",
+                background="Team lead with 5 years remote work experience",
+                expertise="medium",
+                speaking_style="conversational",
+                level_of_expertise="experienced",
+                focus_aspect="practical implementation",
+                depth="medium",
             ),
             SpeakerConfig(
-                name="Professor Carter",
-                background="Renowned cosmologist with extensive research in timescape theory",
-                expertise="high",
-                speaking_style="conversational",
-                level_of_expertise="post-doc",
-                focus_aspect="observational cosmology",
-                depth="high",
+                name="Marcus",
+                background="HR specialist focusing on remote team dynamics",
+                expertise="medium",
+                speaking_style="analytical",
+                level_of_expertise="experienced",
+                focus_aspect="team communication",
+                depth="medium",
             ),
         ],
         listener=ListenerConfig(
-            expertise="advanced",
-            summary_of_similar_content=["Post-doctoral astrophysics discussions"],
-            level_of_expertise="high",
-            depth="high",
+            expertise="beginner",
+            summary_of_similar_content=["Basic remote work tips"],
+            level_of_expertise="new to remote work",
+            depth="medium",
         ),
     )
 
     config = AudiocastConfig(model=settings.with_model)
     audiocast = OnlyAudiocast(config=config)
     input_data = AudiocastInput(
+        topic="Remote Work Best Practices",
         content=content,
+        context="training my team on effective remote work",
+        purpose="team training and skill development",
+        target_audience="team members new to remote work",
         cast_configuration=cast_configuration,
         audio_out_path=f"{os.environ['HOME']}/Downloads/",
     )
-    await audiocast.cast(input_data)
+    result = await audiocast.cast(input_data)
+
+    # Verify the enhanced output provides value for team training
+    assert result.duration_minutes > 0
+    assert "Remote Work" in result.summary
+    assert "training" in result.summary.lower()
+    assert len(result.speakers_used) == 2
+    assert "Sarah" in result.speakers_used
+    assert "Marcus" in result.speakers_used
+    assert any("team" in step.lower() for step in result.next_steps)
+    assert len(result.key_insights) > 0

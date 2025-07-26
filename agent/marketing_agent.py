@@ -222,7 +222,9 @@ class MarketingWorkflow:
             self.ui.print_colored_text(f"Rephrasing with tone: {tone}, and length: {length}", "cyan")
             from elevate.only_rephrase import RephraseInput
 
-            input_data = RephraseInput(message=content, tone=tone, length=str(length))
+            input_data = RephraseInput(
+                original_text=content, audience="general audience", purpose="content marketing", tone=tone
+            )
             rephrased_content = await self.rephrase_tool.rephrase_text(input_data)
             self.ui.print_content(rephrased_content.rephrased_text, title="Rephrased content")
             return rephrased_content
@@ -422,9 +424,9 @@ class MarketingWorkflow:
         self.ui.print_section_header("Generating Answers")
         from elevate.only_qa import QAInput
 
-        input_data = QAInput(input_text=technical_content + "\n" + question)
+        input_data = QAInput(topic=question, context=technical_content, purpose="content marketing")
         answer = await self.qa_tool.generate_answers(input_data)
-        self.ui.print_content(answer.answers, title="Answer")
+        self.ui.print_content(answer.main_answer, title="Answer")
         return answer
 
     async def execute(self, technical_content: str, email_type: str = "marketing") -> dict[str, str]:

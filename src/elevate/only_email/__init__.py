@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""OnlyEmail class for generating emails using LLMs."""
+"""AI-powered email assistant for crafting professional, personal, and marketing emails with insights."""
 
 import logging
 from pathlib import Path
@@ -43,24 +43,54 @@ class EmailConfig(BaseModel):
 
 
 class EmailInput(BaseModel):
-    """Input model for email generation."""
+    """User-friendly input for email generation."""
 
-    message: str = Field(..., description="Message content for email generation")
-    email_type: str = Field(..., description="Type of email (personal, professional, marketing)")
+    purpose: str = Field(
+        ...,
+        description="What you want to communicate (e.g., 'Ask for time off', 'Thank a colleague', 'Invite friends to party')",
+    )
+    recipient: str = Field(..., description="Who you're writing to (e.g., 'my boss', 'my team', 'close friends')")
+    email_type: str = Field(..., description="Type of email: personal, professional, or marketing")
+    context: str | None = Field(
+        None, description="Additional context about your situation or relationship with the recipient"
+    )
+    tone: str | None = Field(
+        None, description="Desired tone (e.g., 'friendly', 'formal', 'enthusiastic', 'apologetic')"
+    )
+    key_details: str | None = Field(
+        None, description="Important details to include (dates, names, specific requests, etc.)"
+    )
 
 
 class Email(BaseModel):
-    """Pydantic model representing a structured email."""
+    """Enhanced email model with user-valuable insights."""
 
     subject: str
     salutation: str
     body: str
     closing: str
     signature: str
+    key_insights: list[str] = Field(default_factory=list, description="Key points and insights about this email")
+    tone_analysis: str | None = Field(None, description="Analysis of the email's tone and appropriateness")
+    next_steps: list[str] = Field(default_factory=list, description="Suggested follow-up actions or considerations")
+    alternative_approaches: list[str] = Field(
+        default_factory=list, description="Other ways you could approach this communication"
+    )
 
 
 class OnlyEmail:
-    """Class that returns well formatted emails."""
+    """
+    AI-powered email assistant that crafts professional, personal, and marketing emails.
+
+    Perfect for:
+    • Writing professional emails to colleagues, bosses, or clients
+    • Crafting personal messages for friends, family, or invitations
+    • Creating marketing emails that drive engagement and conversions
+    • Getting unstuck when you know what to say but not how to say it
+    • Ensuring your emails have the right tone for any situation
+    • Learning better email communication through AI insights
+    • Saving time while maintaining authenticity and professionalism
+    """
 
     def __init__(self, config: EmailConfig | None = None, with_model: str = "gpt-4o-mini") -> None:
         """Initialize the OnlyEmail class with Pydantic config."""
@@ -87,9 +117,11 @@ class OnlyEmail:
         """Generate a structured email using JSON schema validation."""
         system_prompt = self.get_email_prompt(input_data.email_type)
 
+        user_message = self._build_user_message(input_data)
+
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": input_data.message},
+            {"role": "user", "content": user_message},
         ]
 
         # Build the JSON schema for the Email model
@@ -114,6 +146,24 @@ class OnlyEmail:
 
         return Email.model_validate_json(content)
 
+    def _build_user_message(self, input_data: EmailInput) -> str:
+        """Build a comprehensive user message from the input data."""
+        message_parts = [
+            f"I need to write an email to {input_data.recipient}.",
+            f"Purpose: {input_data.purpose}",
+        ]
+
+        if input_data.context:
+            message_parts.append(f"Context: {input_data.context}")
+
+        if input_data.tone:
+            message_parts.append(f"Desired tone: {input_data.tone}")
+
+        if input_data.key_details:
+            message_parts.append(f"Important details to include: {input_data.key_details}")
+
+        return "\n".join(message_parts)
+
     def _load_prompt_template(self) -> Template:
         """Load the Jinja2 template from instructions.j2 file."""
         template_path = Path(__file__).parent / "instructions.j2"
@@ -134,7 +184,8 @@ class OnlyEmail:
         """Generate an email of the specified type using an LLM."""
         try:
             system_prompt = self.get_email_prompt(input_data.email_type)
-            return await self.make_llm_call(system_prompt, input_data.message)
+            user_message = self._build_user_message(input_data)
+            return await self.make_llm_call(system_prompt, user_message)
         except ValueError as ve:
             logger.debug(f"ValueError: {ve}")
             return "Error: Invalid email type specified."

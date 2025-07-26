@@ -38,17 +38,38 @@ class ShellConfig(BaseModel):
 class ShellInput(BaseModel):
     """Input model for shell command generation."""
 
-    user_prompt: str = Field(..., description="Natural language prompt for shell command")
+    task_description: str = Field(..., description="What you want to accomplish (e.g., 'find all Python files')")
+    context: str | None = Field(
+        None, description="Your situation or purpose (e.g., 'preparing for deployment', 'debugging an issue')"
+    )
+    environment: str = Field(default="linux", description="Your operating system (linux, macos, windows)")
+    skill_level: str = Field(
+        default="intermediate", description="Your shell experience level (beginner, intermediate, advanced)"
+    )
 
 
 class ShellOutput(BaseModel):
     """Output model for shell command generation."""
 
-    command: str = Field(..., description="Generated shell command")
+    command: str = Field(..., description="The shell command to run")
+    explanation: str = Field(..., description="Plain English explanation of what the command does")
+    safety_notes: str | None = Field(None, description="Important warnings or precautions")
+    example_output: str | None = Field(None, description="What you might expect to see when running this command")
+    related_commands: list[str] = Field(default_factory=list, description="Other useful commands for similar tasks")
+    next_steps: str | None = Field(None, description="What you might want to do after running this command")
 
 
 class OnlyShell:
-    """Class that returns a shell command based on users prompt."""
+    """
+    Your AI-powered shell command assistant that transforms everyday language into precise terminal commands.
+
+    Perfect for:
+    • System administrators managing servers and troubleshooting issues
+    • Developers automating workflows and debugging build problems
+    • Data scientists processing files and managing datasets
+    • DevOps engineers handling deployments and monitoring systems
+    • Anyone who knows what they want to do but needs the exact command syntax
+    """
 
     def __init__(self, config: ShellConfig) -> None:
         """Initialize the OnlyShell class with Pydantic config."""
@@ -78,8 +99,47 @@ class OnlyShell:
         return str(template.render())
 
     async def generate_shell_command(self, input_data: ShellInput) -> ShellOutput:
-        """Generates a shell command based on a user-provided natural language prompt."""
+        """Generates a shell command with detailed explanation based on user's task description."""
         system_prompt = self.get_shell_system_prompt()
-        message = "\n<UserPrompt>" + input_data.user_prompt + "</UserPrompt>\n\n"
-        command = await self.make_llm_call(system_prompt, message)
-        return ShellOutput(command=command)
+
+        # Build context-aware message
+        message_parts = [f"<TaskDescription>{input_data.task_description}</TaskDescription>"]
+
+        if input_data.context:
+            message_parts.append(f"<Context>{input_data.context}</Context>")
+
+        message_parts.extend(
+            [
+                f"<Environment>{input_data.environment}</Environment>",
+                f"<SkillLevel>{input_data.skill_level}</SkillLevel>",
+            ]
+        )
+
+        message = "\n".join(message_parts) + "\n\n"
+        response = await self.make_llm_call(system_prompt, message)
+
+        # Parse the structured response (assuming JSON format from the new prompt)
+        import json
+
+        try:
+            # Handle JSON wrapped in code blocks
+            if response.strip().startswith("```json"):
+                # Extract JSON from code block
+                start = response.find("{")
+                end = response.rfind("}") + 1
+                json_content = response[start:end]
+            else:
+                json_content = response
+
+            parsed_response = json.loads(json_content)
+            return ShellOutput(**parsed_response)
+        except (json.JSONDecodeError, ValueError):
+            # Fallback for backwards compatibility
+            return ShellOutput(
+                command=response,
+                explanation="Generated shell command",
+                safety_notes=None,
+                example_output=None,
+                related_commands=[],
+                next_steps=None,
+            )

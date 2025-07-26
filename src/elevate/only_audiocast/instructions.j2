@@ -1,56 +1,57 @@
-ROLE:
-You are an experienced dialogue writer creating a natural-sounding conversation based on the provided article. The listener should feel as if they're casually dropping into an ongoing exchange.
+YOUR MISSION:
+Transform content into a natural, engaging conversation that feels like you're overhearing experts discussing something fascinating. Think of the best podcast moments when hosts make complex topics feel accessible and interesting.
 
-GOAL:
-Craft a conversation that:
-1. Accurately covers all key points from the article, presented organically as part of the ongoing discussion.
-2. Takes ample time to explore each point in depth as described by the article, without introducing new information.
-3. Flows naturally, giving the listener a sense of entering mid-conversation.
-4. Includes subtle contextual clues to orient the listener without explicit introductions, greetings, or farewells.
-5. Ensures each speaker's dialogue is distinct, engaging, and authentic to their character profile.
+WHAT MAKES A GREAT AUDIOCAST:
+Create a conversation that:
+1. Makes listeners think "I wish I could have been part of this discussion"
+2. Breaks down complex ideas into digestible, relatable concepts
+3. Flows like a real conversation - with natural interruptions, agreements, and "aha!" moments
+4. Helps listeners understand not just WHAT something is, but WHY it matters
+5. Leaves people feeling smarter and more informed than when they started
 
-REQUIREMENTS:
-- Use short, conversational sentences suitable for speech synthesis.
-- Exclude all last names for privacy.
-- Do not add speakers beyond those specified in the cast configuration.
-- Avoid segments that directly address the listener or acknowledge their presence explicitly.
-- Do not include information outside what is explicitly mentioned in the article.
-- Include natural speech patterns and filler sounds (e.g., um, ah, (pause), (breath)) to enhance realism (but don't make it forced).
-- Present each speaker's dialogue in complete, coherent paragraphs.
-- Maintain an engaging, informative, and seamless dialogue experience.
-- DO NOT INCLUDE A SEGMENT FOR THE LISTENER.
+HOW TO CRAFT ENGAGING DIALOGUE:
+- Make it conversational: "Wait, so you're saying..." or "That reminds me of..."
+- Add human elements: genuine curiosity, surprise, enthusiasm
+- Use analogies and examples that everyday people can relate to
+- Build on ideas progressively - start simple, then go deeper
+- Let speakers have different perspectives or approaches to the same topic
+- Include natural speech patterns (brief pauses, "you know", "actually") without overdoing it
+- Keep sentences short and punchy for easy listening
 
-CAST CONFIGURATION:
-Use the following schema to define speaker and listener profiles:
-- Speaker:
-  - name: Name of the speaker
-  - background: Background information relevant to the speaker
-  - expertise: General expertise area
-  - speaking_style: Description of their speaking style
-  - level_of_expertise: Detailed expertise level
-  - focus_aspect: Specific aspect or angle the speaker emphasizes
-  - depth: Depth of content provided
-- Listener:
-  - name: Optional name of the listener
-  - expertise: General expertise area of the listener
-  - summary_of_similar_content: List summarizing similar content known to the listener
-  - level_of_expertise: Listener's proficiency level
-  - depth: Desired depth of content for the listener
+LISTENER EXPERIENCE:
+Your audience wants to:
+- Learn something new while commuting, exercising, or doing chores
+- Feel like they're getting insider knowledge from experts
+- Understand topics they might find intimidating in written form
+- Stay engaged throughout the entire conversation
+- Come away with actionable insights or new perspectives
 
-EXAMPLE (Style Reference):
-Imagine dropping into a casual yet intellectually rich conversation between Joe Rogan and Neil deGrasse Tyson discussing space exploration:
+CONVERSATION GUIDELINES:
+- Keep it authentic: No forced introductions or awkward explanations
+- Stay focused: Cover the content thoroughly but don't add outside information
+- Make it accessible: Explain technical terms naturally within the conversation
+- Be conversational: Use everyday language, not academic jargon
+- Create connection: Let speakers build on each other's ideas
+- Respect privacy: Use first names only
 
-Joe:
-"So, Neil, you're telling me we've got satellites out there, right now, literally mapping planets?"
+EXAMPLE CONVERSATION STYLE:
+Here's how to make content come alive - notice the natural flow and genuine curiosity:
 
-Neil:
-"(laughs) Yeah, exactly. (pause) It's mind-blowing. These satellites send back detailed images, data on atmospheric conditions—everything scientists need to understand these worlds remotely."
+Sarah:
+"You know what I find fascinating about this whole remote work thing? It's not just about working from home anymore."
 
-Joe:
-"Wow. (breath) And they're just floating out there, doing their thing?"
+Mike:
+"Right! I was reading about companies that are completely distributed now - like, they don't even have a main office. That seems wild to me."
 
-Neil:
-"Precisely. And here's the fascinating part—some missions even search for signs of life. It completely changes how we see ourselves in the universe."
+Sarah:
+"But think about it - if you can hire the best talent from anywhere in the world, why wouldn't you? I mean, there's this company mentioned in the article that grew from 10 to 100 employees without ever meeting in person."
 
-Here's the cast configuration provided for this conversation:
+Mike:
+"That's incredible. But how do you build company culture like that? Like, how do you get people to actually care about the work?"
+
+Sarah:
+"That's exactly what they figured out. They use these virtual coffee chats and..."
+
+CAST SETUP:
+The following speakers and listener configuration will guide the conversation style and depth:
 {{ cast_config_yaml }}

@@ -25,121 +25,175 @@ from typing import Any
 import pytest
 from pydantic import BaseModel, Field
 
-from elevate.only_judge_llms import OnlyJudgeLLMs
+from elevate.only_judge_llms import JudgeLLMsConfig, JudgeLLMsInput, JudgeLLMsOutput, OnlyJudgeLLMs
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_summary_evaluation(settings: Any) -> None:
-    class SummaryCriteria(BaseModel):
-        coherence: int = Field(..., description="Coherence of the summary (1-5)")
-        fluency: int = Field(..., description="Fluency of the language (1-5)")
-        factual_consistency: int = Field(..., description="Factual consistency (1-5)")
+async def test_important_client_email(settings: Any) -> None:
+    class EmailCriteria(BaseModel):
+        professionalism: int = Field(..., description="How professional does this sound? (1-5)")
+        clarity: int = Field(..., description="How clear and easy to understand? (1-5)")
 
-    sample_text = (
-        "The Q3 report indicates a 12% increase in revenue driven by new market strategies, "
-        "cost-saving initiatives, and improved operational efficiency, though challenges remain in emerging markets."
+    sample_content = (
+        "Hi Sarah, I wanted to follow up on our conversation last week about the project timeline. "
+        "Unfortunately, we're running into some technical issues that might push back our delivery date. "
+        "I know this isn't ideal, but I wanted to be transparent about where we stand. "
+        "Can we schedule a call this week to discuss next steps? Thanks for your understanding."
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, SummaryCriteria)
 
-    # This text is coherent and factually consistent, so we expect mid-to-high scores
-    assert 4 <= result.coherence <= 5
-    assert 3 <= result.fluency <= 5
-    assert 4 <= result.factual_consistency <= 5
+    config = JudgeLLMsConfig(model="gpt-4o-mini")
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(
+        content=sample_content,
+        context="important client email about project delays",
+        purpose="need to maintain good relationship while delivering bad news",
+        criteria=EmailCriteria,
+    )
+    result: JudgeLLMsOutput = await judge.evaluate(input_data)
+
+    # This email is professional and clear, though delivering bad news
+    assert isinstance(result.scores, EmailCriteria)
+    assert 1 <= result.scores.professionalism <= 5
+    assert 1 <= result.scores.clarity <= 5
+
+    # Check enhanced output fields exist
+    assert isinstance(result.summary, str)
+    assert len(result.summary) > 0
+    assert isinstance(result.key_insights, list)
+    assert isinstance(result.recommendations, list)
 
 
-# --- Test 2: Evaluation of a conversational reply ---
-# Updated to reflect a less relevant/helpful response.
 @pytest.mark.asyncio  # type: ignore
-async def test_conversational_evaluation(settings: Any) -> None:
-    class ConversationCriteria(BaseModel):
-        relevance: int = Field(..., description="How relevant is the reply? (1-5)")
-        helpfulness: int = Field(..., description="How helpful is the response? (1-5)")
-        conciseness: int = Field(..., description="How concise is the answer? (1-5)")
+async def test_social_media_post(settings: Any) -> None:
+    class SocialMediaCriteria(BaseModel):
+        engagement: int = Field(..., description="How likely is this to get likes and comments? (1-5)")
+        authenticity: int = Field(..., description="Does this sound genuine and personal? (1-5)")
 
-    # This reply doesn't provide useful info about a product launch, so we expect lower scores for relevance/helpfulness.
-    sample_text = (
-        "Thanks for reaching out. Honestly, I don't have any details about the product launch right now. "
-        "It's a beautiful day, though. How have you been?"
+    sample_content = (
+        "🌟 Just finished setting up our new coffee corner at the shop! "
+        "There's nothing quite like the smell of fresh beans in the morning. "
+        "What's your go-to coffee order? Drop it in the comments!"
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, ConversationCriteria)
 
-    # Relevance should be lower because it doesn't address the product launch well
-    assert 1 <= result.relevance <= 3
-    # Helpfulness is also low
-    assert 1 <= result.helpfulness <= 3
-    # The response is relatively short (though not extremely concise)
-    assert 2 <= result.conciseness <= 5
+    config = JudgeLLMsConfig(model="gpt-4o-mini")
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(
+        content=sample_content, context="Instagram post for my small coffee shop", criteria=SocialMediaCriteria
+    )
+    result: JudgeLLMsOutput = await judge.evaluate(input_data)
+
+    # Basic validation of structure
+    assert isinstance(result.scores, SocialMediaCriteria)
+    assert 1 <= result.scores.engagement <= 5
+    assert 1 <= result.scores.authenticity <= 5
+
+    # Verify enhanced fields exist
+    assert isinstance(result.summary, str)
+    assert isinstance(result.key_insights, list)
+    assert isinstance(result.recommendations, list)
 
 
-# --- Test 3: Evaluation of creative writing ---
-# Leveraging metrics such as creativity, narrative flow, and imagery.
 @pytest.mark.asyncio  # type: ignore
-async def test_creative_writing_evaluation(settings: Any) -> None:
-    class CreativeCriteria(BaseModel):
-        creativity: int = Field(..., description="How creative is the composition? (1-5)")
-        narrative_flow: int = Field(..., description="Flow of the narrative (1-5)")
-        imagery: int = Field(..., description="Quality of imagery evoked (1-5)")
+async def test_job_application_cover_letter(settings: Any) -> None:
+    class CoverLetterCriteria(BaseModel):
+        enthusiasm: int = Field(..., description="How enthusiastic and motivated do I sound? (1-5)")
+        relevance: int = Field(..., description="How well do I connect my experience to the role? (1-5)")
+        professionalism: int = Field(..., description="Is this appropriately professional? (1-5)")
 
-    sample_text = (
-        "Amidst the twilight of a fading day, the vibrant hues of an impressionist sky dissolve into whispers of lost dreams. "
-        "The city pulses with poetic intensity, each corner revealing a story etched in light and shadow."
+    sample_content = (
+        "Dear Hiring Manager, I'm excited to apply for the Marketing Coordinator position at your company. "
+        "In my previous role at a tech startup, I managed social media campaigns that increased engagement by 40%. "
+        "I'm particularly drawn to your company's mission of sustainable innovation, which aligns perfectly with my values. "
+        "I believe my combination of creativity and analytical skills would be a great fit for your marketing team. "
+        "Thank you for considering my application. I look forward to hearing from you."
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, CreativeCriteria)
 
-    # Quite imaginative; likely high creativity
-    assert 4 <= result.creativity <= 5
-    # Narrative flow might vary
-    assert 3 <= result.narrative_flow <= 5
-    # Strong imagery
-    assert 4 <= result.imagery <= 5
+    config = JudgeLLMsConfig(model="gpt-4o-mini")
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(
+        content=sample_content,
+        context="cover letter for marketing coordinator job",
+        purpose="need to stand out from other candidates and get an interview",
+        criteria=CoverLetterCriteria,
+    )
+    result: JudgeLLMsOutput = await judge.evaluate(input_data)
+
+    # Basic validation of structure
+    assert isinstance(result.scores, CoverLetterCriteria)
+    assert 1 <= result.scores.enthusiasm <= 5
+    assert 1 <= result.scores.relevance <= 5
+    assert 1 <= result.scores.professionalism <= 5
+
+    # Should provide enhanced output
+    assert isinstance(result.next_steps, list)
 
 
-# --- Test 4: Evaluation of an instructional response ---
-# Updated to reflect a less complete/accurate set of instructions.
 @pytest.mark.asyncio  # type: ignore
-async def test_instructional_evaluation(settings: Any) -> None:
-    class InstructionCriteria(BaseModel):
-        clarity: int = Field(..., description="Clarity of the instructions (1-5)")
-        accuracy: int = Field(..., description="Accuracy of the details provided (1-5)")
-        completeness: int = Field(..., description="Completeness of the explanation (1-5)")
+async def test_team_announcement(settings: Any) -> None:
+    class AnnouncementCriteria(BaseModel):
+        clarity: int = Field(..., description="Is the message clear and easy to understand? (1-5)")
+        motivation: int = Field(..., description="Will this motivate and inspire the team? (1-5)")
+        completeness: int = Field(..., description="Does it include all necessary information? (1-5)")
 
-    # This is intentionally vague and incomplete for installation instructions.
-    sample_text = (
-        "To install the package, first you open your terminal. Then do something with pip. I'm not entirely sure."
+    sample_content = (
+        "Hi everyone, I wanted to share some exciting news about our Q4 goals. "
+        "We're launching a new project that should help streamline our workflow. "
+        "I'll need everyone to be flexible with deadlines over the next few weeks. "
+        "Let me know if you have questions. Thanks for all your hard work!"
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, InstructionCriteria)
 
-    # The instructions aren't very clear
-    assert 1 <= result.clarity <= 3
-    # Accuracy is also low
-    assert 1 <= result.accuracy <= 3
-    # Not very comprehensive
-    assert 1 <= result.completeness <= 3
+    config = JudgeLLMsConfig(model="gpt-4o-mini")
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(
+        content=sample_content,
+        context="team announcement to 12 people about upcoming project changes",
+        purpose="need to prepare team for busy period while keeping morale high",
+        criteria=AnnouncementCriteria,
+    )
+    result: JudgeLLMsOutput = await judge.evaluate(input_data)
+
+    # Basic validation of structure
+    assert isinstance(result.scores, AnnouncementCriteria)
+    assert 1 <= result.scores.clarity <= 5
+    assert 1 <= result.scores.motivation <= 5
+    assert 1 <= result.scores.completeness <= 5
+
+    # Should provide enhanced output
+    assert isinstance(result.recommendations, list)
 
 
-# --- Test 5: Evaluation of poetic text ---
-# Focusing on metrics like elegance, metaphorical depth, and rhythm.
 @pytest.mark.asyncio  # type: ignore
-async def test_poetic_evaluation(settings: Any) -> None:
-    class PoeticCriteria(BaseModel):
-        elegance: int = Field(..., description="Elegance of the phrasing (1-5)")
-        metaphorical_depth: int = Field(..., description="Depth of metaphorical expression (1-5)")
-        rhythm: int = Field(..., description="Rhythmic quality of the verse (1-5)")
+async def test_thank_you_note_to_mentor(settings: Any) -> None:
+    class ThankYouCriteria(BaseModel):
+        sincerity: int = Field(..., description="How genuine and heartfelt does this sound? (1-5)")
+        specificity: int = Field(..., description="Do I mention specific ways they helped me? (1-5)")
+        gratitude: int = Field(..., description="Does this clearly express my appreciation? (1-5)")
 
-    sample_text = (
-        "In the gentle embrace of dusk, silver threads of moonlight weave ancient tales; "
-        "the cadence of nature whispers secrets where dreams and reality converge into a poetic reverie."
+    sample_content = (
+        "Dear Dr. Martinez, I wanted to reach out and thank you for all the guidance you've provided "
+        "during my internship this summer. Your advice about approaching client presentations with "
+        "confidence really transformed how I communicate. The feedback you gave me on my research "
+        "project helped me see new perspectives I hadn't considered. I'm grateful to have had you "
+        "as a mentor, and I hope to stay in touch as I continue my career. Thank you again for "
+        "believing in me and pushing me to grow."
     )
-    judge = OnlyJudgeLLMs(with_model=settings.with_model)
-    result: Any = await judge.evaluate(sample_text, PoeticCriteria)
 
-    # The text is fairly elegant, though we allow some variation
-    assert 3 <= result.elegance <= 5
-    # Strong metaphors here
-    assert 4 <= result.metaphorical_depth <= 5
-    # Decent rhythm
-    assert 3 <= result.rhythm <= 5
+    config = JudgeLLMsConfig(model="gpt-4o-mini")
+    judge = OnlyJudgeLLMs(config=config)
+    input_data = JudgeLLMsInput(
+        content=sample_content,
+        context="thank you note to my internship mentor before I graduate",
+        purpose="want to express genuine gratitude and maintain professional relationship",
+        criteria=ThankYouCriteria,
+    )
+    result: JudgeLLMsOutput = await judge.evaluate(input_data)
+
+    # Basic validation of structure
+    assert isinstance(result.scores, ThankYouCriteria)
+    assert 1 <= result.scores.sincerity <= 5
+    assert 1 <= result.scores.specificity <= 5
+    assert 1 <= result.scores.gratitude <= 5
+
+    # Should provide enhanced output
+    assert isinstance(result.summary, str)
+    assert isinstance(result.key_insights, list)

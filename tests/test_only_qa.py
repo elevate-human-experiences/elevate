@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Module to test the Q&A generation functionality of the OnlyQA class."""
+"""Test the user-friendly knowledge assistant functionality."""
 
 import logging
 from typing import Any
@@ -28,102 +28,101 @@ from typing import Any
 import pytest
 
 from common import setup_logging
-from elevate.only_qa import OnlyQA
+from elevate.only_qa import OnlyQA, QAConfig, QAInput
 
 
 logger = setup_logging(logging.INFO)
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_qa_generation_from_product_docs(settings: Any) -> None:
-    """Test Q&A generation from product documentation."""
-    input_text = (
-        "Product: CloudSync Pro\n"
-        "CloudSync Pro is a cloud storage solution that allows users to sync files across multiple devices. "
-        "Features include: automatic backup, file versioning, real-time collaboration, and 256-bit encryption. "
-        "Pricing: Basic plan ($5/month for 100GB), Pro plan ($15/month for 1TB), Enterprise plan (custom pricing). "
-        "System requirements: Windows 10+, macOS 10.15+, or Linux Ubuntu 18.04+. "
-        "Support is available 24/7 via chat, email, and phone."
+async def test_team_explanation_scenario(settings: Any) -> None:
+    """Test explaining a product to team members for a presentation."""
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(
+        topic="CloudSync Pro - our new cloud storage solution with automatic backup, file versioning, real-time collaboration, and 256-bit encryption. Pricing starts at $5/month for 100GB.",
+        context="I need to present this to our sales team next week",
+        purpose="Help them understand key features and pricing to discuss with clients",
+        specific_questions="What are the main benefits? How should we position this against competitors?",
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
-    logger.debug("Q&A Generation Output:\n%s", qa_output)
+    result = await only_qa.generate_answers(input_data)
+    main_answer = result.main_answer
+    logger.debug("Team Explanation Output:\n%s", main_answer)
 
-    # Basic validation - ensure output contains typical Q&A patterns
-    assert qa_output is not None
-    assert len(qa_output.strip()) > 0
+    # Validate user-friendly output
+    assert main_answer is not None
+    assert len(main_answer.strip()) > 0
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_qa_generation_from_technical_docs(settings: Any) -> None:
-    """Test Q&A generation from technical documentation."""
-    input_text = (
-        "API Documentation: UserAuth Service\n"
-        "The UserAuth service provides authentication endpoints for user management. "
-        "Endpoints: POST /api/auth/login (authenticate user), POST /api/auth/register (create new user), "
-        "GET /api/auth/profile (get user profile), POST /api/auth/logout (end session). "
-        "Authentication uses JWT tokens with 24-hour expiration. "
-        "Rate limiting: 100 requests per minute per IP. "
-        "Error codes: 401 (unauthorized), 403 (forbidden), 429 (rate limit exceeded), 500 (server error)."
+async def test_developer_onboarding_scenario(settings: Any) -> None:
+    """Test helping a new developer understand our authentication system."""
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(
+        topic="UserAuth Service API with endpoints for login, register, profile, and logout. Uses JWT tokens with 24-hour expiration and rate limiting of 100 requests/minute.",
+        context="I'm a new developer who needs to integrate user authentication into our mobile app",
+        purpose="Understand how to implement login/logout functionality properly",
+        specific_questions="What endpoints do I need? How do I handle JWT tokens and error responses?",
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
-    logger.debug("Technical Q&A Generation Output:\n%s", qa_output)
+    result = await only_qa.generate_answers(input_data)
+    main_answer = result.main_answer
+    logger.debug("Developer Onboarding Output:\n%s", main_answer)
 
-    # Basic validation
-    assert qa_output is not None
-    assert len(qa_output.strip()) > 0
+    # Validate helpful response
+    assert main_answer is not None
+    assert len(main_answer.strip()) > 0
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_qa_generation_from_user_manual(settings: Any) -> None:
-    """Test Q&A generation from user manual content."""
-    input_text = (
-        "User Manual: SmartHome Controller\n"
-        "Getting Started: Download the SmartHome app from your app store. "
-        "Setup: Connect the controller to your Wi-Fi network using the setup wizard. "
-        "Adding devices: Tap '+' in the app, select device type, and follow pairing instructions. "
-        "Supported devices: lights, thermostats, door locks, security cameras, and smart plugs. "
-        "Troubleshooting: If device won't pair, ensure it's in pairing mode and within 30 feet of controller. "
-        "For connection issues, restart both the controller and your router."
+async def test_customer_support_scenario(settings: Any) -> None:
+    """Test helping a customer support agent assist users with setup issues."""
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(
+        topic="SmartHome Controller setup: download app, connect to Wi-Fi, add devices (lights, thermostats, door locks, cameras, smart plugs). Common issues: devices not pairing, connection problems.",
+        context="I work in customer support and get lots of calls about device pairing problems",
+        purpose="Create a quick reference guide for common setup issues and solutions",
+        specific_questions="What are the most common setup problems and their step-by-step solutions?",
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
-    logger.debug("User Manual Q&A Generation Output:\n%s", qa_output)
+    result = await only_qa.generate_answers(input_data)
+    main_answer = result.main_answer
+    logger.debug("Customer Support Output:\n%s", main_answer)
 
-    # Basic validation
-    assert qa_output is not None
-    assert len(qa_output.strip()) > 0
+    # Validate practical response
+    assert main_answer is not None
+    assert len(main_answer.strip()) > 0
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_qa_generation_from_faq_content(settings: Any) -> None:
-    """Test Q&A generation from existing FAQ content to enhance it."""
-    input_text = (
-        "Existing FAQ for EcoTracker App:\n"
-        "Q: How do I track my carbon footprint?\n"
-        "A: Open the app and log your daily activities like transportation, energy use, and consumption.\n"
-        "Q: Is my data secure?\n"
-        "A: Yes, all data is encrypted and stored locally on your device.\n"
-        "Additional info: The app also provides personalized recommendations to reduce your environmental impact. "
-        "Premium features include detailed analytics, goal setting, and community challenges."
+async def test_marketing_content_scenario(settings: Any) -> None:
+    """Test creating marketing content from product information."""
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(
+        topic="EcoTracker App: track carbon footprint by logging daily activities, get personalized recommendations, secure local data storage. Premium features: detailed analytics, goal setting, community challenges.",
+        context="I'm writing marketing copy for our app store listing and website",
+        purpose="Highlight key benefits that will convince people to download and use the app",
+        specific_questions="What makes this app special? What problems does it solve for environmentally conscious users?",
     )
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
-    logger.debug("FAQ Enhancement Output:\n%s", qa_output)
+    result = await only_qa.generate_answers(input_data)
+    main_answer = result.main_answer
+    logger.debug("Marketing Content Output:\n%s", main_answer)
 
-    # Basic validation
-    assert qa_output is not None
-    assert len(qa_output.strip()) > 0
+    # Validate marketing-focused response
+    assert main_answer is not None
+    assert len(main_answer.strip()) > 0
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_qa_generation_empty_input(settings: Any) -> None:
-    """Test Q&A generation with empty input."""
-    input_text = ""
-    only_qa = OnlyQA(with_model=settings.with_model)
-    qa_output = await only_qa.generate_answers(input_text)
-    logger.debug("Empty Input Q&A Output:\n%s", qa_output)
+async def test_minimal_input_scenario(settings: Any) -> None:
+    """Test handling minimal user input gracefully."""
+    config = QAConfig(model=settings.with_model)
+    only_qa = OnlyQA(config=config)
+    input_data = QAInput(topic="Help me understand project management", context="", purpose="", specific_questions="")
+    result = await only_qa.generate_answers(input_data)
+    main_answer = result.main_answer
+    logger.debug("Minimal Input Output:\n%s", main_answer)
 
-    # Should handle empty input gracefully
-    assert qa_output is not None
+    # Should handle minimal input gracefully
+    assert main_answer is not None

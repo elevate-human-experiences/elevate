@@ -13,9 +13,9 @@ console = Console()
 def select_genai_snippet(menu_input: str) -> str:
     match menu_input:
         case "1":
-            return "only_email.py"
+            return "only_email/__init__.py"
         case "2":
-            return "only_rephrase.py"
+            return "only_rephrase/__init__.py"
         case _:
             raise ValueError("Invalid menu type specified.")
 
@@ -35,10 +35,11 @@ async def main(with_model: str = "gpt-4o-mini") -> None:
         if menu_input.lower() == "3":
             break
         user_input = Prompt.ask("[magenta]Enter your prompt[/magenta]")
-        genai_snippet_code_file_name = "src/elevate/" + select_genai_snippet(menu_input)
-        genai_snippet_code = read_geni_snippet(genai_snippet_code_file_name)
         only_python = OnlyPython()
-        output = await only_python.generate_code(user_input, "", False, False, genai_snippet_code)
+        from elevate.only_python import PythonInput
+
+        input_data = PythonInput(task=user_input, purpose="CLI automation", experience_level="intermediate")
+        output = await only_python.create_code(input_data)
         console.print(f"[green]\nOutput:[/green]\n{output}")
 
 

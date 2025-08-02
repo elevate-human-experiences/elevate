@@ -28,10 +28,16 @@ import sys
 atexit.register(logging.shutdown)
 
 
-def setup_logging(level: int = logging.INFO) -> logging.Logger:
+def setup_logging(level: int = logging.INFO, enable_logging: bool = False) -> logging.Logger:
     """Configure the root logger to output log messages to the console only."""
     # Get the root logger
     logger = logging.getLogger()
+
+    if not enable_logging:
+        # Disable logging entirely
+        logging.disable(logging.CRITICAL)
+        return logger
+
     # Set the overall logging level
     logger.setLevel(level)
 

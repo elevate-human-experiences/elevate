@@ -22,6 +22,8 @@
 
 """Only rephrase module for the Elevate app."""
 
+import re
+
 from litellm import acompletion
 
 
@@ -38,9 +40,15 @@ class OnlyRephrase:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_text},
         ]
-        response = await acompletion(api_key="", model=self.model, messages=messages, temperature=0.1)
+        response = await acompletion(model=self.model, messages=messages, temperature=0.1)
         # Fix: Use response.content if choices/message is not available
-        return str(getattr(response, "content", response))
+        output = str(response.choices[0].message.content)
+        pattern = r"```markdown\n((?:(?!```).|\n)*?)```"
+        match = re.search(pattern, output, re.DOTALL)
+
+        if match:
+            return match.group(1).strip()
+        return output
 
     def get_rephrase_system_prompt(self) -> str:
         """Return the rephrase system prompt."""

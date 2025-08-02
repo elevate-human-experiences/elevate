@@ -305,7 +305,7 @@ class MarketingWorkflow:
         self.ui.print_section_header("Generating Summary")
         return await self.process_with_rephrase(
             self.summary_generator.summarize_and_convert_to_markdown,
-            "video summary",
+            "summary",
             "summary.md",
             technical_content,
             summary_type,
